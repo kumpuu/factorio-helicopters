@@ -1,0 +1,8 @@
+require ("prototypes.entities.heli_entity")
+require ("prototypes.entities.rotor_entity")
+require ("prototypes.entities.smoke")
+require ("prototypes.items.heli_item")
+require ("prototypes.items.heli_rocket_launcher_item")
+require ("prototypes.recipes.heli_recipe")
+require ("prototypes.technologies.heli_technology")
+require ("input.input")

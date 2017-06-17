@@ -1,0 +1,14 @@
+{
+	"entity":
+	[
+		["heli-entity", "heli-entity-_-"],
+		["heli-placement-entity", "heli-placement-entity-_-"],
+		["heli-body-entity", "heli-body-entity-_-"],
+		["heli-flying-collision-entity", "heli-flying-collision-entity-_-"],
+		["heli-landed-collision-entity", "heli-landed-collision-entity-_-"],
+		["heli-shadow-entity", "heli-shadow-entity-_-"],
+		["heli-burner-entity", "heli-burner-entity-_-"],
+		["rotor-entity", "rotor-entity-_-"],
+		["rotor-shadow-entity", "rotor-shadow-entity-_-"],
+	]
+}
