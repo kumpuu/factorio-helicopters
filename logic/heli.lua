@@ -89,7 +89,7 @@ local baseEngineConsumption = 20000
 local bodyOffset = 5
 local rotorOffset = 5.1
 
-function printA(...)
+local printA = function(...)
 	local s = ""
 	for i = 1, select("#", ...) do
 		s = s .. tostring(select(i, ...))
@@ -100,8 +100,20 @@ function printA(...)
 	end
 end
 
-function IsEntityBurnerOutOfFuel(ent)
+local IsEntityBurnerOutOfFuel = function(ent)
 	return ent.burner.remaining_burning_fuel <= 0 and ent.burner.inventory.is_empty()
+end
+
+local transferGridEquipment = function(srcEnt, destEnt)
+	if srcEnt.grid and destEnt.grid then --assume they have the same size and destEnt.grid is empty.
+		for i, equip in ipairs(srcEnt.grid.equipment) do
+			local newEquip = destEnt.grid.put{name = equip.name, position = equip.position}
+
+			if equip.type == "energy-shield-equipment" then newEquip.shield = equip.shield end
+			newEquip.energy = equip.energy
+		end
+		srcEnt.grid.clear()
+	end
 end
 
 heli = {
@@ -118,7 +130,10 @@ heli = {
 
 	new = function(ent)
 		baseEnt = game.surfaces[1].create_entity{name = "heli-entity-_-", force = ent.force, position = ent.position}
+		
+		transferGridEquipment(ent, baseEnt)
 		baseEnt.health = ent.health
+
 		ent.destroy()
 
 		local obj = {
