@@ -1,3 +1,6 @@
+local fuel_slots = 5
+local inventory_slots = 80
+
 data:extend({
 	{
 		type = "car",
@@ -17,7 +20,7 @@ data:extend({
 		burner = {
 			effectivity = 0.5,
 			emissions = 0,
-			fuel_inventory_size = 4,
+			fuel_inventory_size = 0,
 			
 		},
 		consumption = "3MW",
@@ -27,7 +30,7 @@ data:extend({
 		weight = 3000,
 
 		rotation_speed = 0.005,
-		inventory_size = 4,
+		inventory_size = 0,
 
 		animation = {
 			layers = {
@@ -83,7 +86,6 @@ data:extend({
 
 
 
-
 	---------------------base entity---------------------
 	{
 		type = "car",
@@ -95,7 +97,7 @@ data:extend({
 		corpse = "medium-remnants",
 		dying_explosion = "medium-explosion",
 		selection_box = {{-1.8, -1.8}, {1.2, 3}},
-		collision_box = {{0,0},{0,0}},
+		collision_box = {{-1.8, -1.8}, {1.2, 3}},
 		collision_mask = {},
 		energy_per_hit_point = 1,
 		effectivity = 0.3,
@@ -103,7 +105,7 @@ data:extend({
 		burner = {
 			effectivity = 0.5,
 			emissions = 0.005,
-			fuel_inventory_size = 5,
+			fuel_inventory_size = fuel_slots,
 			
 		},
 		consumption = "3MW",
@@ -114,7 +116,7 @@ data:extend({
 
 		rotation_speed = 0.005,
 		tank_driving = true,
-		inventory_size = 80,
+		inventory_size = inventory_slots,
 
 		animation = {
 			layers = {
@@ -376,6 +378,8 @@ data:extend({
 		max_health = 1500,
 		corpse = "medium-remnants",
 		selection_box = {{0,0},{0,0}},
+		collision_box = {{0,0},{0,0}},
+		collision_mask = {},
 		energy_per_hit_point = 1,
 		effectivity = 0.5,
 		braking_power = "100kW",
@@ -447,6 +451,8 @@ data:extend({
 		max_health = 1500,
 		corpse = "medium-remnants",
 		selection_box = {{0,0},{0,0}},
+		collision_box = {{0,0},{0,0}},
+		collision_mask = {},
 		energy_per_hit_point = 1,
 		effectivity = 0.5,
 		braking_power = "100kW",
@@ -519,6 +525,8 @@ data:extend({
 		max_health = 999999,
 		corpse = "medium-remnants",
 		selection_box = {{0,0},{0,0}},
+		collision_box = {{0,0},{0,0}},
+		collision_mask = {},
 		energy_per_hit_point = 1,
 		effectivity = 0.01,
 		breaking_speed = 0.01,
