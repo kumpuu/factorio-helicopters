@@ -136,6 +136,10 @@ heli = {
 		"rotor-shadow-entity-_-",
 	},
 
+	---------- fallback vals for old version objects -----------
+	landedColliderCreationDelay = 0,
+	------------------------------------------------------------
+
 	new = function(ent)
 		baseEnt = game.surfaces[1].create_entity{name = "heli-entity-_-", force = ent.force, position = ent.position}
 		
@@ -161,7 +165,7 @@ heli = {
 			rotorMaxRPF = rotorMaxRPM/60/60, --revolutions per frame
 
 			hasLandedCollider = false,
-			delayLandedColliderCreation = 1, --frames. workaround for inserters trying to access collider inventory when created at the same time.
+			landedColliderCreationDelay = 1, --frames. workaround for inserters trying to access collider inventory when created at the same time.
 
 			baseEnt = baseEnt,
 
@@ -429,9 +433,8 @@ heli = {
 					self.startupProgress = math.max(self.startupProgress - 1, 0)
 				end
 				if self.baseEnt.speed == 0 and not self.hasLandedCollider then
-					if not self.delayLandedColliderCreation then self.delayLandedColliderCreation = 0 end
-					if self.delayLandedColliderCreation > 0 then 
-						self.delayLandedColliderCreation = self.delayLandedColliderCreation - 1
+					if self.landedColliderCreationDelay > 0 then 
+						self.landedColliderCreationDelay = self.landedColliderCreationDelay - 1
 					else
 						self.hasLandedCollider = true
 						if self.childs.collisionEnt and self.childs.collisionEnt.valid then
