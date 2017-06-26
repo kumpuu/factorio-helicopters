@@ -100,6 +100,14 @@ local printA = function(...)
 	end
 end
 
+local tableToString = function(table)
+	local s = ""
+	for k,v in pairs(table) do
+		s = s .. "'" .. k .. "': " .. tostring(v) .. "\n"
+	end
+	return s
+end
+
 local IsEntityBurnerOutOfFuel = function(ent)
 	return ent.burner.remaining_burning_fuel <= 0 and ent.burner.inventory.is_empty()
 end
@@ -152,7 +160,8 @@ heli = {
 			rotorRPF = 0,
 			rotorMaxRPF = rotorMaxRPM/60/60, --revolutions per frame
 
-			hasLandedCollider = true,
+			hasLandedCollider = false,
+			delayLandedColliderCreation = 1, --frames. workaround for inserters trying to access collider inventory when created at the same time.
 
 			baseEnt = baseEnt,
 
@@ -163,7 +172,7 @@ heli = {
 				bodyEntShadow = game.surfaces[1].create_entity{name = "heli-shadow-entity-_-", force = game.forces.neutral, position = baseEnt.position},
 				rotorEntShadow = game.surfaces[1].create_entity{name = "rotor-shadow-entity-_-", force = game.forces.neutral, position = baseEnt.position},
 
-				collisionEnt = game.surfaces[1].create_entity{name = "heli-landed-collision-entity-_-", force = game.forces.neutral, position = baseEnt.position},
+				--collisionEnt = game.surfaces[1].create_entity{name = "heli-landed-collision-entity-_-", force = game.forces.neutral, position = baseEnt.position},
 
 				burnerEnt = game.surfaces[1].create_entity{name = "heli-burner-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + 1.3}},
 			},
@@ -172,11 +181,11 @@ heli = {
 		obj.baseEnt.effectivity_modifier = 0
 
 		for k,v in pairs(obj.childs) do
-			v.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 1})
+			v.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
 			v.destructible = false
 		end
 
-		obj.childs.collisionEnt.destructible = true
+		--obj.childs.collisionEnt.destructible = true
 
 		return setmetatable(obj, {__index = heli})
 	end,
@@ -221,14 +230,16 @@ heli = {
 	end,
 
 	handleCollider = function(self)
-		if self.childs.collisionEnt and self.childs.collisionEnt.health ~= colliderMaxHealth then
-			self.baseEnt.speed = self.childs.collisionEnt.speed
-			self.baseEnt.damage(colliderMaxHealth - self.childs.collisionEnt.health, game.forces.neutral)
+		if self.childs.collisionEnt then
+			if self.childs.collisionEnt.health ~= colliderMaxHealth then
+				self.baseEnt.speed = self.childs.collisionEnt.speed
+				self.baseEnt.damage(colliderMaxHealth - self.childs.collisionEnt.health, game.forces.neutral)
 
-			if not self.baseEnt.valid then --destroy event might already be executed
-				return false 
-			end 
-			self.childs.collisionEnt.health = colliderMaxHealth
+				if not self.baseEnt.valid then --destroy event might already be executed
+					return false 
+				end 
+				self.childs.collisionEnt.health = colliderMaxHealth
+			end
 		end
 		return true
 	end,
@@ -304,8 +315,35 @@ heli = {
 				self.burnerDriver = game.surfaces[1].create_entity{name="player", force = game.forces.neutral, position = self.baseEnt.position}
 				self.childs.burnerEnt.passenger = self.burnerDriver
 			end
+
+
 			self.baseEnt.burner.remaining_burning_fuel = self.baseEnt.burner.remaining_burning_fuel - baseEngineConsumption
-			self.burnerDriver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.direction.north}
+
+			if self.baseEnt.burner.remaining_burning_fuel <= 0 then
+				if self.baseEnt.burner.inventory.is_empty() then
+					local mod = self.baseEnt.effectivity_modifier
+					self.baseEnt.effectivity_modifier = 0
+					self.baseEnt.passenger.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
+					self.baseEnt.effectivity_modifier = mod
+				else
+					local fuelItemStack = nil
+					for i = 1, #self.baseEnt.burner.inventory do
+						if self.baseEnt.burner.inventory[i] and self.baseEnt.burner.inventory[i].valid_for_read then
+							fuelItemStack = self.baseEnt.burner.inventory[i]
+							break
+						end
+					end
+
+					if fuelItemStack then
+						self.baseEnt.burner.currently_burning = fuelItemStack.name
+						self.baseEnt.burner.remaining_burning_fuel = fuelItemStack.prototype.fuel_value
+
+						self.baseEnt.burner.inventory.remove({name = fuelItemStack.name})
+					end
+				end
+			end
+
+			self.burnerDriver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
 			if self.childs.burnerEnt.burner.remaining_burning_fuel < 1000 then
 				self.childs.burnerEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 1})
 			end
@@ -343,7 +381,7 @@ heli = {
 						position = self.baseEnt.position,
 						orientation = self.baseEnt.orientation
 					}
-					self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 1})
+					self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
 				end
 
 				if self.height > maxCollisionHeight and self.childs.collisionEnt then
@@ -376,7 +414,7 @@ heli = {
 
 				if self.height <= maxCollisionHeight and not self.childs.collisionEnt then
 					self.childs.collisionEnt = game.surfaces[1].create_entity{name = "heli-flying-collision-entity-_-", force = game.forces.neutral, position = self.baseEnt.position}
-					self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 1})
+					self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
 				end
 
 				if self.height == 0 then
@@ -391,15 +429,24 @@ heli = {
 					self.startupProgress = math.max(self.startupProgress - 1, 0)
 				end
 				if self.baseEnt.speed == 0 and not self.hasLandedCollider then
-					self.hasLandedCollider = true
-					self.childs.collisionEnt.destroy()
-					self.childs.collisionEnt = game.surfaces[1].create_entity{
-						name = "heli-landed-collision-entity-_-",
-						force = game.forces.neutral,
-						position = self.baseEnt.position,
-						orientation = self.baseEnt.orientation
-					}
-					self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 1})
+					if not self.delayLandedColliderCreation then self.delayLandedColliderCreation = 0 end
+					if self.delayLandedColliderCreation > 0 then 
+						self.delayLandedColliderCreation = self.delayLandedColliderCreation - 1
+					else
+						self.hasLandedCollider = true
+						if self.childs.collisionEnt and self.childs.collisionEnt.valid then
+							self.childs.collisionEnt.destroy()
+						end
+
+						self.childs.collisionEnt = game.surfaces[1].create_entity{
+							name = "heli-landed-collision-entity-_-",
+							force = game.forces.neutral,
+							position = self.baseEnt.position,
+							orientation = self.baseEnt.orientation
+						}
+						self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
+						self.childs.collisionEnt.operable = false
+					end
 				end
 			end
 		end

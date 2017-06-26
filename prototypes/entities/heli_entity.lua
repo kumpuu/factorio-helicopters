@@ -204,7 +204,7 @@ data:extend({
 	    open_sound = { filename = "__base__/sound/car-door-open.ogg", volume=0.7 },
     	close_sound = { filename = "__base__/sound/car-door-close.ogg", volume = 0.7 },
 	    guns = {"tank-machine-gun", "heli-rocket-launcher-item"},
-	    turret_rotation_speed = 0.35 / 60,
+	    turret_rotation_speed = 1 / 60,
 
 		
 	},
