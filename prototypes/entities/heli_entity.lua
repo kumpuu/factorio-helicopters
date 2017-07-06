@@ -46,7 +46,7 @@ data:extend({
 					stripes =
 					{
 						{
-							filename = "__Helicopters__/graphics/heli/body-0.png",
+							filename = "__Helicopters__/graphics/entities/heli/body-0.png",
 							width_in_frames = 1,
 							height_in_frames = 1,
 						},
@@ -65,7 +65,7 @@ data:extend({
 					stripes =
 					{
 						{
-							filename = "__Helicopters__/graphics/heli/rotor-0.png",
+							filename = "__Helicopters__/graphics/entities/heli/rotor-0.png",
 							width_in_frames = 1,
 							height_in_frames = 1,
 						},
@@ -132,7 +132,7 @@ data:extend({
 					stripes =
 					{
 						{
-							filename = "__Helicopters__/graphics/heli/void.png",
+							filename = "__Helicopters__/graphics/void.png",
 							width_in_frames = 8,
 							height_in_frames = 8,
 						},
@@ -263,7 +263,7 @@ data:extend({
 					stripes =
 					{
 						{
-							filename = "__Helicopters__/graphics/heli/void.png",
+							filename = "__Helicopters__/graphics/void.png",
 							width_in_frames = 1,
 							height_in_frames = 1,
 						},
@@ -337,7 +337,7 @@ data:extend({
 					stripes =
 					{
 						{
-							filename = "__Helicopters__/graphics/heli/void.png",
+							filename = "__Helicopters__/graphics/void.png",
 							width_in_frames = 1,
 							height_in_frames = 1,
 						},
@@ -406,22 +406,22 @@ data:extend({
 					stripes =
 					{
 						{
-							filename = "__Helicopters__/graphics/heli/body-0.png",
+							filename = "__Helicopters__/graphics/entities/heli/body-0.png",
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
 						{
-							filename = "__Helicopters__/graphics/heli/body-1.png",
+							filename = "__Helicopters__/graphics/entities/heli/body-1.png",
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
 						{
-							filename = "__Helicopters__/graphics/heli/body-2.png",
+							filename = "__Helicopters__/graphics/entities/heli/body-2.png",
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
 						{
-							filename = "__Helicopters__/graphics/heli/body-3.png",
+							filename = "__Helicopters__/graphics/entities/heli/body-3.png",
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
@@ -480,22 +480,22 @@ data:extend({
 					stripes =
 					{
 						{
-							filename = "__Helicopters__/graphics/heli/body_shadow-0.png",
+							filename = "__Helicopters__/graphics/entities/heli/body_shadow-0.png",
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
 						{
-							filename = "__Helicopters__/graphics/heli/body_shadow-1.png",
+							filename = "__Helicopters__/graphics/entities/heli/body_shadow-1.png",
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
 						{
-							filename = "__Helicopters__/graphics/heli/body_shadow-2.png",
+							filename = "__Helicopters__/graphics/entities/heli/body_shadow-2.png",
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
 						{
-							filename = "__Helicopters__/graphics/heli/body_shadow-3.png",
+							filename = "__Helicopters__/graphics/entities/heli/body_shadow-3.png",
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
@@ -577,7 +577,7 @@ data:extend({
 					stripes =
 					{
 						{
-							filename = "__Helicopters__/graphics/heli/void.png",
+							filename = "__Helicopters__/graphics/void.png",
 							width_in_frames = 1,
 							height_in_frames = 1,
 						},

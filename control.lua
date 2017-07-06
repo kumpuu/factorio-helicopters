@@ -1,4 +1,5 @@
 require ("logic.heli")
+require ("logic.remote")
 
 function getHeliFromBaseEntity(ent)
 	for k,v in pairs(global.helis) do
@@ -10,25 +11,26 @@ function getHeliFromBaseEntity(ent)
 	return nil
 end
 
---[[function onDrivingStateChanged(e)
-	local pInd = e.player_index
-	local player = game.players[pInd]
-
-	if player.driving then
-		local char_name = player.vehicle.name
-		local t = player.vehicle.type
-		local d = player.driving
-
-		player.print(tostring(pInd) .. " entered " .. t .. " with name " .. char_name .. " and driving= " .. tostring(d))
-	else
-		player.print(tostring(pInd) .. " left a vehicle ")
+function getHeliPadIndexFromBaseEntity(ent)
+	for i, v in ipairs(global.heli_pads) do
+		if v.baseEnt == ent then
+			return i
+		end
 	end
-end]]
+
+	return nil
+end
 
 function OnLoad(e)
 	if global.helis then
 		for k, v in pairs(global.helis) do
 			setmetatable(v, {__index = heli})
+		end
+	end
+
+	if global.remoteGuis then
+		for k, v in pairs(global.remoteGuis) do
+			setmetatable(v, {__index = remoteGui})
 		end
 	end
 end
@@ -38,15 +40,18 @@ function OnBuilt(e)
 
 	if ent.name == "heli-placement-entity-_-" then
 		if not global.helis then global.helis = {} end
-		OnHeliBuilt(ent)
-	end
-end
+		local newHeli = heli.new(ent)
+		table.insert(global.helis, newHeli)
 
-function OnTick(e)
-	if global.helis then
-		for k, heli in pairs(global.helis) do
-			heli:OnTick()
+		if global.remoteGuis then
+			for k, curRemote in pairs(global.remoteGuis) do
+				curRemote:OnHeliBuilt(newHeli)
+			end
 		end
+
+	elseif ent.name == "heli-pad-placement-entity" then
+		if not global.heli_pads then global.heli_pads = {} end
+		table.insert(global.heli_pads, heli_pad.new(ent))
 	end
 end
 
@@ -59,8 +64,36 @@ function OnRemoved(e)
 				if val:isBaseOrChild(ent) then
 					val:destroy()
 					table.remove(global.helis, i)
+					
+					if global.remoteGuis then
+						for k, curRemote in pairs(global.remoteGuis) do
+							curRemote:OnHeliRemoved(val)
+						end
+					end
 				end
 			end
+		end
+	end
+
+	if ent.name == "heli-pad-entity" then
+		local i = getHeliPadIndexFromBaseEntity(ent)
+		if i then
+			global.heli_pads[i]:destroy()
+			table.remove(global.heli_pads, i)
+		end
+	end
+end
+
+function OnTick(e)
+	if global.helis then
+		for k, v in pairs(global.helis) do
+			v:OnTick()
+		end
+	end
+
+	if global.remoteGuis then
+		for k, v in pairs(global.remoteGuis) do
+			v:OnTick()
 		end
 	end
 end
@@ -70,6 +103,7 @@ function OnHeliUp(e)
 	if p.driving and p.vehicle.name == "heli-entity-_-" then
 		getHeliFromBaseEntity(p.vehicle):OnUp()
 	end
+	OnPlayerPlacedRemote(e)
 end
 
 function OnHeliDown(e)
@@ -79,7 +113,21 @@ function OnHeliDown(e)
 	end
 end
 
---script.on_event(defines.events.on_player_driving_changed_state, onDrivingStateChanged)
+---------------------
+
+function OnPlacedEquipment(e)
+	if e.equipment.name == "heli-remote-equipment" then
+		OnPlayerPlacedRemote(e)
+	end
+end
+
+function OnRemovedEquipment(e)
+	if e.equipment == "heli-remote-equipment" then
+		OnPlayerRemovedRemote(e)
+	end
+end
+
+--------------------
 
 script.on_event(defines.events.on_built_entity, OnBuilt)
 script.on_event(defines.events.on_robot_built_entity, OnBuilt)
@@ -93,3 +141,8 @@ script.on_event(defines.events.on_entity_died, OnRemoved)
 
 script.on_event("heli-up", OnHeliUp)
 script.on_event("heli-down", OnHeliDown)
+
+
+script.on_event(defines.events.on_player_placed_equipment, OnPlacedEquipment)
+script.on_event(defines.events.on_player_removed_equipment, OnRemovedEquipment)
+script.on_event(defines.events.on_gui_click, OnGuiClick)

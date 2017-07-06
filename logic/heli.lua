@@ -138,6 +138,7 @@ heli = {
 
 	---------- fallback vals for old version objects -----------
 	landedColliderCreationDelay = 0,
+	valid = true,
 	------------------------------------------------------------
 
 	new = function(ent)
@@ -149,6 +150,7 @@ heli = {
 		ent.destroy()
 
 		local obj = {
+			valid = true,
 			version = versionStrToInt(game.active_mods.Helicopters),
 
 			oldBasePosition = baseEnt.position,
@@ -195,6 +197,8 @@ heli = {
 	end,
 
 	destroy = function(self)
+		self.valid = false
+		
 		if self.baseEnt and self.baseEnt.valid then
 			--self.baseEnt.destroy()
 		end
@@ -508,7 +512,3 @@ heli = {
 		self.goUp = false
 	end,
 }
-
-function OnHeliBuilt(ent)
-	table.insert(global.helis, heli.new(ent))
-end
