@@ -1,5 +1,15 @@
 local math3d = require("math3d")
 
+function getHeliFromBaseEntity(ent)
+	for k,v in pairs(global.helis) do
+		if v.baseEnt == ent then
+			return v
+		end
+	end
+
+	return nil
+end
+
 local frameFixes = {
 	0, --1	
 	0.015625, --2	
@@ -89,24 +99,6 @@ local baseEngineConsumption = 20000
 local bodyOffset = 5
 local rotorOffset = 5.1
 
-local printA = function(...)
-	local s = ""
-	for i = 1, select("#", ...) do
-		s = s .. tostring(select(i, ...))
-	end
-
-	for k,v in pairs(game.players) do
-		v.print(s)
-	end
-end
-
-local tableToString = function(table)
-	local s = ""
-	for k,v in pairs(table) do
-		s = s .. "'" .. k .. "': " .. tostring(v) .. "\n"
-	end
-	return s
-end
 
 local IsEntityBurnerOutOfFuel = function(ent)
 	return ent.burner.remaining_burning_fuel <= 0 and ent.burner.inventory.is_empty()

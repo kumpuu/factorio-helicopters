@@ -1,38 +1,41 @@
 require ("logic.heli")
-require ("logic.remote")
+require ("logic.heliController")
+require ("logic.heliPad")
+require ("logic.remoteGui")
+require ("logic.util")
 
-function getHeliFromBaseEntity(ent)
-	for k,v in pairs(global.helis) do
-		if v.baseEnt == ent then
-			return v
+function setMetatables(name, mt)
+	if global[name] then
+		for k, v in pairs(global[name]) do
+			setmetatable(v, {__index = mt})
 		end
 	end
-
-	return nil
 end
 
-function getHeliPadIndexFromBaseEntity(ent)
-	for i, v in ipairs(global.heli_pads) do
-		if v.baseEnt == ent then
-			return i
+function checkAndTick(name)
+	if global[name] then
+		for i, v in ipairs(global[name]) do
+			if v.valid then
+				v:OnTick()
+			else
+				table.remove(global[name], i)
+			end
 		end
 	end
-
-	return nil
 end
+
+
 
 function OnLoad(e)
-	if global.helis then
-		for k, v in pairs(global.helis) do
-			setmetatable(v, {__index = heli})
-		end
-	end
+	setMetatables("helis", heli)
+	setMetatables("remoteGuis", remoteGui)
+	setMetatables("heliPads", heliPad)
+end
 
-	if global.remoteGuis then
-		for k, v in pairs(global.remoteGuis) do
-			setmetatable(v, {__index = remoteGui})
-		end
-	end
+function OnTick(e)
+	checkAndTick("helis")
+	checkAndTick("remoteGuis")
+	checkAndTick("heliControllers")
 end
 
 function OnBuilt(e)
@@ -50,8 +53,8 @@ function OnBuilt(e)
 		end
 
 	elseif ent.name == "heli-pad-placement-entity" then
-		if not global.heli_pads then global.heli_pads = {} end
-		table.insert(global.heli_pads, heli_pad.new(ent))
+		if not global.heliPads then global.heliPads = {} end
+		table.insert(global.heliPads, heliPad.new(ent))
 	end
 end
 
@@ -78,22 +81,8 @@ function OnRemoved(e)
 	if ent.name == "heli-pad-entity" then
 		local i = getHeliPadIndexFromBaseEntity(ent)
 		if i then
-			global.heli_pads[i]:destroy()
-			table.remove(global.heli_pads, i)
-		end
-	end
-end
-
-function OnTick(e)
-	if global.helis then
-		for k, v in pairs(global.helis) do
-			v:OnTick()
-		end
-	end
-
-	if global.remoteGuis then
-		for k, v in pairs(global.remoteGuis) do
-			v:OnTick()
+			global.heliPads[i]:destroy()
+			table.remove(global.heliPads, i)
 		end
 	end
 end
@@ -113,8 +102,6 @@ function OnHeliDown(e)
 	end
 end
 
----------------------
-
 function OnPlacedEquipment(e)
 	if e.equipment.name == "heli-remote-equipment" then
 		OnPlayerPlacedRemote(e)
@@ -126,8 +113,6 @@ function OnRemovedEquipment(e)
 		OnPlayerRemovedRemote(e)
 	end
 end
-
---------------------
 
 script.on_event(defines.events.on_built_entity, OnBuilt)
 script.on_event(defines.events.on_robot_built_entity, OnBuilt)
