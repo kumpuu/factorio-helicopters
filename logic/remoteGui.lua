@@ -71,10 +71,11 @@ function OnGuiClick(e)
 	local name = e.element.name
 
 	if name:match("^heli_") then
+		local i = getRemoteGuiIndexByPlayer(p)
+		
 		if name == "heli_remote_btn" then
 			if not global.remoteGuis then global.remoteGuis = {} end
 
-			local i = getRemoteGuiIndexByPlayer(p)
 			if not i then
 				table.insert(global.remoteGuis, remoteGui.new(p))
 			else
@@ -82,17 +83,8 @@ function OnGuiClick(e)
 				table.remove(global.remoteGuis, i)
 			end
 		
-		elseif name:match("^heli_cam_%d+$") then
-			getRemoteGuiByPlayer(p):OnHeliCamClicked(e)
-		
-		elseif name == "heli_btn_to_player" then
-			local gui = getRemoteGuiByPlayer(p)
-			local heli = gui.selectedHeli
-
-			if heli then
-				if not global.heliControllers then global.heliControllers = {} end
-				table.insert(global.heliControllers, heliController.new(p, heli, p.position))
-			end
+		else
+			global.remoteGuis[i]:OnGuiClick(e)
 		end
 	end
 end
@@ -106,72 +98,140 @@ remoteGui =
 			valid = true,
 
 			player = p,
-			force = p.force,
-			selectedHeli = nil,
-			trackedHelis = {},
+
+			curState = heliSelectionGui.new(p)
 		}
 
 		setmetatable(obj, {__index = remoteGui})
-		obj:rebuildGui()
 		return obj
 	end,
 
 	destroy = function(self)
 		self.valid = false
-		self:destroyGui()
+		self.curState:destroy()
+	end,
+
+	safeStateCall = function(self, k, ...)
+		if self.curState[k] then
+			self.curState[k](self.curState, ...)
+		end
 	end,
 
 	OnTick = function(self)
 		if not self.player.valid then
 			self:destroy()
-		elseif self.player.force ~= self.force then
-			self.force = self.player.force
-			self.selectedHeli = nil
-			self:rebuildGui()
 		else
-			self:updateCamPositions()
+			self:safeStateCall("OnTick")
 		end
 	end,
 
-	OnHeliCamClicked = function(self, e)
+	OnGuiClick = function(self, e)
+		local name = e.element.name
+
+		if name:match("^" .. self.curState.prefix .. ".+") then
+			self:safeStateCall("OnGuiClick", e)
+		end
+	end,
+
+	OnHeliBuilt = function(self, heli)
+		self:safeStateCall("OnHeliBuilt", heli)
+	end,
+
+	OnHeliRemoved = function(self, heli)
+		self:safeStateCall("OnHeliRemoved", heli)
+	end,
+}
+
+
+
+heliSelectionGui =
+{
+	prefix = "heli_heliSelectionGui_",
+
+	new = function(p)
+		obj = 
+		{
+			valid = true,
+			player = p,
+
+			guiElems = 
+			{
+				parent = p.gui.left,
+			},
+
+			curCamID = 0,
+		}
+
+		for k,v in pairs(heliSelectionGui) do
+			obj[k] = v
+		end
+
+		obj:buildGui()
+
+		return obj
+	end,
+
+	destroy = function(self)
+		self.valid = false
+	
+		if self.guiElems.root then
+			self.guiElems.root.destroy()
+		end
+	end,
+
+	OnTick = function(self)
+		self:updateCamPositions()
+	end,
+
+	OnGuiClick = function(self, e)
+		local name = e.element.name
+
+		if name:match("^" .. self.prefix .. "cam_%d+$") then
+			self:OnCamClicked(e)
+		
+		elseif name == self.prefix .. "btn_toPlayer" then
+			if self.selectedCam then
+				if not global.heliControllers then global.heliControllers = {} end
+				table.insert(global.heliControllers, heliController.new(self.player, self.selectedCam.heli, self.player.position))
+			end
+		end
+	end,
+
+	OnHeliBuilt = function(self, heli)
+		local flow, selectionBox, cam = self:buildCam(self.guiElems.camTable, self.curCamID, false, heli.baseEnt.position, 0.3)
+
+		table.insert(self.guiElems.cams,
+		{
+			flow = flow,
+			selectionBox = selectionBox,
+			cam = cam,
+			heli = heli,
+			ID = self.curCamID,
+		})
+
+		self.curCamID = self.curCamID + 1
+	end,
+
+	OnHeliRemoved = function(self, heli)
+		for i, curCam in ipairs(self.guiElems.cams) do
+			if curCam.heli == heli then
+				if curCam == self.selectedCam then
+					self.selectedCam = nil
+				end
+
+				curCam.flow.destroy()
+				table.remove(self.guiElems.cams, i)
+				break
+			end
+		end
+	end,
+
+	OnCamClicked = function(self, e)
 		local p = game.players[e.player_index]
-		local camNo = tonumber(e.element.name:match("%d+"))
+		local camID = tonumber(e.element.name:match("%d+"))
 
 		if e.button == defines.mouse_button_type.left then
-			--self:rebuildGui(camNo)
-			local flow = self.player.gui.center.heli_remote_frame.heli_scroller.heli_cam_table["heli_cam_flow_" .. tostring(camNo)]
-			local cam = flow["heli_cam_box_" .. tostring(camNo)]["heli_cam_" .. tostring(camNo)]
-
-			local pos = cam.position
-			local zoom = cam.zoom
-
-			flow.clear()
-
-			local selectionBox = flow.add
-			{
-				type = "sprite",
-				name = "heli_cam_box_" .. tostring(camNo),
-				sprite = "heli_gui_selected",
-			}
-			selectionBox.style.minimal_width = 214
-			selectionBox.style.minimal_height = 214
-			selectionBox.style.maximal_width = 214
-			selectionBox.style.maximal_height = 214
-
-
-				local cam = selectionBox.add
-				{
-					type = "camera",
-					name = "heli_cam_" .. tostring(camNo),
-					position = pos,
-					zoom = zoom,
-				}
-				cam.style.top_padding = 7
-				cam.style.left_padding = 7
-
-				applyStyle(cam, camStyle)
-
-			self.selectedHeli = self.trackedHelis[camNo]
+			self:setCamSelected(self.guiElems.cams[self:getCamIndexById(camID)], true)
 
 		elseif e.button == defines.mouse_button_type.right then
 			local zoomMax = 1.26
@@ -192,154 +252,182 @@ remoteGui =
 		end
 	end,
 
-	OnHeliBuilt = function(self, heli)
-		self:rebuildGui()
-	end,
-
-	OnHeliRemoved = function(self, heli)
-		if heli == self.selectedHeli then
-			self.selectedHeli = nil
+	getCamIndexById = function(self, ID)
+		for i, curCam in ipairs(self.guiElems.cams) do
+			if curCam.ID == ID then return i end
 		end
-		self:rebuildGui()
 	end,
 
 	updateCamPositions = function(self)
-		for i, curHeli in ipairs(self.trackedHelis) do
-			self.player.gui.center.heli_remote_frame.heli_scroller.heli_cam_table["heli_cam_flow_" .. tostring(i)]["heli_cam_box_" .. tostring(i)]["heli_cam_" .. tostring(i)].position = curHeli.baseEnt.position
+		for k, curCam in pairs(self.guiElems.cams) do
+			curCam.cam.position = curCam.heli.baseEnt.position
 		end
 	end,
 
-	rebuildGui = function(self, selectedIndex)
-		local p = self.player
+	setCamSelected = function(self, cam, isSelected)
+		local flow = cam.flow
 
-		if p.gui.center.heli_remote_frame then
-			self:destroyGui()
+		local pos = cam.cam.position
+		local zoom = cam.cam.zoom
+
+		flow.clear()
+
+		cam.selectionBox, cam.cam = self:buildCamInner(flow, cam.ID, isSelected, pos, zoom)
+
+		if isSelected then
+			if self.selectedCam and self.selectedCam ~= cam then
+				self:setCamSelected(self.selectedCam, false)
+			end
+			self.selectedCam = cam
+		else
+			if self.selectedCam and self.selectedCam == cam then
+				self.selectedCam = nil
+			end
+		end
+	end,
+
+	buildCamInner = function(self, parent, ID, isSelected, position, zoom)
+		local sprite = ""
+		if isSelected then
+			sprite = "heli_gui_selected"
 		end
 
-		local frame = p.gui.center.add
+		local selectionBox = parent.add
+		{
+			type = "sprite",
+			name = self.prefix .. "camBox_" .. tostring(ID),
+			sprite = sprite,
+		}
+		selectionBox.style.minimal_width = 214
+		selectionBox.style.minimal_height = 214
+		selectionBox.style.maximal_width = 214
+		selectionBox.style.maximal_height = 214
+
+
+			local cam = selectionBox.add
+			{
+				type = "camera",
+				name = self.prefix .. "cam_" .. tostring(ID),
+				position = position,
+				zoom = zoom,
+			}
+			cam.style.top_padding = 7
+			cam.style.left_padding = 7
+
+			applyStyle(cam, camStyle)
+
+		return selectionBox, cam
+	end,
+
+	buildCam = function(self, parent, ID, isSelected, position, zoom)
+		local flow = parent.add
+		{
+			type = "flow",
+			name = self.prefix .. "camFlow_" .. tostring(ID),
+		}
+
+		flow.style.minimal_width = 214
+		flow.style.minimal_height = 214
+		flow.style.maximal_width = 214
+		flow.style.maximal_height = 214
+
+		return flow, self:buildCamInner(flow, ID, isSelected, position, zoom)
+	end,
+
+	buildGui = function(self, selectedIndex)
+		local p = self.player
+		local els = self.guiElems
+
+		--if els.parent.heli_remote_frame then
+		--	self:destroyGui()
+		--end
+
+		els.root = els.parent.add
 		{
 			type = "frame",
-			name = "heli_remote_frame",
+			name = self.prefix .. "rootFrame",
 			caption = "Helicopter remote control",
 			style = "frame_style",
 			direction = "vertical",
 		}
 
-		frame.style.maximal_width = 1000
-		frame.style.maximal_height = 700
+		els.root.style.maximal_width = 1000
+		els.root.style.maximal_height = 700
 
-			local buttonFlow = frame.add
+			els.buttonFlow = els.root.add
 			{
 				type = "flow",
-				name = "heli_btn_flow",
+				name = self.prefix .. "btnFlow",
 			}
-			buttonFlow.style.left_padding = 7
+			els.buttonFlow.style.left_padding = 7
 
-				local btnToPlayer = buttonFlow.add
+				els.btnToPlayer = els.buttonFlow.add
 				{
 					type = "sprite-button",
-					name = "heli_btn_to_player",
+					name = self.prefix .. "btn_toPlayer",
 					sprite = "heli_to_player",
 					style = mod_gui.button_style,
 				}
 
-				local btnToMap = buttonFlow.add
+				els.btnToMap = els.buttonFlow.add
 				{
 					type = "sprite-button",
-					name = "heli_btn_to_map",
+					name = self.prefix .. "btn_toMap",
 					sprite = "heli_to_map",
 					style = mod_gui.button_style,
 				}
 
-				local btnToPad = buttonFlow.add
+				els.btnToPad = els.buttonFlow.add
 				{
 					type = "sprite-button",
-					name = "heli_btn_to_pad",
+					name = self.prefix .. "btn_toPad",
 					sprite = "heli_to_pad",
 					style = mod_gui.button_style,
 				}
 
-				local btnStop = buttonFlow.add
+				els.btnStop = els.buttonFlow.add
 				{
 					type = "sprite-button",
-					name = "heli_btn_stop",
+					name = self.prefix .. "btn_Stop",
 					sprite = "heli_stop",
 					style = mod_gui.button_style,
 				}
 
-			local scrollPane = frame.add
+			els.scrollPane = els.root.add
 			{
 				type = "scroll-pane",
-				name = "heli_scroller",
+				name = self.prefix .. "scroller",
 			}
 
-			scrollPane.style.maximal_width = 1000
-			scrollPane.style.maximal_height = 600
+			els.scrollPane.style.maximal_width = 1000
+			els.scrollPane.style.maximal_height = 600
 
-				local camTable = scrollPane.add
+				els.camTable = els.scrollPane.add
 				{
 					type = "table",
-					name = "heli_cam_table",
+					name = self.prefix .. "camTable",
 					colspan = 4,
 				}
-				applyStyle(camTable, tableStyle)
+				applyStyle(els.camTable, tableStyle)
 
-
-					self.trackedHelis = {}
-					local i = 1
+					els.cams ={}
+					self.curCamID = 0
 					for k,v in pairs(global.helis) do
-						if v.baseEnt.force == self.force and (v.baseEnt.passenger == nil or v.baseEnt.passenger == self.player) then
-							sprite = ""
-							if selectedIndex and i == selectedIndex then
-								self.selectedHeli = v
-								sprite = "heli_gui_selected"
-							end
-							table.insert(self.trackedHelis, v)
+						if v.baseEnt.force == self.player.force and (v.baseEnt.passenger == nil or v.baseEnt.passenger == self.player) then
 
-							local flow = camTable.add
+							local flow, selectionBox, cam = self:buildCam(els.camTable, self.curCamID, false, v.baseEnt.position, 0.3)
+
+							table.insert(els.cams,
 							{
-								type = "flow",
-								name = "heli_cam_flow_" .. tostring(i),
-							}
+								flow = flow,
+								selectionBox = selectionBox,
+								cam = cam,
+								heli = v,
+								ID = self.curCamID,
+							})
 
-							flow.style.minimal_width = 214
-							flow.style.minimal_height = 214
-							flow.style.maximal_width = 214
-							flow.style.maximal_height = 214
-
-								local selectionBox = flow.add
-								{
-									type = "sprite",
-									name = "heli_cam_box_" .. tostring(i),
-									sprite = sprite,
-									--style = mod_gui.button_style,
-								}
-								selectionBox.style.minimal_width = 214
-								selectionBox.style.minimal_height = 214
-								selectionBox.style.maximal_width = 214
-								selectionBox.style.maximal_height = 214
-
-
-									local cam = selectionBox.add
-									{
-										type = "camera",
-										name = "heli_cam_" .. tostring(i),
-										position = v.baseEnt.position,
-										zoom = 0.3,
-									}
-									cam.style.top_padding = 7
-									cam.style.left_padding = 7
-
-									applyStyle(cam, camStyle)
-
-							i = i + 1
+							self.curCamID = self.curCamID + 1
 						end
 					end
-	end,
-
-	destroyGui = function(self)
-		if self.player.gui.center.heli_remote_frame then
-			self.player.gui.center.heli_remote_frame.destroy()
-		end
 	end,
 }
