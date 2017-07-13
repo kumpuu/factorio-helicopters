@@ -48,4 +48,14 @@ data:extend({
     height = 400,
     flags = {"icon"},
   },
+
+  {
+    type = "sprite",
+    name = "heli_gui_controlled",
+    filename = "__Helicopters__/graphics/gui/controlled.png",
+    priority = "medium",
+    width = 400,
+    height = 400,
+    flags = {"icon"},
+  },
 })

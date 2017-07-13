@@ -13,6 +13,22 @@ function getHeliControllerByOwner(p)
 	if i then return global.heliControllers[i] end
 end
 
+function getHeliControllerIndexByHeli(heli)
+	if global.heliControllers then
+		for i, curController in ipairs(global.heliControllers) do
+			if curController.heli == heli then
+				return i
+			end
+		end
+	end
+end
+
+function getHeliControllerByHeli(heli)
+	local i = getHeliControllerIndexByHeli(heli)
+	if i then return global.heliControllers[i] end
+end
+
+
 heliController = 
 {
 	new = function(player, heli, targetPosition)
@@ -31,11 +47,19 @@ heliController =
 
 		heli.baseEnt.passenger = obj.driver
 
-		return setmetatable(obj, {__index = heliController})
+		setmetatable(obj, {__index = heliController})
+
+		OnHeliControllerCreated(obj)
+		return obj
 	end,
 
 	destroy = function(self)
 		self.valid = false
+		OnHeliControllerDestroyed(self)
+	end,
+
+	stopAndDestroy = function(self)
+		self:changeState(self.stop)
 	end,
 
 	OnTick = function(self)
@@ -182,6 +206,14 @@ heliController =
 		self.heli:OnDown()
 		self.driver.destroy()
 		self:destroy()
+	end,
+
+	stop = function(self)
+		self:setRidingState(defines.riding.acceleration.braking, defines.riding.direction.straight)
+		
+		if self.heli.baseEnt.speed == 0 then
+			self:changeState(self.land)
+		end
 	end,
 	------------------------------------
 }

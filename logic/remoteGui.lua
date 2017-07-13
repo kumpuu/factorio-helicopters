@@ -15,12 +15,6 @@ end
 
 
 
-local camStyle = 
-{
-	minimal_width = 207,
-	minimal_height = 207,
-}
-
 local tableStyle =
 {
 	horizontal_spacing = 10,
@@ -62,6 +56,14 @@ function OnPlayerRemovedRemote(e)
 			table.remove(global.remoteGuis, i)
 		end
 	end
+end
+
+function OnHeliControllerCreated(controller)
+	callInGlobal("remoteGuis", "OnHeliControllerCreated", controller)
+end
+
+function OnHeliControllerDestroyed(controller)
+	callInGlobal("remoteGuis", "OnHeliControllerDestroyed", controller)
 end
 
 function OnGuiClick(e)
@@ -140,6 +142,14 @@ remoteGui =
 	OnHeliRemoved = function(self, heli)
 		self:safeStateCall("OnHeliRemoved", heli)
 	end,
+
+	OnHeliControllerCreated = function(self, controller)
+		self:safeStateCall("OnHeliControllerCreated", controller)
+	end,
+
+	OnHeliControllerDestroyed = function(self, controller)
+		self:safeStateCall("OnHeliControllerDestroyed", controller)
+	end,
 }
 
 
@@ -194,16 +204,19 @@ heliSelectionGui =
 				if not global.heliControllers then global.heliControllers = {} end
 				table.insert(global.heliControllers, heliController.new(self.player, self.selectedCam.heli, self.player.position))
 			end
+		elseif name == self.prefix .. "btn_stop" then
+			if self.selectedCam and self.selectedCam.heliController then
+				self.selectedCam.heliController:stopAndDestroy()
+			end
 		end
 	end,
 
 	OnHeliBuilt = function(self, heli)
-		local flow, selectionBox, cam = self:buildCam(self.guiElems.camTable, self.curCamID, false, heli.baseEnt.position, 0.3)
+		local flow, cam = self:buildCam(self.guiElems.camTable, self.curCamID, heli.baseEnt.position, 0.3, false, false)
 
 		table.insert(self.guiElems.cams,
 		{
 			flow = flow,
-			selectionBox = selectionBox,
 			cam = cam,
 			heli = heli,
 			ID = self.curCamID,
@@ -226,12 +239,30 @@ heliSelectionGui =
 		end
 	end,
 
+	OnHeliControllerCreated = function(self, controller)
+		local cam = searchInTable(self.guiElems.cams, controller.heli, "heli")
+		if cam then
+			print("set")
+			cam.heliController = controller
+			self:setCamStatus(cam, cam == self.selectedCam, true)
+		end
+	end,
+
+	OnHeliControllerDestroyed = function(self, controller)
+		local cam = searchInTable(self.guiElems.cams, controller, "heliController")
+		if cam then
+			cam.heliController = nil
+			self:setCamStatus(cam, cam == self.selectedCam, false)
+		end
+	end,
+
 	OnCamClicked = function(self, e)
 		local p = game.players[e.player_index]
 		local camID = tonumber(e.element.name:match("%d+"))
 
 		if e.button == defines.mouse_button_type.left then
-			self:setCamSelected(self.guiElems.cams[self:getCamIndexById(camID)], true)
+			local cam = self.guiElems.cams[self:getCamIndexById(camID)]
+			self:setCamStatus(cam, true, cam.heliController)
 
 		elseif e.button == defines.mouse_button_type.right then
 			local zoomMax = 1.26
@@ -264,7 +295,7 @@ heliSelectionGui =
 		end
 	end,
 
-	setCamSelected = function(self, cam, isSelected)
+	setCamStatus = function(self, cam, isSelected, hasController)
 		local flow = cam.flow
 
 		local pos = cam.cam.position
@@ -272,11 +303,11 @@ heliSelectionGui =
 
 		flow.clear()
 
-		cam.selectionBox, cam.cam = self:buildCamInner(flow, cam.ID, isSelected, pos, zoom)
+		cam.cam = self:buildCamInner(flow, cam.ID, pos, zoom, isSelected, cam.heliController)
 
 		if isSelected then
 			if self.selectedCam and self.selectedCam ~= cam then
-				self:setCamSelected(self.selectedCam, false)
+				self:setCamStatus(self.selectedCam, false, hasController)
 			end
 			self.selectedCam = cam
 		else
@@ -286,40 +317,64 @@ heliSelectionGui =
 		end
 	end,
 
-	buildCamInner = function(self, parent, ID, isSelected, position, zoom)
-		local sprite = ""
+	buildCamInner = function(self, parent, ID, position, zoom, isSelected, hasController)
+		local camParent = parent
+		local padding = 8
+		local size = 210
+		local camSize = size - padding
+
 		if isSelected then
-			sprite = "heli_gui_selected"
+			camParent = camParent.add
+			{
+				type = "sprite",
+				name = self.prefix .. "camBox_selected_" .. tostring(ID),
+				sprite = "heli_gui_selected",
+			}
+			camParent.style.minimal_width = size
+			camParent.style.minimal_height = size
+			camParent.style.maximal_width = size
+			camParent.style.maximal_height = size
 		end
 
-		local selectionBox = parent.add
-		{
-			type = "sprite",
-			name = self.prefix .. "camBox_" .. tostring(ID),
-			sprite = sprite,
-		}
-		selectionBox.style.minimal_width = 214
-		selectionBox.style.minimal_height = 214
-		selectionBox.style.maximal_width = 214
-		selectionBox.style.maximal_height = 214
-
-
-			local cam = selectionBox.add
+		if hasController then
+			camParent = camParent.add
 			{
-				type = "camera",
-				name = self.prefix .. "cam_" .. tostring(ID),
-				position = position,
-				zoom = zoom,
+				type = "sprite",
+				name = self.prefix .. "camBox_controlled_" .. tostring(ID),
+				sprite = "heli_gui_controlled",
 			}
-			cam.style.top_padding = 7
-			cam.style.left_padding = 7
+			local pa = padding/4
 
-			applyStyle(cam, camStyle)
+			camParent.style.minimal_width = size - pa
+			camParent.style.minimal_height = size - pa
+			camParent.style.maximal_width = size - pa
+			camParent.style.maximal_height = size - pa
 
-		return selectionBox, cam
+
+			camParent.style.top_padding = pa
+			camParent.style.left_padding = pa
+
+			padding = padding - pa
+		end
+
+
+		local cam = camParent.add
+		{
+			type = "camera",
+			name = self.prefix .. "cam_" .. tostring(ID),
+			position = position,
+			zoom = zoom,
+		}
+		cam.style.top_padding = padding
+		cam.style.left_padding = padding
+
+		cam.style.minimal_width = camSize
+		cam.style.minimal_height = camSize
+
+		return cam
 	end,
 
-	buildCam = function(self, parent, ID, isSelected, position, zoom)
+	buildCam = function(self, parent, ID, position, zoom, isSelected, hasController)
 		local flow = parent.add
 		{
 			type = "flow",
@@ -331,7 +386,7 @@ heliSelectionGui =
 		flow.style.maximal_width = 214
 		flow.style.maximal_height = 214
 
-		return flow, self:buildCamInner(flow, ID, isSelected, position, zoom)
+		return flow, self:buildCamInner(flow, ID, position, zoom, isSelected, hasController)
 	end,
 
 	buildGui = function(self, selectedIndex)
@@ -388,7 +443,7 @@ heliSelectionGui =
 				els.btnStop = els.buttonFlow.add
 				{
 					type = "sprite-button",
-					name = self.prefix .. "btn_Stop",
+					name = self.prefix .. "btn_stop",
 					sprite = "heli_stop",
 					style = mod_gui.button_style,
 				}
@@ -415,14 +470,15 @@ heliSelectionGui =
 					for k,v in pairs(global.helis) do
 						if v.baseEnt.force == self.player.force and (v.baseEnt.passenger == nil or v.baseEnt.passenger == self.player) then
 
-							local flow, selectionBox, cam = self:buildCam(els.camTable, self.curCamID, false, v.baseEnt.position, 0.3)
+							local controller = searchInTable(global.heliControllers, v, "heli")
+							local flow, cam = self:buildCam(els.camTable, self.curCamID, v.baseEnt.position, 0.3, false, controller)
 
 							table.insert(els.cams,
 							{
 								flow = flow,
-								selectionBox = selectionBox,
 								cam = cam,
 								heli = v,
+								heliController = controller,
 								ID = self.curCamID,
 							})
 
