@@ -12,5 +12,9 @@ require ("prototypes.recipes.remote_recipes")
 
 require ("prototypes.technologies.heli_technology")
 require ("prototypes.equipment.equipment")
+
 require ("prototypes.sprites.sprites")
+require("prototypes.font.font")
+
 require ("input.input")
+

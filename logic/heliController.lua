@@ -37,7 +37,6 @@ heliController =
 			valid = true,
 
 			owner = player,
-			driver = game.surfaces[1].create_entity{name = "player", force = player.force, position = player.position},
 			heli = heli,
 			targetPos = targetPosition,
 
@@ -45,7 +44,16 @@ heliController =
 			stateChanged = true,
 		}
 
-		heli.baseEnt.passenger = obj.driver
+		if not heli.baseEnt.passenger then
+			obj.driverIsBot = true
+			obj.driver = game.surfaces[1].create_entity{name = "player", force = player.force, position = player.position}
+			heli.baseEnt.passenger = obj.driver
+		else
+			obj.driverIsBot = false
+			obj.driver = heli.baseEnt.passenger
+		end
+
+		heli.hasRemoteController = true
 
 		setmetatable(obj, {__index = heliController})
 
@@ -55,6 +63,12 @@ heliController =
 
 	destroy = function(self)
 		self.valid = false
+		self.heli.hasRemoteController = nil
+
+		if self.driverIsBot and self.driver and self.driver.valid then
+			self.driver.destroy()
+		end
+
 		OnHeliControllerDestroyed(self)
 	end,
 
@@ -63,13 +77,34 @@ heliController =
 	end,
 
 	OnTick = function(self)
-		local old = self.curState
-		self:curState()
+		if not (self.heli.valid and self.heli.baseEnt.valid) then
+			self:destroy()
 
-		if old == self.curState then
-			self.stateChanged = false
+		elseif not (self.heli.baseEnt.passenger and self.heli.baseEnt.passenger.valid) then
+			if self.driverIsBot then
+				self:destroy()
+			else
+				self.driverIsBot = true
+				self.driver = game.surfaces[1].create_entity{name = "player", force = self.owner.force, position = self.owner.position}
+				self.heli.baseEnt.passenger = self.driver
+			end
+
+		elseif self.driverIsBot and self.heli.baseEnt.passenger ~= self.driver then
+			if self.driver and self.driver.valid then
+				self.driver.destroy()
+				self.driver = self.heli.baseEnt.passenger
+				self.driverIsBot = false
+			end
+
 		else
-			self.stateChanged = true
+			local old = self.curState
+			self:curState()
+
+			if old == self.curState then
+				self.stateChanged = false
+			else
+				self.stateChanged = true
+			end
 		end
 	end,
 
@@ -204,7 +239,6 @@ heliController =
 
 	land = function(self)
 		self.heli:OnDown()
-		self.driver.destroy()
 		self:destroy()
 	end,
 

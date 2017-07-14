@@ -1,158 +1,8 @@
-require("mod-gui")
-
-function getRemoteGuiIndexByPlayer(p)
-	if global.remoteGuis then
-		for i, curGui in ipairs(global.remoteGuis) do
-			if curGui.player == p then return i end
-		end
-	end
-end
-
-function getRemoteGuiByPlayer(p)
-	local i = getRemoteGuiIndexByPlayer(p)
-	if i then return global.remoteGuis[i] end
-end
-
-
-
 local tableStyle =
 {
 	horizontal_spacing = 10,
 	vertical_spacing = 10,
 }
-
-function applyStyle(guiElem, style)
-	for k,v in pairs(style) do
-		guiElem.style[k] = v
-	end
-end
-
-function OnPlayerPlacedRemote(e)
-	local p = game.players[e.player_index]
-
-	if not mod_gui.get_button_flow(p).heli_remote_btn then
-		mod_gui.get_button_flow(p).add
-		{
-			type = "sprite-button",
-			name = "heli_remote_btn",
-			sprite = "item/heli-remote-equipment",
-			style = mod_gui.button_style,
-		}
-	end
-end
-
-function OnPlayerRemovedRemote(e)
-	if not equipmentGridHasItem(e.grid, "heli-remote-equipment") then
-		local p = game.players[e.player_index]
-		local flow = mod_gui.get_button_flow(p)
-
-		if flow.heli_remote_btn then
-			flow.heli_remote_btn.destroy()
-		end
-
-		local i = getRemoteGuiIndexByPlayer(p)
-		if i then
-			global.remoteGuis[i]:destroy()
-			table.remove(global.remoteGuis, i)
-		end
-	end
-end
-
-function OnHeliControllerCreated(controller)
-	callInGlobal("remoteGuis", "OnHeliControllerCreated", controller)
-end
-
-function OnHeliControllerDestroyed(controller)
-	callInGlobal("remoteGuis", "OnHeliControllerDestroyed", controller)
-end
-
-function OnGuiClick(e)
-	local p = game.players[e.player_index]
-
-	p.print(e.element.name)
-	local name = e.element.name
-
-	if name:match("^heli_") then
-		local i = getRemoteGuiIndexByPlayer(p)
-		
-		if name == "heli_remote_btn" then
-			if not global.remoteGuis then global.remoteGuis = {} end
-
-			if not i then
-				table.insert(global.remoteGuis, remoteGui.new(p))
-			else
-				global.remoteGuis[i]:destroy()
-				table.remove(global.remoteGuis, i)
-			end
-		
-		else
-			global.remoteGuis[i]:OnGuiClick(e)
-		end
-	end
-end
-
-
-
-remoteGui = 
-{
-	new = function(p)
-		local obj = {
-			valid = true,
-
-			player = p,
-
-			curState = heliSelectionGui.new(p)
-		}
-
-		setmetatable(obj, {__index = remoteGui})
-		return obj
-	end,
-
-	destroy = function(self)
-		self.valid = false
-		self.curState:destroy()
-	end,
-
-	safeStateCall = function(self, k, ...)
-		if self.curState[k] then
-			self.curState[k](self.curState, ...)
-		end
-	end,
-
-	OnTick = function(self)
-		if not self.player.valid then
-			self:destroy()
-		else
-			self:safeStateCall("OnTick")
-		end
-	end,
-
-	OnGuiClick = function(self, e)
-		local name = e.element.name
-
-		if name:match("^" .. self.curState.prefix .. ".+") then
-			self:safeStateCall("OnGuiClick", e)
-		end
-	end,
-
-	OnHeliBuilt = function(self, heli)
-		self:safeStateCall("OnHeliBuilt", heli)
-	end,
-
-	OnHeliRemoved = function(self, heli)
-		self:safeStateCall("OnHeliRemoved", heli)
-	end,
-
-	OnHeliControllerCreated = function(self, controller)
-		self:safeStateCall("OnHeliControllerCreated", controller)
-	end,
-
-	OnHeliControllerDestroyed = function(self, controller)
-		self:safeStateCall("OnHeliControllerDestroyed", controller)
-	end,
-}
-
-
 
 heliSelectionGui =
 {
@@ -323,12 +173,22 @@ heliSelectionGui =
 		local size = 210
 		local camSize = size - padding
 
-		if isSelected then
+		if isSelected or hasController then
+			local sprite = ""
+
+			--if isSelected and hasController then
+			--	sprite = "heli_gui_selectedControlled"
+			if isSelected then
+				sprite = "heli_gui_selected"
+			--elseif hasController then
+			--	sprite = "heli_gui_controlled"
+			end
+
 			camParent = camParent.add
 			{
 				type = "sprite",
 				name = self.prefix .. "camBox_selected_" .. tostring(ID),
-				sprite = "heli_gui_selected",
+				sprite = sprite,
 			}
 			camParent.style.minimal_width = size
 			camParent.style.minimal_height = size
@@ -336,6 +196,7 @@ heliSelectionGui =
 			camParent.style.maximal_height = size
 		end
 
+		--[[
 		if hasController then
 			camParent = camParent.add
 			{
@@ -356,7 +217,7 @@ heliSelectionGui =
 
 			padding = padding - pa
 		end
-
+		]]
 
 		local cam = camParent.add
 		{
@@ -370,6 +231,17 @@ heliSelectionGui =
 
 		cam.style.minimal_width = camSize
 		cam.style.minimal_height = camSize
+
+		if hasController then
+			local label = cam.add
+			{
+				type = "label",
+				caption = "  CONTROLLED",
+			}
+
+			label.style.font = "pixelated"
+			label.style.font_color = {r = 1, g = 0, b = 0}
+		end
 
 		return cam
 	end,
@@ -392,10 +264,6 @@ heliSelectionGui =
 	buildGui = function(self, selectedIndex)
 		local p = self.player
 		local els = self.guiElems
-
-		--if els.parent.heli_remote_frame then
-		--	self:destroyGui()
-		--end
 
 		els.root = els.parent.add
 		{
@@ -467,17 +335,20 @@ heliSelectionGui =
 
 					els.cams ={}
 					self.curCamID = 0
-					for k,v in pairs(global.helis) do
-						if v.baseEnt.force == self.player.force and (v.baseEnt.passenger == nil or v.baseEnt.passenger == self.player) then
+					for k, curHeli in pairs(global.helis) do
+						--if curHeli.baseEnt.passenger then printA(curHeli.baseEnt.passenger.player.name) end
+						if curHeli.baseEnt.force == self.player.force and 
+							(curHeli.baseEnt.passenger == nil or curHeli.hasRemoteController or
+								(curHeli.baseEnt.passenger.player and curHeli.baseEnt.passenger.player.name == self.player.name)) then
 
-							local controller = searchInTable(global.heliControllers, v, "heli")
-							local flow, cam = self:buildCam(els.camTable, self.curCamID, v.baseEnt.position, 0.3, false, controller)
+							local controller = searchInTable(global.heliControllers, curHeli, "heli")
+							local flow, cam = self:buildCam(els.camTable, self.curCamID, curHeli.baseEnt.position, 0.3, false, curHeli.hasRemoteController)
 
 							table.insert(els.cams,
 							{
 								flow = flow,
 								cam = cam,
-								heli = v,
+								heli = curHeli,
 								heliController = controller,
 								ID = self.curCamID,
 							})

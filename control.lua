@@ -1,8 +1,8 @@
 require ("logic.heli")
-require ("logic.heliController")
 require ("logic.heliPad")
-require ("logic.remoteGui")
 require ("logic.util")
+require ("logic.heliController")
+require ("logic.gui.remoteGui")
 
 function setMetatables(name, mt)
 	if global[name] then
