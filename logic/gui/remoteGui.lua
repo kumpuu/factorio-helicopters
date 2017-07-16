@@ -1,5 +1,8 @@
 require("mod-gui")
 require("logic.gui.heliSelectionGui")
+require("logic.gui.playerSelectionGui")
+require("logic.gui.markerSelectionGui")
+require("logic.gui.heliPadSelectionGui")
 
 function getRemoteGuiIndexByPlayer(p)
 	if global.remoteGuis then
@@ -12,12 +15,6 @@ end
 function getRemoteGuiByPlayer(p)
 	local i = getRemoteGuiIndexByPlayer(p)
 	if i then return global.remoteGuis[i] end
-end
-
-function applyStyle(guiElem, style)
-	for k,v in pairs(style) do
-		guiElem.style[k] = v
-	end
 end
 
 function OnPlayerPlacedRemote(e)
@@ -93,17 +90,22 @@ remoteGui =
 			valid = true,
 
 			player = p,
-
-			curState = heliSelectionGui.new(p)
 		}
 
 		setmetatable(obj, {__index = remoteGui})
+		obj:switchState(heliSelectionGui)
 		return obj
 	end,
 
 	destroy = function(self)
 		self.valid = false
 		self.curState:destroy()
+	end,
+
+	switchState = function(self, state)
+		if self.curState then self.curState:destroy() end
+
+		self.curState = state.new(self, self.player)
 	end,
 
 	safeStateCall = function(self, k, ...)

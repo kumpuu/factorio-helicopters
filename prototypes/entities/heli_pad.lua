@@ -1,6 +1,6 @@
 data:extend({
   {
-    type = "simple-entity",
+    type = "simple-entity-with-force",
     name = "heli-pad-placement-entity",
     flags = {"placeable-neutral", "player-creation"},
     icon = "__base__/graphics/icons/stone-rock.png",
@@ -40,16 +40,16 @@ data:extend({
   },
 
   {
-    type = "simple-entity",
+    type = "simple-entity-with-force",
     name = "heli-pad-entity",
     flags = {"placeable-neutral", "player-creation"},
     icon = "__base__/graphics/icons/stone-rock.png",
     subgroup = "grass",
     order = "b[decorative]-k[stone-rock]-a[big]",
     collision_box = {{-3.5, -3.5}, {3.5, 3.5}},
-    collision_mask = {"object-layer"},
+    collision_mask = {},--{"object-layer"},
     selection_box = {{-3.5, -3.5}, {3.5, 3.5}},
-
+    
     minable =
     {
       mining_time = 2,

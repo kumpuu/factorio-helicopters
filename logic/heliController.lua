@@ -43,6 +43,7 @@ heliController =
 			curState = heliController.getUp,
 			stateChanged = true,
 		}
+		obj.targetPos.y = obj.targetPos.y - 5
 
 		if not heli.baseEnt.passenger then
 			obj.driverIsBot = true

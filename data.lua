@@ -14,7 +14,8 @@ require ("prototypes.technologies.heli_technology")
 require ("prototypes.equipment.equipment")
 
 require ("prototypes.sprites.sprites")
-require("prototypes.font.font")
+require ("prototypes.font.font")
+require ("prototypes.style.style")
 
 require ("input.input")
 

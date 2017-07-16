@@ -1,17 +1,12 @@
-local tableStyle =
-{
-	horizontal_spacing = 10,
-	vertical_spacing = 10,
-}
-
 heliSelectionGui =
 {
 	prefix = "heli_heliSelectionGui_",
 
-	new = function(p)
+	new = function(mgr, p)
 		obj = 
 		{
 			valid = true,
+			manager = mgr,
 			player = p,
 
 			guiElems = 
@@ -48,15 +43,26 @@ heliSelectionGui =
 
 		if name:match("^" .. self.prefix .. "cam_%d+$") then
 			self:OnCamClicked(e)
-		
-		elseif name == self.prefix .. "btn_toPlayer" then
-			if self.selectedCam then
-				if not global.heliControllers then global.heliControllers = {} end
-				table.insert(global.heliControllers, heliController.new(self.player, self.selectedCam.heli, self.player.position))
-			end
-		elseif name == self.prefix .. "btn_stop" then
-			if self.selectedCam and self.selectedCam.heliController then
-				self.selectedCam.heliController:stopAndDestroy()
+
+		elseif self.selectedCam then
+			if name == self.prefix .. "btn_toPlayer" then
+				if e.button == defines.mouse_button_type.left then
+					if not global.heliControllers then global.heliControllers = {} end
+					table.insert(global.heliControllers, heliController.new(self.player, self.selectedCam.heli, self.player.position))
+				else
+					self.manager:switchState(playerSelectionGui)
+				end
+
+			elseif name == self.prefix .. "btn_toMap" then
+				self.manager:switchState(markerSelectionGui)
+
+			elseif name == self.prefix .. "btn_toPad" then
+				self.manager:switchState(heliPadSelectionGui)
+
+			elseif name == self.prefix .. "btn_stop" then
+				if self.selectedCam.heliController then
+					self.selectedCam.heliController:stopAndDestroy()
+				end
 			end
 		end
 	end,
@@ -173,51 +179,18 @@ heliSelectionGui =
 		local size = 210
 		local camSize = size - padding
 
-		if isSelected or hasController then
-			local sprite = ""
-
-			--if isSelected and hasController then
-			--	sprite = "heli_gui_selectedControlled"
-			if isSelected then
-				sprite = "heli_gui_selected"
-			--elseif hasController then
-			--	sprite = "heli_gui_controlled"
-			end
-
+		if isSelected then
 			camParent = camParent.add
 			{
 				type = "sprite",
 				name = self.prefix .. "camBox_selected_" .. tostring(ID),
-				sprite = sprite,
+				sprite = "heli_gui_selected",
 			}
 			camParent.style.minimal_width = size
 			camParent.style.minimal_height = size
 			camParent.style.maximal_width = size
 			camParent.style.maximal_height = size
 		end
-
-		--[[
-		if hasController then
-			camParent = camParent.add
-			{
-				type = "sprite",
-				name = self.prefix .. "camBox_controlled_" .. tostring(ID),
-				sprite = "heli_gui_controlled",
-			}
-			local pa = padding/4
-
-			camParent.style.minimal_width = size - pa
-			camParent.style.minimal_height = size - pa
-			camParent.style.maximal_width = size - pa
-			camParent.style.maximal_height = size - pa
-
-
-			camParent.style.top_padding = pa
-			camParent.style.left_padding = pa
-
-			padding = padding - pa
-		end
-		]]
 
 		local cam = camParent.add
 		{
@@ -331,7 +304,8 @@ heliSelectionGui =
 					name = self.prefix .. "camTable",
 					colspan = 4,
 				}
-				applyStyle(els.camTable, tableStyle)
+				els.camTable.style.horizontal_spacing = 10
+				els.camTable.style.vertical_spacing = 10
 
 					els.cams ={}
 					self.curCamID = 0
