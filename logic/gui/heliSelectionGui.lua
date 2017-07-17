@@ -34,6 +34,10 @@ heliSelectionGui =
 		end
 	end,
 
+	setVisible = function(self, val)
+		self.guiElems.root.style.visible = val
+	end,
+
 	OnTick = function(self)
 		self:updateCamPositions()
 	end,
@@ -47,17 +51,16 @@ heliSelectionGui =
 		elseif self.selectedCam then
 			if name == self.prefix .. "btn_toPlayer" then
 				if e.button == defines.mouse_button_type.left then
-					if not global.heliControllers then global.heliControllers = {} end
-					table.insert(global.heliControllers, heliController.new(self.player, self.selectedCam.heli, self.player.position))
+					self.manager:OnChildEvent(self, "selectedPosition", self.player.position)
 				else
-					self.manager:switchState(playerSelectionGui)
+					self.manager:OnChildEvent(self, "showTargetSelectionGui", playerSelectionGui)
 				end
 
 			elseif name == self.prefix .. "btn_toMap" then
-				self.manager:switchState(markerSelectionGui)
+				self.manager:OnChildEvent(self, "showTargetSelectionGui", markerSelectionGui)
 
 			elseif name == self.prefix .. "btn_toPad" then
-				self.manager:switchState(heliPadSelectionGui)
+				self.manager:OnChildEvent(self, "showTargetSelectionGui", heliPadSelectionGui)
 
 			elseif name == self.prefix .. "btn_stop" then
 				if self.selectedCam.heliController then
@@ -68,17 +71,19 @@ heliSelectionGui =
 	end,
 
 	OnHeliBuilt = function(self, heli)
-		local flow, cam = self:buildCam(self.guiElems.camTable, self.curCamID, heli.baseEnt.position, 0.3, false, false)
+		if heli.baseEnt.force == self.player.force then
+			local flow, cam = self:buildCam(self.guiElems.camTable, self.curCamID, heli.baseEnt.position, 0.3, false, false)
 
-		table.insert(self.guiElems.cams,
-		{
-			flow = flow,
-			cam = cam,
-			heli = heli,
-			ID = self.curCamID,
-		})
+			table.insert(self.guiElems.cams,
+			{
+				flow = flow,
+				cam = cam,
+				heli = heli,
+				ID = self.curCamID,
+			})
 
-		self.curCamID = self.curCamID + 1
+			self.curCamID = self.curCamID + 1
+		end
 	end,
 
 	OnHeliRemoved = function(self, heli)
@@ -86,6 +91,8 @@ heliSelectionGui =
 			if curCam.heli == heli then
 				if curCam == self.selectedCam then
 					self.selectedCam = nil
+					self:setControlBtnsEnabled(false)
+					self.manager:OnChildEvent(self, "OnSelectedHeliIsInvalid")
 				end
 
 				curCam.flow.destroy()
@@ -119,6 +126,7 @@ heliSelectionGui =
 		if e.button == defines.mouse_button_type.left then
 			local cam = self.guiElems.cams[self:getCamIndexById(camID)]
 			self:setCamStatus(cam, true, cam.heliController)
+			self:setControlBtnsEnabled(true)
 
 		elseif e.button == defines.mouse_button_type.right then
 			local zoomMax = 1.26
@@ -171,6 +179,13 @@ heliSelectionGui =
 				self.selectedCam = nil
 			end
 		end
+	end,
+
+	setControlBtnsEnabled = function(self, val)
+		self.guiElems.btnToPlayer.enabled = val
+		self.guiElems.btnToMap.enabled = val
+		self.guiElems.btnToPad.enabled = val
+		self.guiElems.btnStop.enabled = val
 	end,
 
 	buildCamInner = function(self, parent, ID, position, zoom, isSelected, hasController)
@@ -288,6 +303,7 @@ heliSelectionGui =
 					sprite = "heli_stop",
 					style = mod_gui.button_style,
 				}
+				self:setControlBtnsEnabled(false)
 
 			els.scrollPane = els.root.add
 			{
@@ -313,7 +329,7 @@ heliSelectionGui =
 						--if curHeli.baseEnt.passenger then printA(curHeli.baseEnt.passenger.player.name) end
 						if curHeli.baseEnt.force == self.player.force and 
 							(curHeli.baseEnt.passenger == nil or curHeli.hasRemoteController or
-								(curHeli.baseEnt.passenger.player and curHeli.baseEnt.passenger.player.name == self.player.name)) then
+								(curHeli.baseEnt.passenger.player and curHeli.baseEnt.passenger.player.valid and curHeli.baseEnt.passenger.player.name == self.player.name)) then
 
 							local controller = searchInTable(global.heliControllers, curHeli, "heli")
 							local flow, cam = self:buildCam(els.camTable, self.curCamID, curHeli.baseEnt.position, 0.3, false, curHeli.hasRemoteController)

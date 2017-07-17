@@ -4,19 +4,6 @@ require("logic.gui.playerSelectionGui")
 require("logic.gui.markerSelectionGui")
 require("logic.gui.heliPadSelectionGui")
 
-function getRemoteGuiIndexByPlayer(p)
-	if global.remoteGuis then
-		for i, curGui in ipairs(global.remoteGuis) do
-			if curGui.player == p then return i end
-		end
-	end
-end
-
-function getRemoteGuiByPlayer(p)
-	local i = getRemoteGuiIndexByPlayer(p)
-	if i then return global.remoteGuis[i] end
-end
-
 function OnPlayerPlacedRemote(e)
 	local p = game.players[e.player_index]
 
@@ -40,7 +27,7 @@ function OnPlayerRemovedRemote(e)
 			flow.heli_remote_btn.destroy()
 		end
 
-		local i = getRemoteGuiIndexByPlayer(p)
+		local i = searchIndexInTable(global.remoteGuis, p, "player")
 		if i then
 			global.remoteGuis[i]:destroy()
 			table.remove(global.remoteGuis, i)
@@ -56,32 +43,6 @@ function OnHeliControllerDestroyed(controller)
 	callInGlobal("remoteGuis", "OnHeliControllerDestroyed", controller)
 end
 
-function OnGuiClick(e)
-	local p = game.players[e.player_index]
-
-	p.print(e.element.name)
-	local name = e.element.name
-
-	if name:match("^heli_") then
-		local i = getRemoteGuiIndexByPlayer(p)
-		
-		if name == "heli_remote_btn" then
-			if not global.remoteGuis then global.remoteGuis = {} end
-
-			if not i then
-				table.insert(global.remoteGuis, remoteGui.new(p))
-			else
-				global.remoteGuis[i]:destroy()
-				table.remove(global.remoteGuis, i)
-			end
-		
-		else
-			global.remoteGuis[i]:OnGuiClick(e)
-		end
-	end
-end
-
-
 
 remoteGui = 
 {
@@ -90,27 +51,28 @@ remoteGui =
 			valid = true,
 
 			player = p,
+
+			guis = {}
 		}
 
 		setmetatable(obj, {__index = remoteGui})
-		obj:switchState(heliSelectionGui)
+	
+		obj.guis.heliSelection = heliSelectionGui.new(obj, p)
 		return obj
 	end,
 
 	destroy = function(self)
 		self.valid = false
-		self.curState:destroy()
+		for k, curGui in pairs(self.guis) do
+			curGui:destroy()
+		end
 	end,
 
-	switchState = function(self, state)
-		if self.curState then self.curState:destroy() end
-
-		self.curState = state.new(self, self.player)
-	end,
-
-	safeStateCall = function(self, k, ...)
-		if self.curState[k] then
-			self.curState[k](self.curState, ...)
+	safeStateCall = function(self, kName, ...)
+		for k, curGui in pairs(self.guis) do
+			if curGui[kName] then
+				curGui[kName](curGui, ...)
+			end
 		end
 	end,
 
@@ -125,8 +87,46 @@ remoteGui =
 	OnGuiClick = function(self, e)
 		local name = e.element.name
 
-		if name:match("^" .. self.curState.prefix .. ".+") then
-			self:safeStateCall("OnGuiClick", e)
+		for k, curGui in pairs(self.guis) do
+			if name:match("^" .. curGui.prefix .. ".+") and curGui.OnGuiClick then
+				curGui:OnGuiClick(e)
+			end
+		end
+	end,
+
+	OnPlayerChangedForce = function(self, e)
+		self:safeStateCall("OnPlayerChangedForce", e)
+	end,
+
+	OnChildEvent = function(self, child, evtName, ...)
+		if evtName == "showTargetSelectionGui" then
+			local prot = ...
+			self.guis.heliSelection:setVisible(false)
+			self.guis.targetSelection = prot.new(self, self.player)
+
+		elseif evtName == "selectedPosition" then
+			local pos = ...
+			local heli = self.guis.heliSelection.selectedCam.heli
+
+			local oldControllerIndex = searchIndexInTable(global.heliControllers, heli, "heli")
+			if oldControllerIndex then
+				global.heliControllers[oldControllerIndex]:destroy()
+				table.remove(global.heliControllers, oldControllerIndex)
+			end
+
+			insertInGlobal("heliControllers", heliController.new(self.player, self.guis.heliSelection.selectedCam.heli, pos))
+
+			if child ~= self.guis.heliSelection then
+				child:destroy()
+				self.guis.targetSelection = nil
+			end
+			self.guis.heliSelection:setVisible(true)
+		
+		elseif evtName == "OnSelectedHeliIsInvalid" then
+			if self.guis.targetSelection then
+				self.guis.targetSelection:destroy()
+				self.guis.heliSelection:setVisible(true)
+			end
 		end
 	end,
 
@@ -136,6 +136,14 @@ remoteGui =
 
 	OnHeliRemoved = function(self, heli)
 		self:safeStateCall("OnHeliRemoved", heli)
+	end,
+
+	OnHeliPadBuilt = function(self, heli)
+		self:safeStateCall("OnHeliPadBuilt", heli)
+	end,
+
+	OnHeliPadRemoved = function(self, heli)
+		self:safeStateCall("OnHeliPadRemoved", heli)
 	end,
 
 	OnHeliControllerCreated = function(self, controller)

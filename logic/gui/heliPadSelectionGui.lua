@@ -1,6 +1,7 @@
 heliPadSelectionGui = 
 {
 	prefix = "heli_heliPadSelectionGui_",
+	defaultCamZoom = 0.2,
 
 	new = function(mgr, p)
 		obj = 
@@ -22,6 +23,26 @@ heliPadSelectionGui =
 		obj:buildGui()
 
 		return obj
+	end,
+
+	OnHeliPadBuilt = function(self, heliPad)
+		if heliPad.baseEnt.force == self.player.force then
+			table.insert(self.guiElems.cams, 
+			{
+				cam = self:buildCam(self.guiElems.camTable, self.curCamID, heliPad.baseEnt.position, self.defaultCamZoom),
+				ID = self.curCamID,
+				heliPad = heliPad,
+			})
+			self.curCamID = self.curCamID + 1
+		end
+	end,
+
+	OnHeliPadRemoved = function(self, heliPad)
+		local i = searchIndexInTable(self.guiElems.cams, heliPad, "heliPad")
+		if i then
+			self.guiElems.cams[i].cam.destroy()
+			table.remove(self.guiElems.cams, i)
+		end
 	end,
 
 	destroy = function(self)
@@ -100,10 +121,18 @@ heliPadSelectionGui =
 				els.camTable.style.horizontal_spacing = 10
 				els.camTable.style.vertical_spacing = 10
 
+					self.curCamID = 0
+					els.cams = {}
 					for k, curPad in pairs(global.heliPads) do
-							printA(curPad.baseEnt.force, self.player.force, curPad.baseEnt.force == self.player.force)
 						if curPad.baseEnt.force == self.player.force then
-							self:buildCam(els.camTable, k, curPad.baseEnt.position, 0.3)
+							table.insert(els.cams, 
+							{
+								cam = self:buildCam(els.camTable, self.curCamID, curPad.baseEnt.position, self.defaultCamZoom),
+								ID = self.curCamID,
+								heliPad = curPad,
+							})
+
+							self.curCamID = self.curCamID + 1
 						end
 					end
 	end,

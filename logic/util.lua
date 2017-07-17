@@ -30,14 +30,6 @@ function equipmentGridHasItem(grid, itemName)
 	return contents[itemName] and contents[itemName] > 0
 end
 
-function callInGlobal(gName, kName, ...)
-	if global[gName] then
-		for k,v in pairs(global[gName]) do
-			if v[kName] then v[kName](v, ...) end
-		end
-	end
-end
-
 function searchIndexInTable(table, obj, field)
 	if table then
 		for i, v in ipairs(table) do
@@ -60,4 +52,38 @@ function searchInTable(table, obj, field)
 			end
 		end
 	end
+end
+
+function setMetatablesInGlobal(name, mt)
+	if global[name] then
+		for k, v in pairs(global[name]) do
+			setmetatable(v, {__index = mt})
+		end
+	end
+end
+
+function checkAndTickInGlobal(name)
+	if global[name] then
+		for i, v in ipairs(global[name]) do
+			if v.valid then
+				v:OnTick()
+			else
+				table.remove(global[name], i)
+			end
+		end
+	end
+end
+
+function callInGlobal(gName, kName, ...)
+	if global[gName] then
+		for k,v in pairs(global[gName]) do
+			if v[kName] then v[kName](v, ...) end
+		end
+	end
+end
+
+function insertInGlobal(gName, val)
+	if not global[gName] then global[gName] = {} end
+	table.insert(global[gName], val)
+	return val
 end
