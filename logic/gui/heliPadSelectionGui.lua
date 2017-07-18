@@ -33,6 +33,40 @@ heliPadSelectionGui =
 		end
 	end,
 
+	OnGuiClick = function(self, e)
+		local name = e.element.name
+
+		if name:match("^" .. self.prefix .. "cam_%d+$") then
+			self:OnCamClicked(e)
+		end
+	end,
+
+	OnCamClicked = function(self, e)
+
+		if e.button == defines.mouse_button_type.left then
+			local camID = tonumber(e.element.name:match("%d+"))
+			local cam = searchInTable(self.guiElems.cams, camID, "ID")
+			self.manager:OnChildEvent(self, "selectedPosition", cam.heliPad.baseEnt.position)
+
+		elseif e.button == defines.mouse_button_type.right then
+			local zoomMax = 1.0125
+			local zoomMin = 0.025
+			local zoomDelta = 0.5
+
+			if e.shift then
+				e.element.zoom = e.element.zoom * (1 + zoomDelta)
+				if e.element.zoom > zoomMax then
+					e.element.zoom = zoomMin
+				end
+			else
+				e.element.zoom = e.element.zoom * (1 - zoomDelta)
+				if e.element.zoom < zoomMin then
+					e.element.zoom = zoomMax
+				end
+			end
+		end
+	end,
+
 	OnHeliPadBuilt = function(self, heliPad)
 		if heliPad.baseEnt.force == self.player.force then
 			table.insert(self.guiElems.cams, 
