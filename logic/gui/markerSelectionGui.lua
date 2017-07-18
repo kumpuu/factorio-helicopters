@@ -44,6 +44,14 @@ markerSelectionGui =
 		end
 	end,
 
+	OnPlayerChangedForce = function(self, player)
+		if player == self.player then
+			self.guiElems.root.destroy()
+			self.guiElems = {parent = self.guiElems.parent}
+			self:buildGui()
+		end
+	end,
+
 	OnGuiClick = function(self, e)
 		if e.element.name:match("^" .. self.prefix .. "btn_%d+$") then
 			local ID = tonumber(e.element.name:match("%d+"))
@@ -100,6 +108,28 @@ markerSelectionGui =
 			printA(curTag.valid, curTag.text)
 			table.insert(self.guiElems.btns, self:buildBtnFromTag(self.guiElems.table, curTag))
 		end
+
+		self:setNothingAvailableIfNecessary()
+	end,
+
+	setNothingAvailableIfNecessary = function(self)
+		local els = self.guiElems
+		local nec = #els.btns == 0
+
+		if nec and not els.nothingAvailable then
+			els.nothingAvailable = els.table.add
+			{
+				type = "label",
+				name = self.prefix .. "nothingAvailable",
+				caption = "NO MAP MARKERS AVAILABLE",
+			}
+			els.nothingAvailable.style.font = "default-bold"
+			els.nothingAvailable.style.font_color = {r = 1, g = 0, b = 0}
+
+		elseif not nec and els.nothingAvailable then
+			els.nothingAvailable.destroy()
+			els.nothingAvailable = nil
+		end
 	end,
 
 	buildIconFromTag = function(self, parent, tag)
@@ -153,7 +183,7 @@ markerSelectionGui =
 		{
 			type = "frame",
 			name = self.prefix .. "rootFrame",
-			caption = "Select marker to fly to",
+			caption = "Select map marker to fly to",
 			style = "frame_style",
 		}
 
@@ -179,5 +209,6 @@ markerSelectionGui =
 			table.insert(self.guiElems.btns, self:buildBtnFromTag(self.guiElems.table, curTag))
 		end
 		
+		self:setNothingAvailableIfNecessary()
 	end,
 }

@@ -6,7 +6,7 @@ require ("logic.gui.remoteGui")
 
 function OnLoad(e)
 	setMetatablesInGlobal("helis", heli)
-	setMetatablesInGlobal("remoteGuis", remoteGui)
+	setMetatablesInGlobal("remoteGuis", remoteGui.mt)
 	setMetatablesInGlobal("heliPads", heliPad)
 end
 
@@ -108,10 +108,23 @@ function OnGuiClick(e)
 end
 
 function OnPlayerChangedForce(e)
-	local gui = searchInTable(global.remoteGuis, game.players[e.player_index], "player")
+	local p = game.players[e.player_index]
+	local gui = searchInTable(global.remoteGuis, p, "player")
 	if gui then 
-		gui:OnPlayerChangedForce(e)
+		gui:OnPlayerChangedForce(p)
 	end
+end
+
+function OnPlayerDied(e)
+	callInGlobal("remoteGuis", "OnPlayerDied", game.players[e.player_index])
+end
+
+function OnPlayerLeft(e)
+	callInGlobal("remoteGuis", "OnPlayerLeft", game.players[e.player_index])
+end
+
+function OnPlayerRespawned(e)
+	callInGlobal("remoteGuis", "OnPlayerRespawned", game.players[e.player_index])
 end
 
 script.on_event(defines.events.on_built_entity, OnBuilt)
@@ -133,3 +146,6 @@ script.on_event(defines.events.on_player_removed_equipment, OnRemovedEquipment)
 script.on_event(defines.events.on_gui_click, OnGuiClick)
 
 script.on_event(defines.events.on_player_changed_force, OnPlayerChangedForce)
+script.on_event(defines.events.on_player_died, OnPlayerDied)
+script.on_event(defines.events.on_player_left_game, OnPlayerLeft)
+script.on_event(defines.events.on_player_respawned, OnPlayerRespawned)

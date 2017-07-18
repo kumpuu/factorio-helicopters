@@ -32,11 +32,58 @@ playerSelectionGui =
 		end
 	end,
 
-	OnTick = function(self)
+	OnPlayerDied = function(self, player)
+		self:removeBtnByPlayer(player)
+	end,
+
+	OnPlayerLeftGame = function(self, player)
+		self:removeBtnByPlayer(player)
+	end,
+
+	OnPlayerRespawned = function(self, player)
+		if player.force == self.player.force then
+			table.insert(self.guiElems.btns, self:buildBtnFromPlayer(self.guiElems.flow, player))
+		end
+	end,
+
+	OnPlayerChangedForce = function(self, player)
+		if player == self.player then
+			self.guiElems.root.destroy()
+			self.guiElems = {parent = self.guiElems.parent}
+			self:buildGui()
+		else
+			self:removeBtnByPlayer(player)
+		end
+	end,
+
+	removeBtnByPlayer = function(self, player)
+		local i = searchIndexInTable(self.guiElems.btns, player, "player")
+		if i then
+			self.guiElems[i].btn.destroy()
+			table.remove(self.guiElems.btns, i)
+		end
+	end,
+
+	buildBtnFromPlayer = function(self, parent, player)
+		local btn = parent.add
+		{
+			type = "button",
+			name = self.prefix .. "btn_" .. player.name,
+			style = "listbox_button_style",
+			caption = player.name,
+		}
+		btn.style.minimal_width = 290
+
+		return {
+			btn = btn,
+			player = player,
+		}
 	end,
 
 	buildGui = function(self)
-		self.guiElems.root = self.guiElems.parent.add
+		local els = self.guiElems
+
+		els.root = els.parent.add
 		{
 			type = "frame",
 			name = self.prefix .. "rootFrame",
@@ -44,16 +91,16 @@ playerSelectionGui =
 			style = "frame_style",
 		}
 
-		self.guiElems.scroller = self.guiElems.root.add
+		els.scroller = els.root.add
 		{
 			type = "scroll-pane",
 			name = self.prefix .. "scroller",
 		}
 
-		self.guiElems.scroller.style.maximal_width = 1000
-		self.guiElems.scroller.style.maximal_height = 600
+		els.scroller.style.maximal_width = 1000
+		els.scroller.style.maximal_height = 600
 
-		self.guiElems.flow = self.guiElems.scroller.add
+		els.flow = els.scroller.add
 		{
 			type = "flow",
 			name = self.prefix .. "flow",
@@ -61,15 +108,11 @@ playerSelectionGui =
 			direction = "vertical",
 		}
 
-		for i, curPlayer in pairs(game.players) do	
-			local btn = self.guiElems.flow.add
-			{
-				type = "button",
-				name = self.prefix .. "btn_" .. curPlayer.name,
-				style = "listbox_button_style",
-				caption = curPlayer.name,
-			}
-			btn.style.minimal_width = 290
+		els.btns = {}
+		for i, curPlayer in pairs(game.connected_players) do
+			if curPlayer.controller_type == defines.controllers.character and curPlayer.character then
+				table.insert(els.btns, self:buildBtnFromPlayer(els.flow, curPlayer))
+			end
 		end
 		
 	end,

@@ -25,6 +25,14 @@ heliPadSelectionGui =
 		return obj
 	end,
 
+	destroy = function(self)
+		self.valid = false
+	
+		if self.guiElems.root then
+			self.guiElems.root.destroy()
+		end
+	end,
+
 	OnHeliPadBuilt = function(self, heliPad)
 		if heliPad.baseEnt.force == self.player.force then
 			table.insert(self.guiElems.cams, 
@@ -34,6 +42,7 @@ heliPadSelectionGui =
 				heliPad = heliPad,
 			})
 			self.curCamID = self.curCamID + 1
+			self:setNothingAvailable(false)
 		end
 	end,
 
@@ -42,14 +51,18 @@ heliPadSelectionGui =
 		if i then
 			self.guiElems.cams[i].cam.destroy()
 			table.remove(self.guiElems.cams, i)
+
+			if #self.guiElems.cams == 0 then
+				self:setNothingAvailable(true)
+			end
 		end
 	end,
 
-	destroy = function(self)
-		self.valid = false
-	
-		if self.guiElems.root then
+	OnPlayerChangedForce = function(self, player)
+		if player == self.player then
 			self.guiElems.root.destroy()
+			self.guiElems = {parent = self.guiElems.parent}
+			self:buildGui()
 		end
 	end,
 
@@ -85,6 +98,25 @@ heliPadSelectionGui =
 		]]
 
 		return cam
+	end,
+
+	setNothingAvailable = function(self, val)
+		local els = self.guiElems
+
+		if val and not els.nothingAvailable then
+			els.nothingAvailable = els.camTable.add
+			{
+				type = "label",
+				name = self.prefix .. "nothingAvailable",
+				caption = "NO HELICOPTER PADS AVAILABLE",
+			}
+			els.nothingAvailable.style.font = "default-bold"
+			els.nothingAvailable.style.font_color = {r = 1, g = 0, b = 0}
+
+		elseif not val and els.nothingAvailable then
+			els.nothingAvailable.destroy()
+			els.nothingAvailable = nil
+		end
 	end,
 
 	buildGui = function(self)
@@ -123,17 +155,26 @@ heliPadSelectionGui =
 
 					self.curCamID = 0
 					els.cams = {}
-					for k, curPad in pairs(global.heliPads) do
-						if curPad.baseEnt.force == self.player.force then
-							table.insert(els.cams, 
-							{
-								cam = self:buildCam(els.camTable, self.curCamID, curPad.baseEnt.position, self.defaultCamZoom),
-								ID = self.curCamID,
-								heliPad = curPad,
-							})
 
-							self.curCamID = self.curCamID + 1
+					local hasCams = false
+					if global.heliPads then
+						for k, curPad in pairs(global.heliPads) do
+							if curPad.baseEnt.force == self.player.force then
+								hasCams = true
+								table.insert(els.cams, 
+								{
+									cam = self:buildCam(els.camTable, self.curCamID, curPad.baseEnt.position, self.defaultCamZoom),
+									ID = self.curCamID,
+									heliPad = curPad,
+								})
+
+								self.curCamID = self.curCamID + 1
+							end
 						end
+					end
+
+					if not hasCams then
+						self:setNothingAvailable(true)
 					end
 	end,
 }

@@ -42,6 +42,17 @@ heliSelectionGui =
 		self:updateCamPositions()
 	end,
 
+	OnPlayerChangedForce = function(self, player)
+		if player == self.player then
+			local vis = self.guiElems.root.style.visible
+			self.guiElems.root.destroy()
+			self.guiElems = {parent = self.guiElems.parent}
+			self.selectedCam = nil
+			self:buildGui()
+			self:setVisible(vis)
+		end
+	end,
+
 	OnGuiClick = function(self, e)
 		local name = e.element.name
 
@@ -91,7 +102,7 @@ heliSelectionGui =
 			if curCam.heli == heli then
 				if curCam == self.selectedCam then
 					self.selectedCam = nil
-					self:setControlBtnsEnabled(false)
+					self:setControlBtnsStatus(false, false)
 					self.manager:OnChildEvent(self, "OnSelectedHeliIsInvalid")
 				end
 
@@ -126,7 +137,7 @@ heliSelectionGui =
 		if e.button == defines.mouse_button_type.left then
 			local cam = self.guiElems.cams[self:getCamIndexById(camID)]
 			self:setCamStatus(cam, true, cam.heliController)
-			self:setControlBtnsEnabled(true)
+			--self:setControlBtnsStatus(true, cam.heliController)
 
 		elseif e.button == defines.mouse_button_type.right then
 			local zoomMax = 1.26
@@ -174,6 +185,7 @@ heliSelectionGui =
 				self:setCamStatus(self.selectedCam, false, hasController)
 			end
 			self.selectedCam = cam
+			self:setControlBtnsStatus(isSelected, hasController)
 		else
 			if self.selectedCam and self.selectedCam == cam then
 				self.selectedCam = nil
@@ -181,11 +193,11 @@ heliSelectionGui =
 		end
 	end,
 
-	setControlBtnsEnabled = function(self, val)
-		self.guiElems.btnToPlayer.enabled = val
-		self.guiElems.btnToMap.enabled = val
-		self.guiElems.btnToPad.enabled = val
-		self.guiElems.btnStop.enabled = val
+	setControlBtnsStatus = function(self, heliSelected, hasController)
+		self.guiElems.btnToPlayer.enabled = heliSelected
+		self.guiElems.btnToMap.enabled = heliSelected
+		self.guiElems.btnToPad.enabled = heliSelected
+		self.guiElems.btnStop.enabled = heliSelected and hasController
 	end,
 
 	buildCamInner = function(self, parent, ID, position, zoom, isSelected, hasController)
@@ -303,7 +315,7 @@ heliSelectionGui =
 					sprite = "heli_stop",
 					style = mod_gui.button_style,
 				}
-				self:setControlBtnsEnabled(false)
+				self:setControlBtnsStatus(false, false)
 
 			els.scrollPane = els.root.add
 			{
@@ -326,7 +338,6 @@ heliSelectionGui =
 					els.cams ={}
 					self.curCamID = 0
 					for k, curHeli in pairs(global.helis) do
-						--if curHeli.baseEnt.passenger then printA(curHeli.baseEnt.passenger.player.name) end
 						if curHeli.baseEnt.force == self.player.force and 
 							(curHeli.baseEnt.passenger == nil or curHeli.hasRemoteController or
 								(curHeli.baseEnt.passenger.player and curHeli.baseEnt.passenger.player.valid and curHeli.baseEnt.passenger.player.name == self.player.name)) then

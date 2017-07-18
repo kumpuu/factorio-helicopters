@@ -46,6 +46,20 @@ end
 
 remoteGui = 
 {
+	mt = 
+	{
+		__index = function(t, k)
+			if remoteGui[k] then
+				return remoteGui[k]
+
+			elseif type(k) == "string" and k:match("^On.+") then
+				return function(self, ...)
+					remoteGui.safeStateCall(self, k, ...)
+				end
+			end
+		end,
+	},
+
 	new = function(p)
 		local obj = {
 			valid = true,
@@ -55,7 +69,7 @@ remoteGui =
 			guis = {}
 		}
 
-		setmetatable(obj, {__index = remoteGui})
+		setmetatable(obj, remoteGui.mt)
 	
 		obj.guis.heliSelection = heliSelectionGui.new(obj, p)
 		return obj
@@ -94,10 +108,6 @@ remoteGui =
 		end
 	end,
 
-	OnPlayerChangedForce = function(self, e)
-		self:safeStateCall("OnPlayerChangedForce", e)
-	end,
-
 	OnChildEvent = function(self, child, evtName, ...)
 		if evtName == "showTargetSelectionGui" then
 			local prot = ...
@@ -128,29 +138,5 @@ remoteGui =
 				self.guis.heliSelection:setVisible(true)
 			end
 		end
-	end,
-
-	OnHeliBuilt = function(self, heli)
-		self:safeStateCall("OnHeliBuilt", heli)
-	end,
-
-	OnHeliRemoved = function(self, heli)
-		self:safeStateCall("OnHeliRemoved", heli)
-	end,
-
-	OnHeliPadBuilt = function(self, heli)
-		self:safeStateCall("OnHeliPadBuilt", heli)
-	end,
-
-	OnHeliPadRemoved = function(self, heli)
-		self:safeStateCall("OnHeliPadRemoved", heli)
-	end,
-
-	OnHeliControllerCreated = function(self, controller)
-		self:safeStateCall("OnHeliControllerCreated", controller)
-	end,
-
-	OnHeliControllerDestroyed = function(self, controller)
-		self:safeStateCall("OnHeliControllerDestroyed", controller)
 	end,
 }
