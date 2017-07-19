@@ -65,7 +65,11 @@ heliSelectionGui =
 		elseif self.selectedCam then
 			if name == self.prefix .. "btn_toPlayer" then
 				if e.button == defines.mouse_button_type.left then
-					self.manager:OnChildEvent(self, "selectedPosition", self.player.position)
+					if e.shift then
+						self.manager:OnChildEvent(self, "selectedPosition", self.player.position)
+					else
+						self.manager:OnChildEvent(self, "selectedPlayer", self.player)
+					end
 				else
 					self.manager:OnChildEvent(self, "showTargetSelectionGui", playerSelectionGui)
 				end

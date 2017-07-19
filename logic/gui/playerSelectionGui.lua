@@ -36,8 +36,12 @@ playerSelectionGui =
 		local name = e.element.name
 
 		if name:match("^" .. self.prefix .. "btn_.+$") then
-			self.manager:OnChildEvent(self, "selectedPosition", searchInTable(self.guiElems.btns, e.element, "btn").player.position)
-
+			if e.shift then
+				self.manager:OnChildEvent(self, "selectedPosition", searchInTable(self.guiElems.btns, e.element, "btn").player.position)
+			else
+				self.manager:OnChildEvent(self, "selectedPlayer", searchInTable(self.guiElems.btns, e.element, "btn").player)
+			end
+			
 		elseif name == self.prefix .. "rootFrame" and e.button == defines.mouse_button_type.right then
 			self.manager:OnChildEvent(self, "cancel")
 		end

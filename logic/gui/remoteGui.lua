@@ -126,6 +126,24 @@ remoteGui =
 			end
 			self.guis.heliSelection:setVisible(true)
 		
+		elseif evtName == "selectedPlayer" then
+			local p = ...
+			local heli = self.guis.heliSelection.selectedCam.heli
+
+			local oldControllerIndex = searchIndexInTable(global.heliControllers, heli, "heli")
+			if oldControllerIndex then
+				global.heliControllers[oldControllerIndex]:destroy()
+				table.remove(global.heliControllers, oldControllerIndex)
+			end
+
+			insertInGlobal("heliControllers", heliController.new(self.player, self.guis.heliSelection.selectedCam.heli, p, true))
+
+			if child ~= self.guis.heliSelection then
+				child:destroy()
+				self.guis.targetSelection = nil
+			end
+			self.guis.heliSelection:setVisible(true)
+
 		elseif evtName == "OnSelectedHeliIsInvalid" then
 			if self.guis.targetSelection then
 				self.guis.targetSelection:destroy()

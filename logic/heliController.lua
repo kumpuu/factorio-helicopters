@@ -31,18 +31,26 @@ end
 
 heliController = 
 {
-	new = function(player, heli, targetPosition)
+	new = function(player, heli, target, targetIsPlayer)
 		local obj = 
 		{
 			valid = true,
 
 			owner = player,
 			heli = heli,
-			targetPos = targetPosition,
+			targetIsPlayer = targetIsPlayer,
 
 			curState = heliController.getUp,
 			stateChanged = true,
 		}
+		if targetIsPlayer then
+			obj.targetPlayer = target
+			obj.targetPos = target.position
+		else
+			obj.targetPos = target
+		end
+
+
 		obj.targetPos.y = obj.targetPos.y - 5
 
 		if not heli.baseEnt.passenger then
@@ -102,6 +110,15 @@ heliController =
 			end
 
 		else
+			if self.targetIsPlayer then
+				if self.targetPlayer.valid then
+					self.targetPos = {x = self.targetPlayer.position.x, y = self.targetPlayer.position.y - 5}
+				else
+					self:stopAndDestroy()
+					return
+				end
+			end
+
 			local old = self.curState
 			self:curState()
 
@@ -215,7 +232,7 @@ heliController =
 		end
 
 		self.updateOrientationCooldown = self.updateOrientationCooldown - 1
-		if self.updateOrientationCooldown <  3 then
+		if self.updateOrientationCooldown <  3 or dist < 10 then
 			if self.updateOrientationCooldown == 0 then
 				self.updateOrientationCooldown = 30
 			end
