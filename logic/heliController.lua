@@ -74,7 +74,11 @@ heliController =
 	end,
 
 	stopAndDestroy = function(self)
-		self:changeState(self.stop)
+		if self.driverIsBot then
+			self:changeState(self.stop)
+		else
+			self:destroy()
+		end
 	end,
 
 	OnTick = function(self)
@@ -209,7 +213,6 @@ heliController =
 		if self.stateChanged then
 			self.updateOrientationCooldown = 30
 		end
-		--printA(self.heli.baseEnt.speed)
 
 		self.updateOrientationCooldown = self.updateOrientationCooldown - 1
 		if self.updateOrientationCooldown <  3 then
@@ -224,9 +227,13 @@ heliController =
 		end
 
 		if dist < 150 then
-			self:holdSpeed(dist/100 - 0.025)
+			local deadZone = 0.3
+			local landingZone = 0.5
+			local desiredSpeed = 1.5 - (1.2247448 - (dist - deadZone) / 150)^2
 
-			if dist <= 4 and self.heli.baseEnt.speed == 0 then
+			self:holdSpeed(desiredSpeed)
+
+			if dist <= landingZone and self.heli.baseEnt.speed == 0 then
 				self:setRidingState(defines.riding.acceleration.braking)
 				self:changeState(self.land)
 			end

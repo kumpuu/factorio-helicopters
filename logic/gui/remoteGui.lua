@@ -4,28 +4,20 @@ require("logic.gui.playerSelectionGui")
 require("logic.gui.markerSelectionGui")
 require("logic.gui.heliPadSelectionGui")
 
-function OnPlayerPlacedRemote(e)
-	local p = game.players[e.player_index]
+function setRemoteBtn(p, show)
+	local flow = mod_gui.get_button_flow(p)
 
-	if not mod_gui.get_button_flow(p).heli_remote_btn then
-		mod_gui.get_button_flow(p).add
+	if show and not flow.heli_remote_btn then
+		flow.add
 		{
 			type = "sprite-button",
 			name = "heli_remote_btn",
 			sprite = "item/heli-remote-equipment",
 			style = mod_gui.button_style,
 		}
-	end
-end
 
-function OnPlayerRemovedRemote(e)
-	if not equipmentGridHasItem(e.grid, "heli-remote-equipment") then
-		local p = game.players[e.player_index]
-		local flow = mod_gui.get_button_flow(p)
-
-		if flow.heli_remote_btn then
-			flow.heli_remote_btn.destroy()
-		end
+	elseif (not show) and flow.heli_remote_btn and flow.heli_remote_btn.valid then
+		flow.heli_remote_btn.destroy()
 
 		local i = searchIndexInTable(global.remoteGuis, p, "player")
 		if i then

@@ -29,7 +29,7 @@ heliSelectionGui =
 	destroy = function(self)
 		self.valid = false
 	
-		if self.guiElems.root then
+		if self.guiElems.root and self.guiElems.root.valid then
 			self.guiElems.root.destroy()
 		end
 	end,

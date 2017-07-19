@@ -61,7 +61,6 @@ function OnHeliUp(e)
 	if p.driving and p.vehicle.name == "heli-entity-_-" then
 		getHeliFromBaseEntity(p.vehicle):OnUp()
 	end
-	OnPlayerPlacedRemote(e)
 end
 
 function OnHeliDown(e)
@@ -73,13 +72,32 @@ end
 
 function OnPlacedEquipment(e)
 	if e.equipment.name == "heli-remote-equipment" then
-		OnPlayerPlacedRemote(e)
+		local p = game.players[e.player_index]
+
+		setRemoteBtn(p, true)
 	end
 end
 
 function OnRemovedEquipment(e)
 	if e.equipment == "heli-remote-equipment" then
-		OnPlayerRemovedRemote(e)
+		local p = game.players[e.player_index]
+
+		if not equipmentGridHasItem(e.grid, "heli-remote-equipment") then
+			setRemoteBtn(p, false)
+		end
+	end
+end
+
+function OnArmorInventoryChanged(e)
+	local p = game.players[e.player_index]
+
+	if p.character and p.character.valid and
+		p.character.grid and p.character.grid.valid and
+			equipmentGridHasItem(p.character.grid, "heli-remote-equipment") then
+			
+		setRemoteBtn(p, true)
+	else
+		setRemoteBtn(p, false)
 	end
 end
 
@@ -109,18 +127,28 @@ end
 
 function OnPlayerChangedForce(e)
 	local p = game.players[e.player_index]
-	local gui = searchInTable(global.remoteGuis, p, "player")
-	if gui then 
-		gui:OnPlayerChangedForce(p)
-	end
+	
+	callInGlobal("remoteGuis", "OnPlayerChangedForce", p)
 end
 
 function OnPlayerDied(e)
-	callInGlobal("remoteGuis", "OnPlayerDied", game.players[e.player_index])
+	local p = game.players[e.player_index]
+	
+	setRemoteBtn(p, false)
+
+	callInGlobal("remoteGuis", "OnPlayerDied", p)
 end
 
 function OnPlayerLeft(e)
-	callInGlobal("remoteGuis", "OnPlayerLeft", game.players[e.player_index])
+	local p = game.players[e.player_index]
+	local i = searchIndexInTable(global.remoteGuis, p, "player")
+
+	if i then
+		global.remoteGuis[i]:destroy()
+		table.remove(global.remoteGuis, i)
+	end
+
+	callInGlobal("remoteGuis", "OnPlayerLeft", p)
 end
 
 function OnPlayerRespawned(e)
@@ -149,3 +177,5 @@ script.on_event(defines.events.on_player_changed_force, OnPlayerChangedForce)
 script.on_event(defines.events.on_player_died, OnPlayerDied)
 script.on_event(defines.events.on_player_left_game, OnPlayerLeft)
 script.on_event(defines.events.on_player_respawned, OnPlayerRespawned)
+
+script.on_event(defines.events.on_player_armor_inventory_changed, OnArmorInventoryChanged)
