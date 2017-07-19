@@ -87,3 +87,14 @@ function insertInGlobal(gName, val)
 	table.insert(global[gName], val)
 	return val
 end
+
+function removeInGlobal(gName, val)
+	if global[gName] then
+		for i, v in ipairs(global[gName]) do
+			if v == val then
+				table.remove(global[gName], i)
+				return v
+			end
+		end
+	end
+end

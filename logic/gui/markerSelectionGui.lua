@@ -53,7 +53,9 @@ markerSelectionGui =
 	end,
 
 	OnGuiClick = function(self, e)
-		if e.element.name:match("^" .. self.prefix .. "btn_%d+$") then
+		local name = e.element.name
+
+		if name:match("^" .. self.prefix .. "btn_%d+$") then
 			local ID = tonumber(e.element.name:match("%d+"))
 
 			for k, curBtn in pairs(self.guiElems.btns) do
@@ -64,6 +66,9 @@ markerSelectionGui =
 					break
 				end
 			end
+
+		elseif name == self.prefix .. "rootFrame" and e.button == defines.mouse_button_type.right then
+			self.manager:OnChildEvent(self, "cancel")
 		end
 	end,
 

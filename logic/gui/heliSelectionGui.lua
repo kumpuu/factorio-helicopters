@@ -59,6 +59,9 @@ heliSelectionGui =
 		if name:match("^" .. self.prefix .. "cam_%d+$") then
 			self:OnCamClicked(e)
 
+		elseif name == self.prefix .. "rootFrame" and e.button == defines.mouse_button_type.right then
+			self.manager:OnChildEvent(self, "cancel")
+
 		elseif self.selectedCam then
 			if name == self.prefix .. "btn_toPlayer" then
 				if e.button == defines.mouse_button_type.left then
@@ -94,6 +97,8 @@ heliSelectionGui =
 			})
 
 			self.curCamID = self.curCamID + 1
+
+			self:setNothingAvailableIfNecessary()
 		end
 	end,
 
@@ -108,6 +113,7 @@ heliSelectionGui =
 
 				curCam.flow.destroy()
 				table.remove(self.guiElems.cams, i)
+				self:setNothingAvailableIfNecessary()
 				break
 			end
 		end
@@ -131,13 +137,11 @@ heliSelectionGui =
 	end,
 
 	OnCamClicked = function(self, e)
-		local p = game.players[e.player_index]
-		local camID = tonumber(e.element.name:match("%d+"))
 
 		if e.button == defines.mouse_button_type.left then
-			local cam = self.guiElems.cams[self:getCamIndexById(camID)]
+			local camID = tonumber(e.element.name:match("%d+"))
+			local cam = searchInTable(self.guiElems.cams, camID, "ID")
 			self:setCamStatus(cam, true, cam.heliController)
-			--self:setControlBtnsStatus(true, cam.heliController)
 
 		elseif e.button == defines.mouse_button_type.right then
 			local zoomMax = 1.26
@@ -145,14 +149,14 @@ heliSelectionGui =
 			local zoomDelta = 0.333
 
 			if e.shift then
-				e.element.zoom = e.element.zoom * (1 - zoomDelta)
-				if e.element.zoom < zoomMin then
-					e.element.zoom = zoomMax
-				end
-			else
 				e.element.zoom = e.element.zoom * (1 + zoomDelta)
 				if e.element.zoom > zoomMax then
 					e.element.zoom = zoomMin
+				end
+			else
+				e.element.zoom = e.element.zoom * (1 - zoomDelta)
+				if e.element.zoom < zoomMin then
+					e.element.zoom = zoomMax
 				end
 			end
 		end
@@ -198,6 +202,26 @@ heliSelectionGui =
 		self.guiElems.btnToMap.enabled = heliSelected
 		self.guiElems.btnToPad.enabled = heliSelected
 		self.guiElems.btnStop.enabled = heliSelected and hasController
+	end,
+
+	setNothingAvailableIfNecessary = function(self)
+		local els = self.guiElems
+		local nec = #els.cams == 0
+
+		if nec and not els.nothingAvailable then
+			els.nothingAvailable = els.camTable.add
+			{
+				type = "label",
+				name = self.prefix .. "nothingAvailable",
+				caption = "NO HELICOPTERS AVAILABLE",
+			}
+			els.nothingAvailable.style.font = "default-bold"
+			els.nothingAvailable.style.font_color = {r = 1, g = 0, b = 0}
+
+		elseif not nec and els.nothingAvailable then
+			els.nothingAvailable.destroy()
+			els.nothingAvailable = nil
+		end
 	end,
 
 	buildCamInner = function(self, parent, ID, position, zoom, isSelected, hasController)
@@ -337,25 +361,30 @@ heliSelectionGui =
 
 					els.cams ={}
 					self.curCamID = 0
-					for k, curHeli in pairs(global.helis) do
-						if curHeli.baseEnt.force == self.player.force and 
-							(curHeli.baseEnt.passenger == nil or curHeli.hasRemoteController or
-								(curHeli.baseEnt.passenger.player and curHeli.baseEnt.passenger.player.valid and curHeli.baseEnt.passenger.player.name == self.player.name)) then
 
-							local controller = searchInTable(global.heliControllers, curHeli, "heli")
-							local flow, cam = self:buildCam(els.camTable, self.curCamID, curHeli.baseEnt.position, 0.3, false, curHeli.hasRemoteController)
+					if global.helis then
+						for k, curHeli in pairs(global.helis) do
+							if curHeli.baseEnt.force == self.player.force and 
+								(curHeli.baseEnt.passenger == nil or curHeli.hasRemoteController or
+									(curHeli.baseEnt.passenger.player and curHeli.baseEnt.passenger.player.valid and curHeli.baseEnt.passenger.player.name == self.player.name)) then
 
-							table.insert(els.cams,
-							{
-								flow = flow,
-								cam = cam,
-								heli = curHeli,
-								heliController = controller,
-								ID = self.curCamID,
-							})
+								local controller = searchInTable(global.heliControllers, curHeli, "heli")
+								local flow, cam = self:buildCam(els.camTable, self.curCamID, curHeli.baseEnt.position, 0.3, false, curHeli.hasRemoteController)
 
-							self.curCamID = self.curCamID + 1
+								table.insert(els.cams,
+								{
+									flow = flow,
+									cam = cam,
+									heli = curHeli,
+									heliController = controller,
+									ID = self.curCamID,
+								})
+
+								self.curCamID = self.curCamID + 1
+							end
 						end
 					end
+
+					self:setNothingAvailableIfNecessary()
 	end,
 }

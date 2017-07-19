@@ -32,6 +32,17 @@ playerSelectionGui =
 		end
 	end,
 
+	OnGuiClick = function(self, e)
+		local name = e.element.name
+
+		if name:match("^" .. self.prefix .. "btn_.+$") then
+			self.manager:OnChildEvent(self, "selectedPosition", searchInTable(self.guiElems.btns, e.element, "btn").player.position)
+
+		elseif name == self.prefix .. "rootFrame" and e.button == defines.mouse_button_type.right then
+			self.manager:OnChildEvent(self, "cancel")
+		end
+	end,
+
 	OnPlayerDied = function(self, player)
 		self:removeBtnByPlayer(player)
 	end,
@@ -59,7 +70,7 @@ playerSelectionGui =
 	removeBtnByPlayer = function(self, player)
 		local i = searchIndexInTable(self.guiElems.btns, player, "player")
 		if i then
-			self.guiElems[i].btn.destroy()
+			self.guiElems.btns[i].btn.destroy()
 			table.remove(self.guiElems.btns, i)
 		end
 	end,

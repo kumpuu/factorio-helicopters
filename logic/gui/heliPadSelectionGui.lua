@@ -38,6 +38,9 @@ heliPadSelectionGui =
 
 		if name:match("^" .. self.prefix .. "cam_%d+$") then
 			self:OnCamClicked(e)
+
+		elseif name == self.prefix .. "rootFrame" and e.button == defines.mouse_button_type.right then
+			self.manager:OnChildEvent(self, "cancel")
 		end
 	end,
 
