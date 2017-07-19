@@ -78,7 +78,9 @@ remoteGui =
 	destroy = function(self)
 		self.valid = false
 		for k, curGui in pairs(self.guis) do
-			curGui:destroy()
+			if curGui.valid then
+				curGui:destroy()
+			end
 		end
 	end,
 
@@ -135,6 +137,16 @@ remoteGui =
 		elseif evtName == "OnSelectedHeliIsInvalid" then
 			if self.guis.targetSelection then
 				self.guis.targetSelection:destroy()
+				self.guis.heliSelection:setVisible(true)
+			end
+
+		elseif evtName == "cancel" then
+			if child == self.guis.heliSelection then
+				self:destroy()
+				removeInGlobal("remoteGuis", self)
+			else
+				child:destroy()
+				self.guis.targetSelection = nil
 				self.guis.heliSelection:setVisible(true)
 			end
 		end
