@@ -43,6 +43,7 @@ heliController =
 			curState = heliController.getUp,
 			stateChanged = true,
 		}
+
 		if targetIsPlayer then
 			obj.targetPlayer = target
 			obj.targetPos = target.position
@@ -235,12 +236,15 @@ heliController =
 		if self.updateOrientationCooldown <  3 or dist < 10 then
 			if self.updateOrientationCooldown == 0 then
 				self.updateOrientationCooldown = 30
+				if dist >= 10 then
+					self:setRidingState(nil, defines.riding.direction.straight)
+				end
 			end
 
 			self.targetOrientation = self:getTargetOrientation()
 			self:setRidingState(nil, self:getSteeringToTargetOrientation())
 		else
-			self.driver.riding_state.direction = defines.riding.direction.straight
+			--self:setRidingState(nil, defines.riding.direction.straight)
 		end
 
 		if dist < 150 then

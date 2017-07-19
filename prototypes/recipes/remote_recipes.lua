@@ -2,18 +2,22 @@ data:extend({
 	{
 		type = "recipe",
 		name = "heli-remote-recipe",
-		enabled = true,
+		enabled = false,
 		ingredients = {
-			{"iron-gear-wheel", 1},
+			{"processing-unit", 35},
+			{"battery", 20},
+			{"plastic-bar", 20},
+			{"rocket-control-unit", 2},
+			{"iron-stick", 2},
 		},
 		result = "heli-remote-equipment",
 	},
 	{
 		type = "recipe",
 		name = "heli-pad-recipe",
-		enabled = true,
+		enabled = false,
 		ingredients = {
-			{"iron-gear-wheel", 1},
+			{"concrete", 50},
 		},
 		result = "heli-pad-item",
 	},

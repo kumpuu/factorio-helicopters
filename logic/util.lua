@@ -57,7 +57,7 @@ end
 function setMetatablesInGlobal(name, mt)
 	if global[name] then
 		for k, v in pairs(global[name]) do
-			setmetatable(v, {__index = mt})
+			setmetatable(v, mt)
 		end
 	end
 end

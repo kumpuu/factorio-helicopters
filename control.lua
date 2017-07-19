@@ -5,9 +5,10 @@ require ("logic.heliController")
 require ("logic.gui.remoteGui")
 
 function OnLoad(e)
-	setMetatablesInGlobal("helis", heli)
+	setMetatablesInGlobal("helis", {__index = heli})
 	setMetatablesInGlobal("remoteGuis", remoteGui.mt)
-	setMetatablesInGlobal("heliPads", heliPad)
+	setMetatablesInGlobal("heliPads", {__index = heliPad})
+	setMetatablesInGlobal("heliControllers", {__index = heliController})
 end
 
 function OnTick(e)
@@ -94,7 +95,7 @@ function OnArmorInventoryChanged(e)
 	if p.character and p.character.valid and
 		p.character.grid and p.character.grid.valid and
 			equipmentGridHasItem(p.character.grid, "heli-remote-equipment") then
-			
+
 		setRemoteBtn(p, true)
 	else
 		setRemoteBtn(p, false)
@@ -102,7 +103,6 @@ function OnArmorInventoryChanged(e)
 end
 
 function OnGuiClick(e)
-	printA(e.element.name)
 	local name = e.element.name
 
 	if name:match("^heli_") then
@@ -120,7 +120,9 @@ function OnGuiClick(e)
 			end
 		
 		else
-			global.remoteGuis[i]:OnGuiClick(e)
+			if i then
+				global.remoteGuis[i]:OnGuiClick(e)
+			end
 		end
 	end
 end
