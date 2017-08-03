@@ -101,6 +101,7 @@ heliController =
 				self.driverIsBot = true
 				self.driver = game.surfaces[1].create_entity{name = "player", force = self.owner.force, position = self.owner.position}
 				self.heli.baseEnt.passenger = self.driver
+				self.heli:OnUp()
 			end
 
 		elseif self.driverIsBot and self.heli.baseEnt.passenger ~= self.driver then
@@ -230,6 +231,7 @@ heliController =
 
 		if self.stateChanged then
 			self.updateOrientationCooldown = 30
+			self.oldDist = -1
 		end
 
 		self.updateOrientationCooldown = self.updateOrientationCooldown - 1
@@ -248,22 +250,49 @@ heliController =
 		end
 
 		if dist < 150 then
-			local deadZone = 0.3
-			local landingZone = 0.5
-			local desiredSpeed = 1.5 - (1.2247448 - (dist - deadZone) / 150)^2
+			local creepZone = 0.5
+			local landingZone = 1
+			local desiredSpeed = 1.5 - (1.2247448 - (dist - creepZone) / 150)^2
 
 			self:holdSpeed(desiredSpeed)
 
-			if dist <= landingZone and self.heli.baseEnt.speed == 0 then
+			if dist <= landingZone and (dist <= creepZone or dist == self.oldDist) then
 				self:setRidingState(defines.riding.acceleration.braking)
-				self:changeState(self.land)
+				self:changeState(self.creepToPosition)
 			end
-			--printA("hold" , dist/150 - 0.025)
+
+			self.oldDist = dist
 		else
-			--local dir = self.driver.riding_state.direction
-			--printA("accelerate")
 			self:setRidingState(defines.riding.acceleration.accelerating)
 		end
+	end,
+
+	creepToPosition = function(self)
+		local curPos = self.heli.baseEnt.position
+		
+		if self.stateChanged then
+			self:setRidingState(defines.riding.acceleration.braking)
+			self.heli.baseEnt.speed = 0
+			self.targetIsPlayer = false
+
+			local curDist = getDistance(curPos, self.targetPos)
+			local alignVec = {x = (self.targetPos.x - curPos.x) / curDist * 1,  y = (self.targetPos.y - curPos.y) / curDist * 1}
+			self.targetPos = {x = self.targetPos.x + alignVec.x, y = self.targetPos.y + alignVec.y}
+
+			local creepFrames = 60
+			self.creepVec = {x = (self.targetPos.x - curPos.x) / creepFrames, y = (self.targetPos.y - curPos.y) / creepFrames}
+
+			self.oldDist = getDistance(curPos, self.targetPos)
+		end
+
+		self.heli.baseEnt.teleport({x = curPos.x + self.creepVec.x, y = curPos.y + self.creepVec.y})
+
+		local dist = getDistance(self.heli.baseEnt.position, self.targetPos)
+		if dist < 0.2 or dist > self.oldDist then
+			self:changeState(self.land)
+		end
+
+		self.oldDist = dist
 	end,
 
 	land = function(self)

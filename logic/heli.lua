@@ -90,8 +90,6 @@ end
 
 local rotorMaxRPM = 200
 local startupTime = 5*60 --5 seconds
-local heightPF = 2/60 --2 tiles per second
-local maxHeight = 5
 local maxCollisionHeight = 2
 local colliderMaxHealth = 999999
 local baseEngineConsumption = 20000
@@ -128,9 +126,27 @@ heli = {
 		"rotor-shadow-entity-_-",
 	},
 
-	---------- fallback vals for old version objects -----------
-	landedColliderCreationDelay = 0,
+	---------- default vals -----------
 	valid = true,
+
+	goUp = false,
+
+	startupProgress = 0,
+	height = 0,
+	maxHeight = 5,
+
+	heightPF = 2/60, --2 tiles per second
+
+	maxHeightUperLimit = 20,
+	maxHeightLowerLimit = 3,
+
+
+	rotorOrient = 0,
+	rotorRPF = 0,
+	rotorMaxRPF = rotorMaxRPM/60/60, --revolutions per frame
+
+	hasLandedCollider = false,
+	landedColliderCreationDelay = 1, --frames. workaround for inserters trying to access collider inventory when created at the same time.
 	------------------------------------------------------------
 
 	new = function(ent)
@@ -142,24 +158,11 @@ heli = {
 		ent.destroy()
 
 		local obj = {
-			valid = true,
 			version = versionStrToInt(game.active_mods.Helicopters),
 
-			oldBasePosition = baseEnt.position,
+			oldBasePosition = {x = baseEnt.position.x + 1, y = 0}, --no idea why, but child entities are messed up if not teleported once after spawning
 
 			lockedBaseOrientation = baseEnt.orientation,
-
-			goUp = false,
-
-			startupProgress = 0,
-			height = 0,
-
-			rotorOrient = 0,
-			rotorRPF = 0,
-			rotorMaxRPF = rotorMaxRPM/60/60, --revolutions per frame
-
-			hasLandedCollider = false,
-			landedColliderCreationDelay = 1, --frames. workaround for inserters trying to access collider inventory when created at the same time.
 
 			baseEnt = baseEnt,
 
@@ -169,8 +172,6 @@ heli = {
 
 				bodyEntShadow = game.surfaces[1].create_entity{name = "heli-shadow-entity-_-", force = game.forces.neutral, position = baseEnt.position},
 				rotorEntShadow = game.surfaces[1].create_entity{name = "rotor-shadow-entity-_-", force = game.forces.neutral, position = baseEnt.position},
-
-				--collisionEnt = game.surfaces[1].create_entity{name = "heli-landed-collision-entity-_-", force = game.forces.neutral, position = baseEnt.position},
 
 				burnerEnt = game.surfaces[1].create_entity{name = "heli-burner-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + 1.3}},
 			},
@@ -182,8 +183,6 @@ heli = {
 			v.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
 			v.destructible = false
 		end
-
-		--obj.childs.collisionEnt.destructible = true
 
 		return setmetatable(obj, {__index = heli})
 	end,
@@ -279,7 +278,11 @@ heli = {
 			self.childs.burnerEnt.teleport({x = center.x + vec[1], y = center.y + vec[2]})
 		end
 
-		if self.oldBasePosition ~= self.baseEnt.position then --baseEnt moved
+
+		--if (self.oldBasePosition.x ~= self.baseEnt.position.x or self.oldBasePosition.y ~= self.baseEnt.position.y) then --basEnt moved
+		if true then 
+		--ok so the old check always passed as well, but it turns out that's a good thing since otherwise it can glitch. leaving this in here for now.
+
 			local vec = math3d.vector2.mul(math3d.vector2.rotate({0,1}, math.pi * 2 * self.baseEnt.orientation), self.baseEnt.speed)
 
 			self.childs.bodyEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + bodyOffset})
@@ -357,13 +360,22 @@ heli = {
 				self.startupProgress = math.min(self.startupProgress + 1, startupTime)
 			end
 
-			if self.startupProgress == startupTime and self.height < maxHeight then
+			if self.startupProgress == startupTime and self.height ~= self.maxHeight then
 				self.baseEnt.effectivity_modifier = 1
 				self.baseEnt.friction_modifier = 1
 
-				local delta = heightPF
-				if self.height + delta > maxHeight then
-					delta = maxHeight - self.height
+				local delta
+				if self.height < self.maxHeight then
+					delta = self.heightPF
+					if self.height + delta > self.maxHeight then
+						delta = self.maxHeight - self.height
+					end
+
+				else
+					delta = - self.heightPF
+					if self.height + delta < self.maxHeight then
+						delta = self.maxHeight - self.height
+					end
 				end
 
 				local oldY = self.baseEnt.position.y
@@ -401,7 +413,7 @@ heli = {
 			end
 
 			if self.height > 0 then
-				local delta = heightPF
+				local delta = self.heightPF
 				if self.height < delta then
 					delta = self.height
 				end
@@ -441,8 +453,8 @@ heli = {
 							name = "heli-landed-collision-entity-_-",
 							force = game.forces.neutral,
 							position = self.baseEnt.position,
-							orientation = self.baseEnt.orientation
 						}
+						self.childs.collisionEnt.orientation = self.baseEnt.orientation
 						self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
 						self.childs.collisionEnt.operable = false
 					end
@@ -502,5 +514,20 @@ heli = {
 
 	OnDown = function(self)
 		self.goUp = false
+	end,
+
+	setHeightPF = function(self)
+		local time = 4.5 - (4.5 / (( self.maxHeight + 15) * 0.1) ) * (1 - 0.03 * self.maxHeight)
+		self.heightPF = self.maxHeight / (time * 60)
+	end,
+
+	OnIncreaseMaxHeight = function(self)
+		self.maxHeight = math.min(self.maxHeight + 2, self.maxHeightUperLimit)
+		self:setHeightPF()
+	end,
+
+	OnDecreaseMaxHeight = function(self)
+		self.maxHeight = math.max(self.maxHeight - 2, self.maxHeightLowerLimit)
+		self:setHeightPF()
 	end,
 }

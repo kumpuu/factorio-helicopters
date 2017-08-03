@@ -71,6 +71,20 @@ function OnHeliDown(e)
 	end
 end
 
+function OnHeliIncreaseMaxHeight(e)
+	local p = game.players[e.player_index]
+	if p.driving and p.vehicle.name == "heli-entity-_-" then
+		getHeliFromBaseEntity(p.vehicle):OnIncreaseMaxHeight()
+	end
+end
+
+function OnHeliDecreaseMaxHeight(e)
+	local p = game.players[e.player_index]
+	if p.driving and p.vehicle.name == "heli-entity-_-" then
+		getHeliFromBaseEntity(p.vehicle):OnDecreaseMaxHeight()
+	end
+end
+
 function OnPlacedEquipment(e)
 	if e.equipment.name == "heli-remote-equipment" then
 		local p = game.players[e.player_index]
@@ -169,6 +183,8 @@ script.on_event(defines.events.on_entity_died, OnRemoved)
 
 script.on_event("heli-up", OnHeliUp)
 script.on_event("heli-down", OnHeliDown)
+script.on_event("heli-zaa-height-increase", OnHeliIncreaseMaxHeight)
+script.on_event("heli-zab-height-decrease", OnHeliDecreaseMaxHeight)
 
 
 script.on_event(defines.events.on_player_placed_equipment, OnPlacedEquipment)

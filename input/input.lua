@@ -2,7 +2,7 @@ data:extend({
   {
     type = "custom-input",
     name = "heli-up",
-    key_sequence = "SHIFT + W",
+    key_sequence = "SHIFT + E",
     consuming = "none"
 
     -- 'consuming'
@@ -15,7 +15,21 @@ data:extend({
   {
     type = "custom-input",
     name = "heli-down",
-    key_sequence = "SHIFT + S",
+    key_sequence = "SHIFT + Q",
+    consuming = "none"
+  },
+
+  {
+    type = "custom-input",
+    name = "heli-zaa-height-increase",
+    key_sequence = "Up",
+    consuming = "none"
+  },
+
+  {
+    type = "custom-input",
+    name = "heli-zab-height-decrease",
+    key_sequence = "Down",
     consuming = "none"
   },
 })
