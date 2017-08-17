@@ -98,3 +98,11 @@ function removeInGlobal(gName, val)
 		end
 	end
 end
+
+function fEqual(a, b, prec)
+	if not prec then
+		prec = 0.001
+	end
+
+	return math.abs(a - b) <= prec
+end

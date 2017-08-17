@@ -1,4 +1,7 @@
 local math3d = require("math3d")
+require("logic.basicAnimator")
+require("logic.animationTransitor")
+require("logic.basicState")
 
 function getHeliFromBaseEntity(ent)
 	for k,v in pairs(global.helis) do
@@ -97,6 +100,8 @@ local baseEngineConsumption = 20000
 local bodyOffset = 5
 local rotorOffset = 5.1
 
+local maxBobbing = 0.05
+
 
 local IsEntityBurnerOutOfFuel = function(ent)
 	return ent.burner.remaining_burning_fuel <= 0 and ent.burner.inventory.is_empty()
@@ -134,6 +139,7 @@ heli = {
 	startupProgress = 0,
 	height = 0,
 	maxHeight = 5,
+	curBobbing = 0,
 
 	heightPF = 2/60, --2 tiles per second
 
@@ -184,7 +190,11 @@ heli = {
 			v.destructible = false
 		end
 
-		return setmetatable(obj, {__index = heli})
+		setmetatable(obj, {__index = heli})
+
+		obj:changeState(heli.landed)
+
+		return obj
 	end,
 
 	destroy = function(self)
@@ -205,6 +215,263 @@ heli = {
 		end
 	end,
 
+
+	---------------- events ----------------
+
+	OnTick = function(self)
+		if not self.curState then self:changeState(heli.landed) end
+		
+		self:redirectPassengers()
+		self:updateRotor()
+		self:updateEntityPositions()
+		self.curState.OnTick(self)
+		self:handleColliderDamage()
+	end,
+
+	OnUp = function(self)
+		self.curState.OnUp(self)
+	end,
+
+	OnDown = function(self)
+		self:changeState(self.descend)
+	end,
+
+	OnMaxHeightUp = function(self)
+	end,
+
+	OnMaxHeightDown = function(self)
+	end, 
+
+
+	---------------- states ----------------
+
+	landed = basicState.new({
+		init = function(heli)
+			heli.baseEnt.effectivity_modifier = 0
+			heli.baseEnt.friction_modifier = 50
+
+			heli.lockedBaseOrientation = heli.baseEnt.orientation
+
+			heli.landedColliderCreationDelay = 1
+		end,
+
+		OnTick = function(heli)
+			if heli.landedColliderCreationDelay > 0 then
+				heli.landedColliderCreationDelay = heli.landedColliderCreationDelay - 1
+			else
+				heli:setCollider("landed")
+				heli:updateEntityRotations()
+			end
+
+			if heli.baseEnt.orientation ~= heli.lockedBaseOrientation then
+				heli.baseEnt.orientation = heli.lockedBaseOrientation
+			end
+
+			if heli.baseEnt.speed > 0.25 then --54 km/h
+				heli.baseEnt.damage(heli.baseEnt.speed*210, game.forces.neutral)
+				--still valid??
+			end
+
+			if heli.rotorAnimator and not heli.rotorAnimator.isDone then
+				local isDone
+				heli.rotorRPF, isDone = heli.rotorAnimator:nextFrame()
+
+				if isDone then
+					heli.rotorAnimator = nil
+				end
+			end
+		end,
+
+		OnUp = function(heli)
+			heli:changeState(heli.engineStarting)
+		end,
+	}),
+
+	engineStarting = basicState.new({
+		init = function(heli)
+			heli.lockedBaseOrientation = heli.baseEnt.orientation
+
+			if heli.rotorAnimator and not heli.rotorAnimator.isDone then
+				heli.rotorAnimator:reverse()
+			else
+				heli.rotorAnimator = basicAnimator.new(0, heli.rotorMaxRPF, 5*60, "linear")
+			end
+
+			heli.burnerDriver = game.surfaces[1].create_entity{name="player", force = game.forces.neutral, position = heli.baseEnt.position}
+			heli.childs.burnerEnt.passenger = heli.burnerDriver
+		end,
+
+		OnTick = function(heli)
+			if heli.baseEnt.orientation ~= heli.lockedBaseOrientation then
+				heli.baseEnt.orientation = heli.lockedBaseOrientation
+			end
+
+			heli:consumeBaseFuel()
+			heli:landIfEmpty()
+
+			local isDone
+			heli.rotorRPF, isDone = heli.rotorAnimator:nextFrame()
+
+			if isDone then
+				heli:changeState(heli.ascend)
+			end
+		end,
+	}),
+
+	ascend = basicState.new({
+		init = function(heli)
+			heli.baseEnt.effectivity_modifier = 1
+			heli.baseEnt.friction_modifier = 1
+
+			if heli.heightAnimator and not heli.heightAnimator.isDone then
+				heli.heightAnimator:fadeOut(45)
+				heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, heli.heightAnimator:remainingFrames(), "linear")
+			else
+				local time = heli.getAscendTime(heli.height)
+				heli.heightAnimator = basicAnimator.new(0, heli.maxHeight, time*60, "easeInOutSine")
+			end
+
+			heli:setCollider("flying")
+		end,
+
+		OnTick = function(heli)
+			heli:updateEntityRotations()
+			heli:consumeBaseFuel()
+			heli:landIfEmpty()
+
+			if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
+				heli.curBobbing = heli.bobbingAnimator:nextFrame()
+			end
+			
+			local height, isDone = heli.heightAnimator:nextFrame()
+			heli:changeHeight(height)
+			
+			if heli.height > maxCollisionHeight then
+				heli:setCollider("none")
+			end
+
+			if isDone then
+				if fEqual(height, heli.maxHeight, 0.1) then
+					heli:changeState(heli.hovering)
+				else
+					local time = heli.getAscendTime(heli.maxHeight - heli.height)
+					heli.heightAnimator = basicAnimator.new(height, heli.maxHeight, time*60, "easeInOutSine")
+				end
+			end
+		end,
+	}),
+
+	hovering = basicState.new({
+		init = function(heli)
+			heli.bobbingAnimator = basicAnimator.new(0, maxBobbing, 4*60, "cyclicSine")
+		end,
+
+		OnTick = function(heli)
+			heli:updateEntityRotations()
+			heli:consumeBaseFuel()
+			heli:landIfEmpty()
+
+			local isDone
+			heli.curBobbing, isDone = heli.bobbingAnimator:nextFrame()
+
+			if isDone then
+				heli.bobbingAnimator:reset()
+			end
+		end,
+	}),
+
+	descend = basicState.new({
+		init = function(heli)
+			local time = heli.getAscendTime(heli.maxHeight)
+
+			if heli.heightAnimator and not heli.heightAnimator.isDone then
+				heli.heightAnimator:fadeOut(45)
+				heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
+			else
+				heli.heightAnimator = basicAnimator.new(heli.height, 0, time*60, "easeInOutSine")
+			end
+		end,
+
+		OnTick = function(heli)
+			heli:updateEntityRotations()
+			heli:consumeBaseFuel()
+			
+			local height, isDone = heli.heightAnimator:nextFrame()
+			heli:changeHeight(height)
+
+			if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
+				heli.curBobbing = heli.bobbingAnimator:nextFrame()
+			end
+			
+			if heli.height <= maxCollisionHeight and not (heli.childs.collisionEnt and heli.childs.collisionEnt.valid) then
+				heli:setCollider("flying")
+			end
+
+			if isDone then
+				if fEqual(height, 0, 0.1) then
+					heli:changeState(heli.engineStopping)
+				else
+					local time = heli.getAscendTime(heli.height)
+					heli.heightAnimator = basicAnimator.new(heli.height, 0, time*60, "easeInOutSine")
+				end
+			end
+		end,
+
+		OnUp = function(heli)
+			heli:changeState(heli.ascend)
+		end,
+	}),
+
+	engineStopping = basicState.new({
+		init = function(heli)
+			heli.childs.burnerEnt.passenger = nil
+
+			if heli.burnerDriver and heli.burnerDriver.valid then
+				heli.burnerDriver.destroy()
+				heli.burnerDriver = nil
+			end
+
+			if heli.rotorAnimator and not heli.rotorAnimator.isDone then
+				heli.rotorAnimator:reverse()
+			else
+				heli.rotorAnimator = basicAnimator.new(heli.rotorRPF, 0, 5*60, "linear")
+			end
+
+			heli:changeState(heli.landed)
+		end,
+	}),
+
+
+	---------------- utility ---------------
+
+	getAscendTime = function(height)
+		return 4.5 - 4.5 / (height * 0.27 + 1)
+	end,
+
+	landIfEmpty = function(self)
+		if not self.baseEnt.passenger or not self.baseEnt.passenger.valid or IsEntityBurnerOutOfFuel(self.baseEnt) then
+			self:OnDown()
+		end
+	end,
+
+	changeState = function(self, newState)
+		self.previousState = self.curState
+
+		if self.curState then
+			self.curState.deinit(self)
+		end
+
+		self.curState = newState
+		self.curState.init(self)
+
+		for k,v in pairs(heli) do
+			if v == newState then
+				printA("change state: " .. k)
+				break
+			end
+		end
+	end,
+
 	redirectPassengers = function(self)
 		for k,v in pairs(self.childs) do
 			if v and v.passenger then
@@ -222,13 +489,36 @@ heli = {
 		end
 	end,
 
-	handleFuel = function(self)
-		if IsEntityBurnerOutOfFuel(self.baseEnt) then
-			self.goUp = false
+	setCollider = function(self, name)
+		if self.childs.collisionEnt and self.childs.collisionEnt.valid then
+			self.childs.collisionEnt.destroy()
+			self.childs.collisionEnt = nil
+			self.hasLandedCollider = false
+		end
+
+		if name == "landed" then
+			self.childs.collisionEnt = game.surfaces[1].create_entity{
+				name = "heli-landed-collision-entity-_-",
+				force = game.forces.neutral,
+				position = self.baseEnt.position,
+			}
+			self.hasLandedCollider = true
+
+		elseif name == "flying" then
+			self.childs.collisionEnt = game.surfaces[1].create_entity{
+				name = "heli-flying-collision-entity-_-",
+				force = game.forces.neutral,
+				position = self.baseEnt.position,
+			}
+		end
+
+		if self.childs.collisionEnt then
+			self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
+			self.childs.collisionEnt.operable = false
 		end
 	end,
 
-	handleCollider = function(self)
+	handleColliderDamage = function(self)
 		if self.childs.collisionEnt then
 			if self.childs.collisionEnt.health ~= colliderMaxHealth then
 				self.baseEnt.speed = self.childs.collisionEnt.speed
@@ -243,56 +533,83 @@ heli = {
 		return true
 	end,
 
-	updateFlightState = function(self)
-		if self.height == 0 then
-			if self.baseEnt.orientation ~= self.lockedBaseOrientation then
-				self.baseEnt.orientation = self.lockedBaseOrientation
+	consumeBaseFuel = function(self)
+		self.baseEnt.burner.remaining_burning_fuel = self.baseEnt.burner.remaining_burning_fuel - baseEngineConsumption
+
+		if self.baseEnt.burner.remaining_burning_fuel <= 0 then
+			if self.baseEnt.burner.inventory.is_empty() then
+				local mod = self.baseEnt.effectivity_modifier
+				self.baseEnt.effectivity_modifier = 0
+				self.baseEnt.passenger.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
+				self.baseEnt.effectivity_modifier = mod
+			else
+				local fuelItemStack = nil
+				for i = 1, #self.baseEnt.burner.inventory do
+					if self.baseEnt.burner.inventory[i] and self.baseEnt.burner.inventory[i].valid_for_read then
+						fuelItemStack = self.baseEnt.burner.inventory[i]
+						break
+					end
+				end
+
+				if fuelItemStack then
+					self.baseEnt.burner.currently_burning = fuelItemStack.name
+					self.baseEnt.burner.remaining_burning_fuel = fuelItemStack.prototype.fuel_value
+
+					self.baseEnt.burner.inventory.remove({name = fuelItemStack.name})
+				end
 			end
+		end
+
+		self.burnerDriver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
+		if self.childs.burnerEnt.burner.remaining_burning_fuel < 1000 then
+			self.childs.burnerEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 1})
+		end
+	end,
+
+	changeHeight = function(self, newHeight)
+		local delta = newHeight - self.height
+		local oldY = self.baseEnt.position.y
+
+		self.baseEnt.teleport({x = self.baseEnt.position.x, y = self.baseEnt.position.y - delta})
+
+		
+		if newHeight == 0 then
+			self.height = 0
+
+		elseif newHeight == self.maxHeight then
+			self.height = self.maxHeight
+
 		else
-			self.childs.bodyEnt.orientation = self.baseEnt.orientation
-			self.childs.bodyEntShadow.orientation = self.baseEnt.orientation
-			self.childs.burnerEnt.orientation = self.baseEnt.orientation
-
-			if self.childs.collisionEnt then
-				self.childs.collisionEnt.orientation = self.baseEnt.orientation
-			end
+			--cant just apply the delta, the height would not reflect the sum of teleports,
+			--causing the shadow to move down.
+			--probably because of precision loss from lua->c++ / double->float
+			self.height = self.height + oldY - self.baseEnt.position.y
 		end
+	end,
 
-		if self.height == 0 and self.baseEnt.speed > 0.25 then
-			self.baseEnt.damage(self.baseEnt.speed * 150, game.forces.neutral)
+	updateRotor = function(self)
+		if self.rotorRPF > 0 then
+			self.rotorOrient = self.rotorOrient + self.rotorRPF
+			if self.rotorOrient > 1 then self.rotorOrient = self.rotorOrient - 1 end
 
-			if not self.baseEnt.valid then --destroy event might already be executed
-				return false 
-			end
+			local frameFix = frameFixes[math.floor(self.rotorOrient * 64) + 1]
+			self.childs.rotorEnt.orientation = frameFix
+			self.childs.rotorEntShadow.orientation = frameFix
 		end
+	end,
 
-		if self.height ~= 0 or self.baseEnt.speed ~= 0 then
-			local off = (1 - math.sin(math.pi*self.baseEnt.orientation)) * 0.7
-			local center = {x = self.baseEnt.position.x, y = self.baseEnt.position.y - off}
-			local radius = 2
-			snap = self.baseEnt.orientation
-			snap = snap * (1 - math.sin(math.pi * snap)*0.05) 
-			snap = math.abs(snap * 64) / 64
-			local vec = math3d.vector2.mul(math3d.vector2.rotate({0,1}, math.pi * 2 * snap), radius)
+	updateEntityPositions = function(self)
+		local vec = math3d.vector2.mul(math3d.vector2.rotate({0,1}, math.pi * 2 * self.baseEnt.orientation), self.baseEnt.speed)
 
-			self.childs.burnerEnt.teleport({x = center.x + vec[1], y = center.y + vec[2]})
-		end
+		self.childs.bodyEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + bodyOffset - self.curBobbing})
+		self.childs.rotorEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + rotorOffset - self.curBobbing})
+		
+		self.childs.rotorEntShadow.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.height})
+		self.childs.bodyEntShadow.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.height})
 
 
-		--if (self.oldBasePosition.x ~= self.baseEnt.position.x or self.oldBasePosition.y ~= self.baseEnt.position.y) then --basEnt moved
-		if true then 
-		--ok so the old check always passed as well, but it turns out that's a good thing since otherwise it can glitch. leaving this in here for now.
-
-			local vec = math3d.vector2.mul(math3d.vector2.rotate({0,1}, math.pi * 2 * self.baseEnt.orientation), self.baseEnt.speed)
-
-			self.childs.bodyEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + bodyOffset})
-			self.childs.rotorEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + rotorOffset})
-			
-			self.childs.rotorEntShadow.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.height})
-			self.childs.bodyEntShadow.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.height})
-
-
-			if self.childs.collisionEnt and not self.hasLandedCollider then
+		if self.childs.collisionEnt then
+			if not self.hasLandedCollider then
 				local initVec = {0,1}
 				local mul = 2
 				if self.baseEnt.speed < 0 then
@@ -304,175 +621,32 @@ heli = {
 				vec = math3d.vector2.mul(math3d.vector2.rotate(initVec, math.pi * 2 * self.baseEnt.orientation), mul)
 				self.childs.collisionEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2]})
 				self.childs.collisionEnt.speed = self.baseEnt.speed
-			end
 
-			self.oldBasePosition = self.baseEnt.position
-		end
-
-		if self.goUp and (not self.baseEnt.passenger or not self.baseEnt.passenger.valid) then
-			self.goUp = false
-		end
-
-		if self.goUp then
-			if not self.burnerDriver then
-				self.burnerDriver = game.surfaces[1].create_entity{name="player", force = game.forces.neutral, position = self.baseEnt.position}
-				self.childs.burnerEnt.passenger = self.burnerDriver
-			end
-
-
-			self.baseEnt.burner.remaining_burning_fuel = self.baseEnt.burner.remaining_burning_fuel - baseEngineConsumption
-
-			if self.baseEnt.burner.remaining_burning_fuel <= 0 then
-				if self.baseEnt.burner.inventory.is_empty() then
-					local mod = self.baseEnt.effectivity_modifier
-					self.baseEnt.effectivity_modifier = 0
-					self.baseEnt.passenger.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
-					self.baseEnt.effectivity_modifier = mod
-				else
-					local fuelItemStack = nil
-					for i = 1, #self.baseEnt.burner.inventory do
-						if self.baseEnt.burner.inventory[i] and self.baseEnt.burner.inventory[i].valid_for_read then
-							fuelItemStack = self.baseEnt.burner.inventory[i]
-							break
-						end
-					end
-
-					if fuelItemStack then
-						self.baseEnt.burner.currently_burning = fuelItemStack.name
-						self.baseEnt.burner.remaining_burning_fuel = fuelItemStack.prototype.fuel_value
-
-						self.baseEnt.burner.inventory.remove({name = fuelItemStack.name})
-					end
-				end
-			end
-
-			self.burnerDriver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
-			if self.childs.burnerEnt.burner.remaining_burning_fuel < 1000 then
-				self.childs.burnerEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 1})
-			end
-
-
-			if self.rotorRPF < self.rotorMaxRPF then
-				self.rotorRPF = math.min(self.rotorRPF + 0.0002, self.rotorMaxRPF)
-			end
-
-			if self.startupProgress < startupTime then
-				self.startupProgress = math.min(self.startupProgress + 1, startupTime)
-			end
-
-			if self.startupProgress == startupTime and self.height ~= self.maxHeight then
-				self.baseEnt.effectivity_modifier = 1
-				self.baseEnt.friction_modifier = 1
-
-				local delta
-				if self.height < self.maxHeight then
-					delta = self.heightPF
-					if self.height + delta > self.maxHeight then
-						delta = self.maxHeight - self.height
-					end
-
-				else
-					delta = - self.heightPF
-					if self.height + delta < self.maxHeight then
-						delta = self.maxHeight - self.height
-					end
-				end
-
-				local oldY = self.baseEnt.position.y
-
-				self.baseEnt.teleport({x = self.baseEnt.position.x, y = self.baseEnt.position.y - delta})
-
-				self.height = self.height + oldY - self.baseEnt.position.y --cant apply delta directly to height or it diverges for some reason
-
-				if self.hasLandedCollider then
-					self.hasLandedCollider = false
-					self.childs.collisionEnt.destroy()
-					self.childs.collisionEnt = game.surfaces[1].create_entity{
-						name = "heli-flying-collision-entity-_-",
-						force = game.forces.neutral,
-						position = self.baseEnt.position,
-						orientation = self.baseEnt.orientation
-					}
-					self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
-				end
-
-				if self.height > maxCollisionHeight and self.childs.collisionEnt then
-					self.childs.collisionEnt.destroy()
-					self.childs.collisionEnt = nil
-				end
-			end
-		else
-			if self.burnerDriver then
-				self.childs.burnerEnt.passenger = nil
-				self.burnerDriver.destroy()
-				self.burnerDriver = nil
-			end
-
-			if self.rotorRPF > 0 then
-				self.rotorRPF = math.max(self.rotorRPF - 0.0002, 0)
-			end
-
-			if self.height > 0 then
-				local delta = self.heightPF
-				if self.height < delta then
-					delta = self.height
-				end
-
-				local oldY = self.baseEnt.position.y
-
-				self.baseEnt.teleport({x = self.baseEnt.position.x, y = self.baseEnt.position.y + delta})
-				
-				self.height = self.height + oldY - self.baseEnt.position.y --cant apply delta directly to height or it diverges for some reason
-
-				if self.height <= maxCollisionHeight and not self.childs.collisionEnt then
-					self.childs.collisionEnt = game.surfaces[1].create_entity{name = "heli-flying-collision-entity-_-", force = game.forces.neutral, position = self.baseEnt.position}
-					self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
-				end
-
-				if self.height == 0 then
-					self.lockedBaseOrientation = self.baseEnt.orientation
-					self.baseEnt.effectivity_modifier = 0
-					self.baseEnt.friction_modifier = 50
-				end
-			end
-
-			if self.height == 0 then
-				if self.startupProgress > 0 then
-					self.startupProgress = math.max(self.startupProgress - 1, 0)
-				end
-				if self.baseEnt.speed == 0 and not self.hasLandedCollider then
-					if self.landedColliderCreationDelay > 0 then 
-						self.landedColliderCreationDelay = self.landedColliderCreationDelay - 1
-					else
-						self.hasLandedCollider = true
-						if self.childs.collisionEnt and self.childs.collisionEnt.valid then
-							self.childs.collisionEnt.destroy()
-						end
-
-						self.childs.collisionEnt = game.surfaces[1].create_entity{
-							name = "heli-landed-collision-entity-_-",
-							force = game.forces.neutral,
-							position = self.baseEnt.position,
-						}
-						self.childs.collisionEnt.orientation = self.baseEnt.orientation
-						self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
-						self.childs.collisionEnt.operable = false
-					end
-				end
+			else
+				self.childs.collisionEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2]})
+				self.childs.collisionEnt.speed = self.baseEnt.speed
 			end
 		end
 
-		return true
+
+		local off = (1 - math.sin(math.pi*self.baseEnt.orientation)) * 0.7
+		local center = {x = self.baseEnt.position.x, y = self.baseEnt.position.y - off}
+		local radius = 2
+		snap = self.baseEnt.orientation
+		snap = snap * (1 - math.sin(math.pi * snap)*0.05) 
+		snap = math.abs(snap * 64) / 64
+		local vec = math3d.vector2.mul(math3d.vector2.rotate({0,1}, math.pi * 2 * snap), radius)
+
+		self.childs.burnerEnt.teleport({x = center.x + vec[1], y = center.y + vec[2] - self.curBobbing})
 	end,
 
-	updateRotor = function(self)
-		if self.rotorRPF > 0 then
-			self.rotorOrient = self.rotorOrient + self.rotorRPF
-			if self.rotorOrient > 1 then self.rotorOrient = self.rotorOrient - 1 end
+	updateEntityRotations = function(self)
+		self.childs.bodyEnt.orientation = self.baseEnt.orientation
+		self.childs.bodyEntShadow.orientation = self.baseEnt.orientation
+		self.childs.burnerEnt.orientation = self.baseEnt.orientation
 
-			local frameFix = frameFixes[math.floor(self.rotorOrient * 64) + 1]
-			self.childs.rotorEnt.orientation = frameFix
-			self.childs.rotorEntShadow.orientation = frameFix
+		if self.childs.collisionEnt then
+			self.childs.collisionEnt.orientation = self.baseEnt.orientation
 		end
 	end,
 
@@ -488,46 +662,5 @@ heli = {
 		end
 
 		return false
-	end,
-
-	OnTick = function(self)
-		if not self:handleCollider() then
-			return
-		end
-
-		self:handleFuel()
-		self:redirectPassengers()
-
-		if not self:updateFlightState() then
-			return
-		end
-
-		self:updateRotor()
-	end,
-
-	 
-	OnUp = function(self)
-		if not IsEntityBurnerOutOfFuel(self.baseEnt) then
-			self.goUp = true
-		end
-	end,
-
-	OnDown = function(self)
-		self.goUp = false
-	end,
-
-	setHeightPF = function(self)
-		local time = 4.5 - (4.5 / (( self.maxHeight + 15) * 0.1) ) * (1 - 0.03 * self.maxHeight)
-		self.heightPF = self.maxHeight / (time * 60)
-	end,
-
-	OnIncreaseMaxHeight = function(self)
-		self.maxHeight = math.min(self.maxHeight + 2, self.maxHeightUperLimit)
-		self:setHeightPF()
-	end,
-
-	OnDecreaseMaxHeight = function(self)
-		self.maxHeight = math.max(self.maxHeight - 2, self.maxHeightLowerLimit)
-		self:setHeightPF()
 	end,
 }
