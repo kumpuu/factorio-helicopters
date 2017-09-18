@@ -324,10 +324,12 @@ heli = {
 			heli.baseEnt.friction_modifier = 1
 
 			if heli.heightAnimator and not heli.heightAnimator.isDone then
-				heli.heightAnimator:fadeOut(45)
-				heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, heli.heightAnimator:remainingFrames(), "linear")
+				local time = heli.getAscendTime(heli.maxHeight - heli.height)
+				
+				heli.heightAnimator = animationTransitor.new(heli.heightAnimator, 45, heli.maxHeight, time*60, "easeInOutSine")
+				heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
 			else
-				local time = heli.getAscendTime(heli.height)
+				local time = heli.getAscendTime(heli.maxHeight)
 				heli.heightAnimator = basicAnimator.new(0, heli.maxHeight, time*60, "easeInOutSine")
 			end
 
@@ -351,12 +353,7 @@ heli = {
 			end
 
 			if isDone then
-				if fEqual(height, heli.maxHeight, 0.1) then
-					heli:changeState(heli.hovering)
-				else
-					local time = heli.getAscendTime(heli.maxHeight - heli.height)
-					heli.heightAnimator = basicAnimator.new(height, heli.maxHeight, time*60, "easeInOutSine")
-				end
+				heli:changeState(heli.hovering)
 			end
 		end,
 	}),
@@ -382,12 +379,14 @@ heli = {
 
 	descend = basicState.new({
 		init = function(heli)
-			local time = heli.getAscendTime(heli.maxHeight)
 
 			if heli.heightAnimator and not heli.heightAnimator.isDone then
-				heli.heightAnimator:fadeOut(45)
+				local time = heli.getAscendTime(heli.height)
+				
+				heli.heightAnimator = animationTransitor.new(heli.heightAnimator, 45, 0, time*60, "easeInOutSine")
 				heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
 			else
+				local time = heli.getAscendTime(heli.maxHeight)
 				heli.heightAnimator = basicAnimator.new(heli.height, 0, time*60, "easeInOutSine")
 			end
 		end,
@@ -408,12 +407,7 @@ heli = {
 			end
 
 			if isDone then
-				if fEqual(height, 0, 0.1) then
-					heli:changeState(heli.engineStopping)
-				else
-					local time = heli.getAscendTime(heli.height)
-					heli.heightAnimator = basicAnimator.new(heli.height, 0, time*60, "easeInOutSine")
-				end
+				heli:changeState(heli.engineStopping)
 			end
 		end,
 

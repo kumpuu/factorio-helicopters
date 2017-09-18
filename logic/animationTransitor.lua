@@ -13,7 +13,16 @@ animationTransitor =
 
 		obj.runningAnim:fadeOut(fadeOutFrames)
 
-		return setmetatable(obj, {__index = animationTransitor})
+		return setmetatable(obj, 
+			{
+				__index = function(t, k)
+					if animationTransitor[k] then
+						return animationTransitor[k]
+					else
+						return basicAnimator[k]
+					end
+				end,
+			})
 	end,
 
 	nextFrame = function(self)
