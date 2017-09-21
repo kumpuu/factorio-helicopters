@@ -101,6 +101,7 @@ local bodyOffset = 5
 local rotorOffset = 5.1
 
 local maxBobbing = 0.05
+local bobbingPeriod = 8*60
 
 
 local IsEntityBurnerOutOfFuel = function(ent)
@@ -138,10 +139,12 @@ heli = {
 
 	startupProgress = 0,
 	height = 0,
+	targetHeight = 0,
 	maxHeight = 5,
 	curBobbing = 0,
 
-	heightPF = 2/60, --2 tiles per second
+	heightSpeed = 0, 
+	heightAcceleration = 0.001,
 
 	maxHeightUperLimit = 20,
 	maxHeightLowerLimit = 3,
@@ -149,6 +152,8 @@ heli = {
 
 	rotorOrient = 0,
 	rotorRPF = 0,
+	rotorTargetRPF = 0,
+	rotorRPFacceleration = 0.0002,
 	rotorMaxRPF = rotorMaxRPM/60/60, --revolutions per frame
 
 	hasLandedCollider = false,
@@ -223,6 +228,7 @@ heli = {
 		
 		self:redirectPassengers()
 		self:updateRotor()
+		self:updateHeight()
 		self:updateEntityPositions()
 		self.curState.OnTick(self)
 		self:handleColliderDamage()
@@ -236,10 +242,14 @@ heli = {
 		self:changeState(self.descend)
 	end,
 
-	OnMaxHeightUp = function(self)
+	OnIncreaseMaxHeight = function(self)
+		self.maxHeight = math.min(self.maxHeightUperLimit, self.maxHeight + 1)
+		self.curState.OnMaxHeightChanged(self)
 	end,
 
-	OnMaxHeightDown = function(self)
+	OnDecreaseMaxHeight = function(self)
+		self.maxHeight = math.max(self.maxHeightLowerLimit, self.maxHeight - 1)
+		self.curState.OnMaxHeightChanged(self)
 	end, 
 
 
@@ -291,11 +301,7 @@ heli = {
 		init = function(heli)
 			heli.lockedBaseOrientation = heli.baseEnt.orientation
 
-			if heli.rotorAnimator and not heli.rotorAnimator.isDone then
-				heli.rotorAnimator:reverse()
-			else
-				heli.rotorAnimator = basicAnimator.new(0, heli.rotorMaxRPF, 5*60, "linear")
-			end
+			heli:setRotorTargetRPF(heli.rotorMaxRPF)
 
 			heli.burnerDriver = game.surfaces[1].create_entity{name="player", force = game.forces.neutral, position = heli.baseEnt.position}
 			heli.childs.burnerEnt.passenger = heli.burnerDriver
@@ -309,10 +315,7 @@ heli = {
 			heli:consumeBaseFuel()
 			heli:landIfEmpty()
 
-			local isDone
-			heli.rotorRPF, isDone = heli.rotorAnimator:nextFrame()
-
-			if isDone then
+			if heli.rotorRPF == heli.rotorMaxRPF then
 				heli:changeState(heli.ascend)
 			end
 		end,
@@ -323,15 +326,8 @@ heli = {
 			heli.baseEnt.effectivity_modifier = 1
 			heli.baseEnt.friction_modifier = 1
 
-			if heli.heightAnimator and not heli.heightAnimator.isDone then
-				local time = heli.getAscendTime(heli.maxHeight - heli.height)
-				
-				heli.heightAnimator = animationTransitor.new(heli.heightAnimator, 45, heli.maxHeight, time*60, "easeInOutSine")
-				heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
-			else
-				local time = heli.getAscendTime(heli.maxHeight)
-				heli.heightAnimator = basicAnimator.new(0, heli.maxHeight, time*60, "easeInOutSine")
-			end
+			local time = heli:setTargetHeight(heli.maxHeight)
+			heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
 
 			heli:setCollider("flying")
 		end,
@@ -345,22 +341,23 @@ heli = {
 				heli.curBobbing = heli.bobbingAnimator:nextFrame()
 			end
 			
-			local height, isDone = heli.heightAnimator:nextFrame()
-			heli:changeHeight(height)
-			
 			if heli.height > maxCollisionHeight then
 				heli:setCollider("none")
 			end
 
-			if isDone then
+			if heli.height == heli.maxHeight then
 				heli:changeState(heli.hovering)
 			end
+		end,
+
+		OnMaxHeightChanged = function(heli)
+			heli:setTargetHeight(heli.maxHeight)
 		end,
 	}),
 
 	hovering = basicState.new({
 		init = function(heli)
-			heli.bobbingAnimator = basicAnimator.new(0, maxBobbing, 4*60, "cyclicSine")
+			heli.bobbingAnimator = basicAnimator.new(0, maxBobbing, bobbingPeriod, "cyclicSine")
 		end,
 
 		OnTick = function(heli)
@@ -375,29 +372,22 @@ heli = {
 				heli.bobbingAnimator:reset()
 			end
 		end,
+
+		OnMaxHeightChanged = function(heli)
+			heli:setTargetHeight(heli.maxHeight)
+		end,
 	}),
 
 	descend = basicState.new({
 		init = function(heli)
-
-			if heli.heightAnimator and not heli.heightAnimator.isDone then
-				local time = heli.getAscendTime(heli.height)
-				
-				heli.heightAnimator = animationTransitor.new(heli.heightAnimator, 45, 0, time*60, "easeInOutSine")
-				heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
-			else
-				local time = heli.getAscendTime(heli.maxHeight)
-				heli.heightAnimator = basicAnimator.new(heli.height, 0, time*60, "easeInOutSine")
-			end
+			local time = heli:setTargetHeight(0)
+			heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
 		end,
 
 		OnTick = function(heli)
 			heli:updateEntityRotations()
 			heli:consumeBaseFuel()
 			
-			local height, isDone = heli.heightAnimator:nextFrame()
-			heli:changeHeight(height)
-
 			if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
 				heli.curBobbing = heli.bobbingAnimator:nextFrame()
 			end
@@ -406,7 +396,7 @@ heli = {
 				heli:setCollider("flying")
 			end
 
-			if isDone then
+			if heli.height == 0 then
 				heli:changeState(heli.engineStopping)
 			end
 		end,
@@ -425,11 +415,7 @@ heli = {
 				heli.burnerDriver = nil
 			end
 
-			if heli.rotorAnimator and not heli.rotorAnimator.isDone then
-				heli.rotorAnimator:reverse()
-			else
-				heli.rotorAnimator = basicAnimator.new(heli.rotorRPF, 0, 5*60, "linear")
-			end
+			heli:setRotorTargetRPF(0)
 
 			heli:changeState(heli.landed)
 		end,
@@ -438,8 +424,35 @@ heli = {
 
 	---------------- utility ---------------
 
+	setTargetHeight = function(self, targetHeight)
+		self.targetHeight = targetHeight
+		return 5
+	end,
+
+	setRotorTargetRPF = function(self, targetRPF)
+		self.rotorTargetRPF = targetRPF
+	end,
+
 	getAscendTime = function(height)
 		return 4.5 - 4.5 / (height * 0.27 + 1)
+	end,
+
+	changeHeight = function(self, newHeight)
+		local delta = newHeight - self.height
+		local oldY = self.baseEnt.position.y
+
+		self.baseEnt.teleport({x = self.baseEnt.position.x, y = self.baseEnt.position.y - delta})
+
+		
+		if newHeight == self.targetHeight then
+			self.height = self.targetHeight
+
+		else
+			--cant just apply the delta, the height would not reflect the sum of teleports,
+			--causing the shadow to move down.
+			--probably because of precision loss from lua->c++ / double->float
+			self.height = self.height + oldY - self.baseEnt.position.y
+		end
 	end,
 
 	landIfEmpty = function(self)
@@ -449,6 +462,13 @@ heli = {
 	end,
 
 	changeState = function(self, newState)
+		for k,v in pairs(heli) do
+			if v == newState then
+				printA("change state: " .. k)
+				break
+			end
+		end
+
 		self.previousState = self.curState
 
 		if self.curState then
@@ -457,13 +477,6 @@ heli = {
 
 		self.curState = newState
 		self.curState.init(self)
-
-		for k,v in pairs(heli) do
-			if v == newState then
-				printA("change state: " .. k)
-				break
-			end
-		end
 	end,
 
 	redirectPassengers = function(self)
@@ -560,28 +573,16 @@ heli = {
 		end
 	end,
 
-	changeHeight = function(self, newHeight)
-		local delta = newHeight - self.height
-		local oldY = self.baseEnt.position.y
-
-		self.baseEnt.teleport({x = self.baseEnt.position.x, y = self.baseEnt.position.y - delta})
-
-		
-		if newHeight == 0 then
-			self.height = 0
-
-		elseif newHeight == self.maxHeight then
-			self.height = self.maxHeight
-
-		else
-			--cant just apply the delta, the height would not reflect the sum of teleports,
-			--causing the shadow to move down.
-			--probably because of precision loss from lua->c++ / double->float
-			self.height = self.height + oldY - self.baseEnt.position.y
-		end
-	end,
-
 	updateRotor = function(self)
+		if self.rotorRPF ~= self.rotorTargetRPF then
+			if self.rotorRPF < self.rotorTargetRPF then
+				self.rotorRPF = math.min(self.rotorRPF + self.rotorRPFacceleration, self.rotorTargetRPF)
+
+			else
+				self.rotorRPF = math.max(self.rotorRPF - self.rotorRPFacceleration, self.rotorTargetRPF)
+			end
+		end
+
 		if self.rotorRPF > 0 then
 			self.rotorOrient = self.rotorOrient + self.rotorRPF
 			if self.rotorOrient > 1 then self.rotorOrient = self.rotorOrient - 1 end
@@ -591,6 +592,34 @@ heli = {
 			self.childs.rotorEntShadow.orientation = frameFix
 		end
 	end,
+
+	updateHeight = function(self)
+		if self.height ~= self.targetHeight then
+			local dir = 1
+			if self.targetHeight < self.height then
+				dir = -1
+			end
+
+			local desiredSpeed = (self.targetHeight - self.height) / 90 + dir * 0.005
+
+			if self.heightSpeed < desiredSpeed then
+				self.heightSpeed = math.min(self.heightSpeed + self.heightAcceleration, desiredSpeed)
+				printA(self.heightSpeed)
+			else
+				self.heightSpeed = math.max(self.heightSpeed - self.heightAcceleration, desiredSpeed)
+			end
+
+			local newHeight = self.height + self.heightSpeed
+
+			if fEqual(newHeight, self.targetHeight, 0.01) then
+				self:changeHeight(self.targetHeight)
+				self.heightSpeed = 0
+			else
+				self:changeHeight(newHeight)
+			end
+		end
+	end,
+
 
 	updateEntityPositions = function(self)
 		local vec = math3d.vector2.mul(math3d.vector2.rotate({0,1}, math.pi * 2 * self.baseEnt.orientation), self.baseEnt.speed)
