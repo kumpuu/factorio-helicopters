@@ -51,9 +51,6 @@ heliController =
 			obj.targetPos = target
 		end
 
-
-		obj.targetPos.y = obj.targetPos.y - 5
-
 		if not heli.baseEnt.passenger then
 			obj.driverIsBot = true
 			obj.driver = game.surfaces[1].create_entity{name = "player", force = player.force, position = player.position}
@@ -114,7 +111,7 @@ heliController =
 		else
 			if self.targetIsPlayer then
 				if self.targetPlayer.valid then
-					self.targetPos = {x = self.targetPlayer.position.x, y = self.targetPlayer.position.y - 5}
+					self.targetPos = {x = self.targetPlayer.position.x, y = self.targetPlayer.position.y - 1}
 				else
 					self:stopAndDestroy()
 					return
@@ -164,7 +161,7 @@ heliController =
 	end,
 
 	getTargetOrientation = function(self)
-		local curPos = self.heli.baseEnt.position
+		local curPos = self.heli.childs.bodyEntShadow.position
 
 		local vec = {x = self.targetPos.x - curPos.x, y = curPos.y - self.targetPos.y}
 		local len = math.sqrt(vec.x ^ 2 + vec.y ^ 2)
@@ -205,9 +202,9 @@ heliController =
 
 	------------- states ---------------
 	getUp = function(self)
-		if not self.heli.goUp then
+		if self.stateChanged then
 			self.heli:OnUp()
-		elseif self.heli.height >= 5 then
+		elseif self.heli.height >= maxCollisionHeight then
 			self:changeState(self.orientToTarget)
 		end
 	end,
@@ -227,7 +224,7 @@ heliController =
 	end,
 
 	moveToTarget = function(self)
-		local dist = getDistance(self.heli.baseEnt.position, self.targetPos)
+		local dist = getDistance(self.heli.childs.bodyEntShadow.position, self.targetPos)
 
 		if self.stateChanged then
 			self.updateOrientationCooldown = 30
@@ -268,10 +265,10 @@ heliController =
 	end,
 
 	creepToPosition = function(self)
-		local curPos = self.heli.baseEnt.position
+		local curPos = self.heli.childs.bodyEntShadow.position
 		
 		if self.stateChanged then
-			self:setRidingState(defines.riding.acceleration.braking)
+			self:setRidingState(defines.riding.acceleration.braking, defines.riding.direction.straight)
 			self.heli.baseEnt.speed = 0
 			self.targetIsPlayer = false
 
@@ -282,12 +279,13 @@ heliController =
 			local creepFrames = 60
 			self.creepVec = {x = (self.targetPos.x - curPos.x) / creepFrames, y = (self.targetPos.y - curPos.y) / creepFrames}
 
-			self.oldDist = getDistance(curPos, self.targetPos)
+			self.oldDist = 100
 		end
 
-		self.heli.baseEnt.teleport({x = curPos.x + self.creepVec.x, y = curPos.y + self.creepVec.y})
+		self.heli.baseEnt.teleport({x = self.heli.baseEnt.position.x + self.creepVec.x, y = self.heli.baseEnt.position.y + self.creepVec.y})
+		self.heli:updateEntityPositions()
 
-		local dist = getDistance(self.heli.baseEnt.position, self.targetPos)
+		local dist = getDistance(self.heli.childs.bodyEntShadow.position, self.targetPos)
 		if dist < 0.2 or dist > self.oldDist then
 			self:changeState(self.land)
 		end

@@ -91,9 +91,9 @@ end
 
 --local modVersion = versionStrToInt(game.active_mods.Helicopters)
 
+maxCollisionHeight = 2
 local rotorMaxRPM = 200
 local startupTime = 5*60 --5 seconds
-local maxCollisionHeight = 2
 local colliderMaxHealth = 999999
 local baseEngineConsumption = 20000
 
@@ -262,15 +262,17 @@ heli = {
 
 			heli.lockedBaseOrientation = heli.baseEnt.orientation
 
-			heli.landedColliderCreationDelay = 1
+			heli.landedColliderCreationDelay = 2
 		end,
 
 		OnTick = function(heli)
 			if heli.landedColliderCreationDelay > 0 then
+				if heli.landedColliderCreationDelay == 1 then
+					heli:setCollider("landed")
+					heli:updateEntityRotations()
+				end
+
 				heli.landedColliderCreationDelay = heli.landedColliderCreationDelay - 1
-			else
-				heli:setCollider("landed")
-				heli:updateEntityRotations()
 			end
 
 			if heli.baseEnt.orientation ~= heli.lockedBaseOrientation then
@@ -604,7 +606,6 @@ heli = {
 
 			if self.heightSpeed < desiredSpeed then
 				self.heightSpeed = math.min(self.heightSpeed + self.heightAcceleration, desiredSpeed)
-				printA(self.heightSpeed)
 			else
 				self.heightSpeed = math.max(self.heightSpeed - self.heightAcceleration, desiredSpeed)
 			end
