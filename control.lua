@@ -11,6 +11,18 @@ function OnLoad(e)
 	setMetatablesInGlobal("heliControllers", {__index = heliController})
 end
 
+function OnConfigChanged(e)
+	for k, curHeli in pairs(global["helis"]) do
+		if not curHeli.curState then
+			if curHeli.goUp then
+				curHeli:changeState(heli.engineStarting)
+			else
+				curHeli:changeState(heli.descend)
+			end
+		end
+	end
+end
+
 function OnTick(e)
 	checkAndTickInGlobal("helis")
 	checkAndTickInGlobal("remoteGuis")
@@ -175,6 +187,7 @@ script.on_event(defines.events.on_built_entity, OnBuilt)
 script.on_event(defines.events.on_robot_built_entity, OnBuilt)
 
 script.on_load(OnLoad)
+script.on_configuration_changed(OnConfigChanged)
 script.on_event(defines.events.on_tick, OnTick)
 
 script.on_event(defines.events.on_player_mined_entity, OnRemoved)

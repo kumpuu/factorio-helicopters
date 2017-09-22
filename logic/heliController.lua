@@ -273,7 +273,8 @@ heliController =
 			self.targetIsPlayer = false
 
 			local curDist = getDistance(curPos, self.targetPos)
-			local alignVec = {x = (self.targetPos.x - curPos.x) / curDist * 1,  y = (self.targetPos.y - curPos.y) / curDist * 1}
+			local alignFactor = 1.1
+			local alignVec = {x = (self.targetPos.x - curPos.x) / curDist * alignFactor,  y = (self.targetPos.y - curPos.y) / curDist * alignFactor}
 			self.targetPos = {x = self.targetPos.x + alignVec.x, y = self.targetPos.y + alignVec.y}
 
 			local creepFrames = 60

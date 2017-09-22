@@ -384,6 +384,10 @@ heliSelectionGui =
 									ID = self.curCamID,
 								})
 
+								if self.curCamID == 0 then
+									self:setCamStatus(els.cams[1], true, controller)
+								end
+
 								self.curCamID = self.curCamID + 1
 							end
 						end

@@ -224,8 +224,6 @@ heli = {
 	---------------- events ----------------
 
 	OnTick = function(self)
-		if not self.curState then self:changeState(heli.landed) end
-		
 		self:redirectPassengers()
 		self:updateRotor()
 		self:updateHeight()
@@ -281,7 +279,10 @@ heli = {
 
 			if heli.baseEnt.speed > 0.25 then --54 km/h
 				heli.baseEnt.damage(heli.baseEnt.speed*210, game.forces.neutral)
-				--still valid??
+
+				if not heli.baseEnt.valid then
+					return
+				end
 			end
 
 			if heli.rotorAnimator and not heli.rotorAnimator.isDone then
@@ -305,8 +306,10 @@ heli = {
 
 			heli:setRotorTargetRPF(heli.rotorMaxRPF)
 
-			heli.burnerDriver = game.surfaces[1].create_entity{name="player", force = game.forces.neutral, position = heli.baseEnt.position}
-			heli.childs.burnerEnt.passenger = heli.burnerDriver
+			if not (heli.burnerDriver and heli.burnerDriver.valid) then
+				heli.burnerDriver = game.surfaces[1].create_entity{name="player", force = game.forces.neutral, position = heli.baseEnt.position}
+				heli.childs.burnerEnt.passenger = heli.burnerDriver
+			end
 		end,
 
 		OnTick = function(heli)
@@ -428,7 +431,7 @@ heli = {
 
 	setTargetHeight = function(self, targetHeight)
 		self.targetHeight = targetHeight
-		return 5
+		return 60
 	end,
 
 	setRotorTargetRPF = function(self, targetRPF)
@@ -549,7 +552,17 @@ heli = {
 			if self.baseEnt.burner.inventory.is_empty() then
 				local mod = self.baseEnt.effectivity_modifier
 				self.baseEnt.effectivity_modifier = 0
-				self.baseEnt.passenger.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
+
+				if self.baseEnt.passenger and self.baseEnt.passenger.valid then
+					self.baseEnt.passenger.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
+				
+				else	
+					self.baseEnt.passenger = game.surfaces[1].create_entity{name = "player", force = self.baseEnt.force, position = self.baseEnt.position}
+					self.baseEnt.passenger.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
+					self.baseEnt.passenger.destroy()
+					self.baseEnt.passenger = nil
+				end
+
 				self.baseEnt.effectivity_modifier = mod
 			else
 				local fuelItemStack = nil
@@ -569,9 +582,11 @@ heli = {
 			end
 		end
 
-		self.burnerDriver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
-		if self.childs.burnerEnt.burner.remaining_burning_fuel < 1000 then
-			self.childs.burnerEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 1})
+		if self.burnerDriver and self.burnerDriver.valid then
+			self.burnerDriver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
+			if self.childs.burnerEnt.burner.remaining_burning_fuel < 1000 then
+				self.childs.burnerEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 1})
+			end
 		end
 	end,
 
