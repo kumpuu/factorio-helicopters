@@ -99,6 +99,7 @@ data:extend({
     type = "tile",
     name = "heli-pad-concrete",
     needs_correction = false,
+    minable = {hardness = 0.2, mining_time = 0.5},
     mined_sound = { filename = "__base__/sound/deconstruct-bricks.ogg" },
     collision_mask = {"ground-tile"},
     walking_speed_modifier = 1.4,

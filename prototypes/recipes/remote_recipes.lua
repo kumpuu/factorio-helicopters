@@ -3,8 +3,9 @@ data:extend({
 		type = "recipe",
 		name = "heli-remote-recipe",
 		enabled = false,
+		energy_required = 15,
 		ingredients = {
-			{"processing-unit", 35},
+			{"processing-unit", 40},
 			{"battery", 20},
 			{"plastic-bar", 20},
 			{"rocket-control-unit", 2},
@@ -16,6 +17,7 @@ data:extend({
 		type = "recipe",
 		name = "heli-pad-recipe",
 		enabled = false,
+		energy_required = 5,
 		ingredients = {
 			{"concrete", 50},
 		},

@@ -72,7 +72,6 @@ basicAnimator =
 		maxSmoothingFrames = math.min(maxSmoothingFrames, self:remainingFrames())
 
 		self.directionChangeRate = (self.direction / maxSmoothingFrames) * 2
-		printA(self.direction, maxSmoothingFrames, self.directionChangeRate, self:remainingFrames())
 	end,
 
 	fadeOut = function(self, maxSmoothingFrames)

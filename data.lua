@@ -11,6 +11,7 @@ require ("prototypes.recipes.heli_recipe")
 require ("prototypes.recipes.remote_recipes")
 
 require ("prototypes.technologies.heli_technology")
+require ("prototypes.technologies.remote_technology")
 require ("prototypes.equipment.equipment")
 
 require ("prototypes.sprites.sprites")

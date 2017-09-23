@@ -1,6 +1,5 @@
 local math3d = require("math3d")
 require("logic.basicAnimator")
-require("logic.animationTransitor")
 require("logic.basicState")
 
 function getHeliFromBaseEntity(ent)
@@ -467,12 +466,14 @@ heli = {
 	end,
 
 	changeState = function(self, newState)
+		--[[
 		for k,v in pairs(heli) do
 			if v == newState then
 				printA("change state: " .. k)
 				break
 			end
 		end
+		]]
 
 		self.previousState = self.curState
 

@@ -126,7 +126,6 @@ heliSelectionGui =
 	OnHeliControllerCreated = function(self, controller)
 		local cam = searchInTable(self.guiElems.cams, controller.heli, "heli")
 		if cam then
-			print("set")
 			cam.heliController = controller
 			self:setCamStatus(cam, cam == self.selectedCam, true)
 		end

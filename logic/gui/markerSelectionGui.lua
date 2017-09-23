@@ -110,7 +110,6 @@ markerSelectionGui =
 		end
 
 		for k, curTag in pairs(newTags) do
-			printA(curTag.valid, curTag.text)
 			table.insert(self.guiElems.btns, self:buildBtnFromTag(self.guiElems.table, curTag))
 		end
 
