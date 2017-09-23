@@ -9,6 +9,8 @@ function OnLoad(e)
 	setMetatablesInGlobal("remoteGuis", remoteGui.mt)
 	setMetatablesInGlobal("heliPads", {__index = heliPad})
 	setMetatablesInGlobal("heliControllers", {__index = heliController})
+
+	callInGlobal("helis", "OnLoad")
 end
 
 function OnConfigChanged(e)

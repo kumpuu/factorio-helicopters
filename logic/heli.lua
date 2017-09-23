@@ -219,6 +219,14 @@ heli = {
 		end
 	end,
 
+	OnLoad = function(self)
+		if self.curState then
+			setmetatable(self.curState, basicState.mt)
+		end
+		if self.previousState then
+			setmetatable(self.previousState, basicState.mt)
+		end
+	end,
 
 	---------------- events ----------------
 
@@ -470,12 +478,15 @@ heli = {
 
 		self.previousState = self.curState
 
-		if self.curState then
+		if self.curState and self.curState.deinit then
 			self.curState.deinit(self)
 		end
 
 		self.curState = newState
-		self.curState.init(self)
+
+		if self.curState.init then
+			self.curState.init(self)
+		end
 	end,
 
 	redirectPassengers = function(self)

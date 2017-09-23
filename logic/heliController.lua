@@ -107,6 +107,10 @@ heliController =
 				self.driver = self.heli.baseEnt.passenger
 				self.driverIsBot = false
 			end
+			if self.targetIsPlayer and self.heli.baseEnt.passenger == self.targetPlayer.character then
+				self:destroy()
+				return
+			end
 
 		else
 			if self.targetIsPlayer then
