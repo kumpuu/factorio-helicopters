@@ -12,12 +12,14 @@ function OnLoad(e)
 end
 
 function OnConfigChanged(e)
-	for k, curHeli in pairs(global["helis"]) do
-		if not curHeli.curState then
-			if curHeli.goUp then
-				curHeli:changeState(heli.engineStarting)
-			else
-				curHeli:changeState(heli.descend)
+	if global.helis then
+		for k, curHeli in pairs(global.helis) do
+			if not curHeli.curState then
+				if curHeli.goUp then
+					curHeli:changeState(heli.engineStarting)
+				else
+					curHeli:changeState(heli.descend)
+				end
 			end
 		end
 	end
