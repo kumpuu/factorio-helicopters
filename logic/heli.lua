@@ -283,15 +283,6 @@ heli = {
 					return
 				end
 			end
-
-			if heli.rotorAnimator and not heli.rotorAnimator.isDone then
-				local isDone
-				heli.rotorRPF, isDone = heli.rotorAnimator:nextFrame()
-
-				if isDone then
-					heli.rotorAnimator = nil
-				end
-			end
 		end,
 
 		OnUp = function(heli)
@@ -331,7 +322,7 @@ heli = {
 			heli.baseEnt.friction_modifier = 1
 
 			local time = heli:setTargetHeight(heli.maxHeight)
-			heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
+			--heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
 
 			heli:setCollider("flying")
 		end,
@@ -341,9 +332,9 @@ heli = {
 			heli:consumeBaseFuel()
 			heli:landIfEmpty()
 
-			if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
-				heli.curBobbing = heli.bobbingAnimator:nextFrame()
-			end
+			--if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
+			--	heli.curBobbing = heli.bobbingAnimator:nextFrame()
+			--end
 			
 			if heli.height > maxCollisionHeight then
 				heli:setCollider("none")
@@ -361,7 +352,7 @@ heli = {
 
 	hovering = basicState.new({
 		init = function(heli)
-			heli.bobbingAnimator = basicAnimator.new(0, maxBobbing, bobbingPeriod, "cyclicSine")
+			--heli.bobbingAnimator = basicAnimator.new(0, maxBobbing, bobbingPeriod, "cyclicSine")
 		end,
 
 		OnTick = function(heli)
@@ -369,12 +360,14 @@ heli = {
 			heli:consumeBaseFuel()
 			heli:landIfEmpty()
 
+			--[[
 			local isDone
 			heli.curBobbing, isDone = heli.bobbingAnimator:nextFrame()
 
 			if isDone then
 				heli.bobbingAnimator:reset()
 			end
+			]]
 		end,
 
 		OnMaxHeightChanged = function(heli)
@@ -385,16 +378,16 @@ heli = {
 	descend = basicState.new({
 		init = function(heli)
 			local time = heli:setTargetHeight(0)
-			heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
+			--heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
 		end,
 
 		OnTick = function(heli)
 			heli:updateEntityRotations()
 			heli:consumeBaseFuel()
 			
-			if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
-				heli.curBobbing = heli.bobbingAnimator:nextFrame()
-			end
+			--if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
+			--	heli.curBobbing = heli.bobbingAnimator:nextFrame()
+			--end
 			
 			if heli.height <= maxCollisionHeight and not (heli.childs.collisionEnt and heli.childs.collisionEnt.valid) then
 				heli:setCollider("flying")
