@@ -127,6 +127,7 @@ heli = {
 		"heli-shadow-entity-_-",
 		"heli-flying-collision-entity-_-",
 		"heli-burner-entity-_-",
+		"heli-floodlight-entity-_-",
 		"rotor-entity-_-",
 		"rotor-shadow-entity-_-",
 	},
@@ -157,6 +158,8 @@ heli = {
 
 	hasLandedCollider = false,
 	landedColliderCreationDelay = 1, --frames. workaround for inserters trying to access collider inventory when created at the same time.
+
+	floodlightEnabled = false,
 	------------------------------------------------------------
 
 	new = function(ent)
@@ -184,6 +187,8 @@ heli = {
 				rotorEntShadow = game.surfaces[1].create_entity{name = "rotor-shadow-entity-_-", force = game.forces.neutral, position = baseEnt.position},
 
 				burnerEnt = game.surfaces[1].create_entity{name = "heli-burner-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + 1.3}},
+			
+				floodlightEnt = game.surfaces[1].create_entity{name = "heli-floodlight-entity-_-", force = game.forces.neutral, position = baseEnt.position},
 			},
 		}
 
@@ -216,6 +221,9 @@ heli = {
 
 		if self.burnerDriver and self.burnerDriver.valid then
 			self.burnerDriver.destroy()
+		end
+		if self.floodlightDriver and self.floodlightDriver.valid then
+			self.floodlightDriver.destroy()
 		end
 	end,
 
@@ -255,12 +263,25 @@ heli = {
 	OnDecreaseMaxHeight = function(self)
 		self.maxHeight = math.max(self.maxHeightLowerLimit, self.maxHeight - 1)
 		self.curState.OnMaxHeightChanged(self)
-	end, 
+	end,
+
+	OnToggleFloodlight = function(self)
+		self.floodlightEnabled = not self.floodlightEnabled
+
+		if not self.floodlightEnabled then
+			self:setFloodlightEntities(false)
+
+		elseif self.height ~= 0 or self.rotorTargetRPF > 0 then
+			self:setFloodlightEntities(true)
+		end
+	end,
 
 
 	---------------- states ----------------
 
 	landed = basicState.new({
+		name = "landed",
+
 		init = function(heli)
 			heli.baseEnt.effectivity_modifier = 0
 			heli.baseEnt.friction_modifier = 50
@@ -268,6 +289,8 @@ heli = {
 			heli.lockedBaseOrientation = heli.baseEnt.orientation
 
 			heli.landedColliderCreationDelay = 2
+
+			heli:setFloodlightEntities(false)
 		end,
 
 		OnTick = function(heli)
@@ -299,6 +322,8 @@ heli = {
 	}),
 
 	engineStarting = basicState.new({
+		name = "engineStarting",
+		
 		init = function(heli)
 			heli.lockedBaseOrientation = heli.baseEnt.orientation
 
@@ -307,6 +332,10 @@ heli = {
 			if not (heli.burnerDriver and heli.burnerDriver.valid) then
 				heli.burnerDriver = game.surfaces[1].create_entity{name="player", force = game.forces.neutral, position = heli.baseEnt.position}
 				heli.childs.burnerEnt.passenger = heli.burnerDriver
+			end
+
+			if heli.floodlightEnabled then
+				heli:setFloodlightEntities(true)
 			end
 		end,
 
@@ -325,6 +354,8 @@ heli = {
 	}),
 
 	ascend = basicState.new({
+		name = "ascend",
+		
 		init = function(heli)
 			heli.baseEnt.effectivity_modifier = 1
 			heli.baseEnt.friction_modifier = 1
@@ -359,6 +390,8 @@ heli = {
 	}),
 
 	hovering = basicState.new({
+		name = "hovering",
+		
 		init = function(heli)
 			--heli.bobbingAnimator = basicAnimator.new(0, maxBobbing, bobbingPeriod, "cyclicSine")
 		end,
@@ -384,6 +417,8 @@ heli = {
 	}),
 
 	descend = basicState.new({
+		name = "descend",
+		
 		init = function(heli)
 			local time = heli:setTargetHeight(0)
 			--heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
@@ -412,6 +447,8 @@ heli = {
 	}),
 
 	engineStopping = basicState.new({
+		name = "engineStopping",
+		
 		init = function(heli)
 			heli.childs.burnerEnt.passenger = nil
 
@@ -497,6 +534,13 @@ heli = {
 						self.baseEnt.passenger = v.passenger
 						v.passenger = self.burnerDriver
 					end
+
+				elseif k == "floodlightEnt" and self.floodlightDriver then
+					if v.passenger ~= self.floodlightDriver then
+						self.baseEnt.passenger = v.passenger
+						v.passenger = self.floodlightDriver
+					end
+
 				else
 					local p = v.passenger
 					v.passenger = nil
@@ -532,6 +576,34 @@ heli = {
 		if self.childs.collisionEnt then
 			self.childs.collisionEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
 			self.childs.collisionEnt.operable = false
+		end
+	end,
+
+	setFloodlightEntities = function(self, enabled)
+		if enabled then
+			if not (self.childs.floodlightEnt and self.childs.floodlightEnt.valid) then
+				self.childs.floodlightEnt = game.surfaces[1].create_entity{name = "heli-floodlight-entity-_-", force = game.forces.neutral, position = self.baseEnt.position}
+				self.childs.floodlightEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
+			end
+			self.childs.floodlightEnt.orientation = self.baseEnt.orientation
+			self.childs.floodlightEnt.operable = false
+
+			if not (self.floodlightDriver and self.floodlightDriver.valid) then
+				self.floodlightDriver = game.surfaces[1].create_entity{name="player", force = game.forces.neutral, position = self.baseEnt.position}
+			end
+
+			self.childs.floodlightEnt.passenger = self.floodlightDriver
+		else
+
+			if self.childs.floodlightEnt and self.childs.floodlightEnt.valid then
+				self.childs.floodlightEnt.destroy()
+			end
+			self.childs.floodlightEnt = nil
+
+			if self.floodlightDriver and self.floodlightDriver.valid then
+				self.floodlightDriver.destroy()
+			end
+			self.floodlightDriver = nil
 		end
 	end,
 
@@ -643,7 +715,8 @@ heli = {
 
 
 	updateEntityPositions = function(self)
-		local vec = math3d.vector2.mul(math3d.vector2.rotate({0,1}, math.pi * 2 * self.baseEnt.orientation), self.baseEnt.speed)
+		local baseVec = math3d.vector2.rotate({0,1}, math.pi * 2 * self.baseEnt.orientation)
+		local vec = math3d.vector2.mul(baseVec, self.baseEnt.speed)
 
 		self.childs.bodyEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + bodyOffset - self.curBobbing})
 		self.childs.rotorEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + rotorOffset - self.curBobbing})
@@ -651,7 +724,11 @@ heli = {
 		self.childs.rotorEntShadow.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.height})
 		self.childs.bodyEntShadow.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.height})
 
-
+		if self.childs.floodlightEnt then
+			local lightOffsetVec = math3d.vector2.mul(baseVec, self.height)
+			self.childs.floodlightEnt.teleport({x = self.baseEnt.position.x - vec[1] - lightOffsetVec[1], y = self.baseEnt.position.y - vec[2] - lightOffsetVec[2] + self.height})
+		end
+		
 		if self.childs.collisionEnt then
 			if not self.hasLandedCollider then
 				local initVec = {0,1}
@@ -691,6 +768,10 @@ heli = {
 
 		if self.childs.collisionEnt then
 			self.childs.collisionEnt.orientation = self.baseEnt.orientation
+		end
+
+		if self.childs.floodlightEnt then
+			self.childs.floodlightEnt.orientation = self.baseEnt.orientation
 		end
 	end,
 

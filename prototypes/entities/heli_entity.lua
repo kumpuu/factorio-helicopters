@@ -205,8 +205,6 @@ data:extend({
     	close_sound = { filename = "__base__/sound/car-door-close.ogg", volume = 0.7 },
 	    guns = {"tank-machine-gun", "heli-rocket-launcher-item"},
 	    turret_rotation_speed = 1 / 60,
-
-		
 	},
 
 
@@ -601,5 +599,95 @@ data:extend({
 			},
 			--match_speed_to_activity = true,
 		},
+	},
+
+
+
+
+
+
+----------------------flashlight--------------------
+	{
+		type = "car",
+		name = "heli-floodlight-entity-_-",
+		icon = "__Helicopters__/graphics/icons/heli.png",
+		flags = {"not-on-map"},
+		minable = {mining_time = 1, result = "heli-item"},
+		max_health = 999999,
+		corpse = "medium-remnants",
+		selection_box = {{0,0},{0,0}},
+		collision_box = {{0,0},{0,0}},
+		energy_per_hit_point = 1,
+		effectivity = 0.3,
+		breaking_speed = 0.03,
+		burner = {
+			effectivity = 0.5,
+			emissions = 0,
+			fuel_inventory_size = 1,
+		},
+		consumption = "1W",
+		braking_power = "1W",
+		friction = 0.002,
+		terrain_friction_modifier = 0,
+		weight = 3000,
+
+		rotation_speed = 0.005,
+		inventory_size = 0,
+
+		animation = {
+			layers = {
+				{
+					priority = "high",
+					width = 1,
+					height = 1,
+					frame_count = 1,
+					direction_count = 1,
+					shift = {0, 0},
+					animation_speed = 8,
+					max_advance = 0.2,
+					stripes =
+					{
+						{
+							filename = "__Helicopters__/graphics/void.png",
+							width_in_frames = 1,
+							height_in_frames = 1,
+						},
+					}
+				},
+			}
+		},
+
+		crash_trigger = {
+			type = "play-sound",
+			sound =
+			{
+				{
+				filename = "__base__/sound/car-crash.ogg",
+				volume = 0.25
+				},
+			}
+		},
+		vehicle_impact_sound = { filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65 },
+
+		light =
+	    {
+	      {
+	        type = "oriented",
+	        minimum_darkness = 0.3,
+	        picture =
+	        {
+	          filename = "__core__/graphics/light-cone.png",
+	          priority = "extra-high",
+	          flags = { "light" },
+	          scale = 2.5,
+	          width = 200,
+	          height = 200
+	        },
+	        shift = {-0.3, -20},
+	        size = 2.5,
+	        intensity = 0.6,
+	        color = {r = 0.92, g = 0.77, b = 0.3}
+	      },
+	    },
 	},
 })

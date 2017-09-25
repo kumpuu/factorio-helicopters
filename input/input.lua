@@ -32,4 +32,11 @@ data:extend({
     key_sequence = "Down",
     consuming = "none"
   },
+
+  {
+    type = "custom-input",
+    name = "heli-zba-toogle-floodlight",
+    key_sequence = "SHIFT + L",
+    consuming = "none"
+  },
 })
