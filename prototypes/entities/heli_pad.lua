@@ -48,7 +48,7 @@ data:extend({
     order = "b[decorative]-k[stone-rock]-a[big]",
     collision_box = {{-3.5, -3.5}, {3.5, 3.5}},
     collision_mask = {},--{"object-layer"},
-    selection_box = {{-3.5, -3.5}, {3.5, 3.5}},
+    selection_box = {{-2, -2}, {2, 2}},
     
     minable =
     {

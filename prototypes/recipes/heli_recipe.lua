@@ -4,11 +4,12 @@ data:extend({
 		name = "heli-recipe",
 		enabled = false,
 		ingredients = {
-			{"engine-unit", 40},
-			{"steel-plate", 30},
-			{"iron-gear-wheel", 50},
-			{"advanced-circuit", 50},
-			{"plastic-bar", 40},
+			{"engine-unit", 150},
+			{"steel-plate", 150},
+			{"iron-gear-wheel", 250},
+			{"processing-unit", 250},
+			{"gun-turret", 10},
+			{"rocket-launcher", 10},
 		},
 		result = "heli-item",
 	}
