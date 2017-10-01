@@ -617,6 +617,7 @@ data:extend({
 		corpse = "medium-remnants",
 		selection_box = {{0,0},{0,0}},
 		collision_box = {{0,0},{0,0}},
+		collision_mask = {},
 		energy_per_hit_point = 1,
 		effectivity = 0.3,
 		breaking_speed = 0.03,
