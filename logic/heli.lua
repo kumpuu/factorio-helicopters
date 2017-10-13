@@ -163,12 +163,10 @@ heli = {
 	------------------------------------------------------------
 
 	new = function(ent)
-		baseEnt = game.surfaces[1].create_entity{name = "heli-entity-_-", force = ent.force, position = ent.position}
+		baseEnt = ent.surface.create_entity{name = "heli-entity-_-", force = ent.force, position = ent.position}
 		
 		transferGridEquipment(ent, baseEnt)
 		baseEnt.health = ent.health
-
-		ent.destroy()
 
 		local obj = {
 			version = versionStrToInt(game.active_mods.Helicopters),
@@ -179,18 +177,22 @@ heli = {
 
 			baseEnt = baseEnt,
 
+			surface = ent.surface,
+
 			childs = {
-				bodyEnt = game.surfaces[1].create_entity{name = "heli-body-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + bodyOffset}},
-				rotorEnt = game.surfaces[1].create_entity{name = "rotor-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + rotorOffset}},
+				bodyEnt = ent.surface.create_entity{name = "heli-body-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + bodyOffset}},
+				rotorEnt = ent.surface.create_entity{name = "rotor-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + rotorOffset}},
 
-				bodyEntShadow = game.surfaces[1].create_entity{name = "heli-shadow-entity-_-", force = game.forces.neutral, position = baseEnt.position},
-				rotorEntShadow = game.surfaces[1].create_entity{name = "rotor-shadow-entity-_-", force = game.forces.neutral, position = baseEnt.position},
+				bodyEntShadow = ent.surface.create_entity{name = "heli-shadow-entity-_-", force = game.forces.neutral, position = baseEnt.position},
+				rotorEntShadow = ent.surface.create_entity{name = "rotor-shadow-entity-_-", force = game.forces.neutral, position = baseEnt.position},
 
-				burnerEnt = game.surfaces[1].create_entity{name = "heli-burner-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + 1.3}},
+				burnerEnt = ent.surface.create_entity{name = "heli-burner-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + 1.3}},
 			
-				floodlightEnt = game.surfaces[1].create_entity{name = "heli-floodlight-entity-_-", force = game.forces.neutral, position = baseEnt.position},
+				floodlightEnt = ent.surface.create_entity{name = "heli-floodlight-entity-_-", force = game.forces.neutral, position = baseEnt.position},
 			},
 		}
+
+		ent.destroy()
 
 		obj.baseEnt.effectivity_modifier = 0
 
@@ -330,7 +332,7 @@ heli = {
 			heli:setRotorTargetRPF(heli.rotorMaxRPF)
 
 			if not (heli.burnerDriver and heli.burnerDriver.valid) then
-				heli.burnerDriver = game.surfaces[1].create_entity{name="player", force = game.forces.neutral, position = heli.baseEnt.position}
+				heli.burnerDriver = heli.surface.create_entity{name="player", force = game.forces.neutral, position = heli.baseEnt.position}
 				heli.childs.burnerEnt.passenger = heli.burnerDriver
 			end
 
@@ -558,7 +560,7 @@ heli = {
 		end
 
 		if name == "landed" then
-			self.childs.collisionEnt = game.surfaces[1].create_entity{
+			self.childs.collisionEnt = self.surface.create_entity{
 				name = "heli-landed-collision-entity-_-",
 				force = game.forces.neutral,
 				position = self.baseEnt.position,
@@ -566,7 +568,7 @@ heli = {
 			self.hasLandedCollider = true
 
 		elseif name == "flying" then
-			self.childs.collisionEnt = game.surfaces[1].create_entity{
+			self.childs.collisionEnt = self.surface.create_entity{
 				name = "heli-flying-collision-entity-_-",
 				force = game.forces.neutral,
 				position = self.baseEnt.position,
@@ -582,14 +584,14 @@ heli = {
 	setFloodlightEntities = function(self, enabled)
 		if enabled then
 			if not (self.childs.floodlightEnt and self.childs.floodlightEnt.valid) then
-				self.childs.floodlightEnt = game.surfaces[1].create_entity{name = "heli-floodlight-entity-_-", force = game.forces.neutral, position = self.baseEnt.position}
+				self.childs.floodlightEnt = self.surface.create_entity{name = "heli-floodlight-entity-_-", force = game.forces.neutral, position = self.baseEnt.position}
 				self.childs.floodlightEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 50})
 			end
 			self.childs.floodlightEnt.orientation = self.baseEnt.orientation
 			self.childs.floodlightEnt.operable = false
 
 			if not (self.floodlightDriver and self.floodlightDriver.valid) then
-				self.floodlightDriver = game.surfaces[1].create_entity{name="player", force = game.forces.neutral, position = self.baseEnt.position}
+				self.floodlightDriver = self.surface.create_entity{name="player", force = game.forces.neutral, position = self.baseEnt.position}
 			end
 
 			self.childs.floodlightEnt.passenger = self.floodlightDriver
@@ -634,7 +636,7 @@ heli = {
 					self.baseEnt.passenger.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
 				
 				else	
-					self.baseEnt.passenger = game.surfaces[1].create_entity{name = "player", force = self.baseEnt.force, position = self.baseEnt.position}
+					self.baseEnt.passenger = self.surface.create_entity{name = "player", force = self.baseEnt.force, position = self.baseEnt.position}
 					self.baseEnt.passenger.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
 					self.baseEnt.passenger.destroy()
 					self.baseEnt.passenger = nil

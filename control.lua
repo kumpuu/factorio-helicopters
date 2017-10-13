@@ -23,6 +23,18 @@ function OnConfigChanged(e)
 					curHeli:changeState(heli.descend)
 				end
 			end
+
+			if not curHeli.surface then
+				curHeli.surface = curHeli.baseEnt.surface
+			end
+		end
+	end
+
+	if global.heliPads then
+		for k, curPad in pairs(global.heliPads) do
+			if not curPad.surface then
+				curPad.surface = curPad.baseEnt.surface
+			end
 		end
 	end
 end
@@ -49,26 +61,30 @@ end
 function OnRemoved(e)
 	local ent = e.entity
 
-	for k,v in pairs(heli.entityNames) do
-		if ent.name == v then
-			for i,val in ipairs(global.helis) do
-				if val:isBaseOrChild(ent) then
-					val:destroy()
-					table.remove(global.helis, i)
-					
-					callInGlobal("remoteGuis", "OnHeliRemoved", val)
+	if ent.valid then
+		local entName = ent.name
+
+		for k,v in pairs(heli.entityNames) do
+			if entName == v then
+				for i,val in ipairs(global.helis) do
+					if val:isBaseOrChild(ent) then
+						val:destroy()
+						table.remove(global.helis, i)
+						
+						callInGlobal("remoteGuis", "OnHeliRemoved", val)
+					end
 				end
 			end
 		end
-	end
 
-	if ent.name == "heli-pad-entity" then
-		local i = getHeliPadIndexFromBaseEntity(ent)
-		if i then
-			global.heliPads[i]:destroy()
+		if entName == "heli-pad-entity" then
+			local i = getHeliPadIndexFromBaseEntity(ent)
+			if i then
+				global.heliPads[i]:destroy()
 
-			callInGlobal("remoteGuis", "OnHeliPadRemoved", global.heliPads[i])
-			table.remove(global.heliPads, i)
+				callInGlobal("remoteGuis", "OnHeliPadRemoved", global.heliPads[i])
+				table.remove(global.heliPads, i)
+			end
 		end
 	end
 end
