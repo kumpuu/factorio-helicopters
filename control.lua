@@ -1,11 +1,25 @@
-require ("logic.heli")
-require ("logic.heliPad")
-require ("logic.util")
-require ("logic.heliController")
-require ("logic.gui.remoteGui")
+require("logic.util")
+
+require("logic.heliBase")
+require("logic.heliAttack")
+
+require("logic.heliPad")
+require("logic.heliController")
+require("logic.gui.remoteGui")
+
+function playerIsInHeli(p)
+	return p.driving and string.find(heliBaseEntityNames, p.vehicle.name .. ",", 1, true)
+end
 
 function OnLoad(e)
-	setMetatablesInGlobal("helis", {__index = heli})
+	if global.helis then
+		for k, curHeli in pairs(global.helis) do
+			if not curHeli.type or curHeli.type == "heliAttack" then
+				setmetatable(curHeli, {__index = heliAttack})
+			end
+		end
+	end
+
 	setMetatablesInGlobal("remoteGuis", remoteGui.mt)
 	setMetatablesInGlobal("heliPads", {__index = heliPad})
 	setMetatablesInGlobal("heliControllers", {__index = heliController})
@@ -26,6 +40,10 @@ function OnConfigChanged(e)
 
 			if not curHeli.surface then
 				curHeli.surface = curHeli.baseEnt.surface
+			end
+
+			if not curHeli.type then
+				curHeli.type = "heliAttack"
 			end
 		end
 	end
@@ -49,8 +67,8 @@ function OnBuilt(e)
 	local ent = e.created_entity
 
 	if ent.name == "heli-placement-entity-_-" then
-		local newHeli = insertInGlobal("helis", heli.new(ent))
-		callInGlobal("helis", "OnHeliBuilt", newHeli)
+		local newHeli = insertInGlobal("helis", heliAttack.new(ent))
+		callInGlobal("remoteGuis", "OnHeliBuilt", newHeli)
 
 	elseif ent.name == "heli-pad-placement-entity" then
 		local newPad = insertInGlobal("heliPads", heliPad.new(ent)) 
@@ -64,15 +82,13 @@ function OnRemoved(e)
 	if ent.valid then
 		local entName = ent.name
 
-		for k,v in pairs(heli.entityNames) do
-			if entName == v then
-				for i,val in ipairs(global.helis) do
-					if val:isBaseOrChild(ent) then
-						val:destroy()
-						table.remove(global.helis, i)
-						
-						callInGlobal("remoteGuis", "OnHeliRemoved", val)
-					end
+		if string.find(heliEntityNames, entName .. ",", 1, true) then
+			for i,val in ipairs(global.helis) do
+				if val:isBaseOrChild(ent) then
+					val:destroy()
+					table.remove(global.helis, i)
+					
+					callInGlobal("remoteGuis", "OnHeliRemoved", val)
 				end
 			end
 		end
@@ -91,35 +107,35 @@ end
 
 function OnHeliUp(e)
 	local p = game.players[e.player_index]
-	if p.driving and p.vehicle.name == "heli-entity-_-" then
+	if playerIsInHeli(p) then
 		getHeliFromBaseEntity(p.vehicle):OnUp()
 	end
 end
 
 function OnHeliDown(e)
 	local p = game.players[e.player_index]
-	if p.driving and p.vehicle.name == "heli-entity-_-" then
+	if playerIsInHeli(p) then
 		getHeliFromBaseEntity(p.vehicle):OnDown()
 	end
 end
 
 function OnHeliIncreaseMaxHeight(e)
 	local p = game.players[e.player_index]
-	if p.driving and p.vehicle.name == "heli-entity-_-" then
+	if playerIsInHeli(p) then
 		getHeliFromBaseEntity(p.vehicle):OnIncreaseMaxHeight()
 	end
 end
 
 function OnHeliDecreaseMaxHeight(e)
 	local p = game.players[e.player_index]
-	if p.driving and p.vehicle.name == "heli-entity-_-" then
+	if playerIsInHeli(p) then
 		getHeliFromBaseEntity(p.vehicle):OnDecreaseMaxHeight()
 	end
 end
 
 function OnHeliToggleFloodlight(e)
 	local p = game.players[e.player_index]
-	if p.driving and p.vehicle.name == "heli-entity-_-" then
+	if playerIsInHeli(p) then
 		getHeliFromBaseEntity(p.vehicle):OnToggleFloodlight()
 	end
 end

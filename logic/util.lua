@@ -106,3 +106,21 @@ function fEqual(a, b, prec)
 
 	return math.abs(a - b) <= prec
 end
+
+function versionStrToInt(s)
+	v = 0
+	for num in s:gmatch("%d+") do
+		v = v * 100 + tonumber(num)
+	end
+
+	return v
+end
+
+function concatStrTable(t, c)
+	local s = ""
+	for k,v in pairs(t) do
+		s = s .. v .. c
+	end
+
+	return s
+end

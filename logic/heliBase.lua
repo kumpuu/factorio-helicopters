@@ -79,29 +79,14 @@ local frameFixes = {
 	0.984375, 	--64
 }
 
-local versionStrToInt = function(s)
-	v = 0
-	for num in s:gmatch("%d+") do
-		v = v * 100 + tonumber(num)
-	end
-
-	return v
-end
-
 --local modVersion = versionStrToInt(game.active_mods.Helicopters)
 
 maxCollisionHeight = 2
-local rotorMaxRPM = 200
-local startupTime = 5*60 --5 seconds
-local colliderMaxHealth = 999999
-local baseEngineConsumption = 20000
-
-local bodyOffset = 5
-local rotorOffset = 5.1
 
 local maxBobbing = 0.05
 local bobbingPeriod = 8*60
 
+local colliderMaxHealth = 999999
 
 local IsEntityBurnerOutOfFuel = function(ent)
 	return ent.burner.remaining_burning_fuel <= 0 and ent.burner.inventory.is_empty()
@@ -119,19 +104,10 @@ local transferGridEquipment = function(srcEnt, destEnt)
 	end
 end
 
-heli = {
-	entityNames = {
-		"heli-entity-_-",
-		"heli-body-entity-_-",
-		"heli-landed-collision-entity-_-",
-		"heli-shadow-entity-_-",
-		"heli-flying-collision-entity-_-",
-		"heli-burner-entity-_-",
-		"heli-floodlight-entity-_-",
-		"rotor-entity-_-",
-		"rotor-shadow-entity-_-",
-	},
+heliEntityNames = ""
+heliBaseEntityNames = ""
 
+heliBase = {
 	---------- default vals -----------
 	valid = true,
 
@@ -154,45 +130,33 @@ heli = {
 	rotorRPF = 0,
 	rotorTargetRPF = 0,
 	rotorRPFacceleration = 0.0002,
-	rotorMaxRPF = rotorMaxRPM/60/60, --revolutions per frame
+	rotorMaxRPF = 200/60/60, --revolutions per frame
 
 	hasLandedCollider = false,
 	landedColliderCreationDelay = 1, --frames. workaround for inserters trying to access collider inventory when created at the same time.
 
 	floodlightEnabled = false,
+
+	baseEngineConsumption = 20000,
+
 	------------------------------------------------------------
 
-	new = function(ent)
-		baseEnt = ent.surface.create_entity{name = "heli-entity-_-", force = ent.force, position = ent.position}
-		
-		transferGridEquipment(ent, baseEnt)
-		baseEnt.health = ent.health
+	new = function(placementEnt, baseEnt, childEnts)
+		transferGridEquipment(placementEnt, baseEnt)
+		baseEnt.health = placementEnt.health
 
 		local obj = {
 			version = versionStrToInt(game.active_mods.Helicopters),
 
-			oldBasePosition = {x = baseEnt.position.x + 1, y = 0}, --no idea why, but child entities are messed up if not teleported once after spawning
-
 			lockedBaseOrientation = baseEnt.orientation,
 
 			baseEnt = baseEnt,
+			childs = childEnts,
 
-			surface = ent.surface,
-
-			childs = {
-				bodyEnt = ent.surface.create_entity{name = "heli-body-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + bodyOffset}},
-				rotorEnt = ent.surface.create_entity{name = "rotor-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + rotorOffset}},
-
-				bodyEntShadow = ent.surface.create_entity{name = "heli-shadow-entity-_-", force = game.forces.neutral, position = baseEnt.position},
-				rotorEntShadow = ent.surface.create_entity{name = "rotor-shadow-entity-_-", force = game.forces.neutral, position = baseEnt.position},
-
-				burnerEnt = ent.surface.create_entity{name = "heli-burner-entity-_-", force = game.forces.neutral, position = {x = baseEnt.position.x, y = baseEnt.position.y + 1.3}},
-			
-				floodlightEnt = ent.surface.create_entity{name = "heli-floodlight-entity-_-", force = game.forces.neutral, position = baseEnt.position},
-			},
+			surface = placementEnt.surface,
 		}
 
-		ent.destroy()
+		placementEnt.destroy()
 
 		obj.baseEnt.effectivity_modifier = 0
 
@@ -201,9 +165,7 @@ heli = {
 			v.destructible = false
 		end
 
-		setmetatable(obj, {__index = heli})
-
-		obj:changeState(heli.landed)
+		heliBase.changeState(obj, heli.landed)
 
 		return obj
 	end,
@@ -625,7 +587,7 @@ heli = {
 	end,
 
 	consumeBaseFuel = function(self)
-		self.baseEnt.burner.remaining_burning_fuel = self.baseEnt.burner.remaining_burning_fuel - baseEngineConsumption
+		self.baseEnt.burner.remaining_burning_fuel = self.baseEnt.burner.remaining_burning_fuel - self.baseEngineConsumption
 
 		if self.baseEnt.burner.remaining_burning_fuel <= 0 then
 			if self.baseEnt.burner.inventory.is_empty() then
@@ -720,8 +682,8 @@ heli = {
 		local baseVec = math3d.vector2.rotate({0,1}, math.pi * 2 * self.baseEnt.orientation)
 		local vec = math3d.vector2.mul(baseVec, self.baseEnt.speed)
 
-		self.childs.bodyEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + bodyOffset - self.curBobbing})
-		self.childs.rotorEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + rotorOffset - self.curBobbing})
+		self.childs.bodyEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.bodyOffset - self.curBobbing})
+		self.childs.rotorEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.rotorOffset - self.curBobbing})
 		
 		self.childs.rotorEntShadow.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.height})
 		self.childs.bodyEntShadow.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.height})
