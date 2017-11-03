@@ -182,6 +182,24 @@ markerSelectionGui =
 		}
 	end,
 
+	tagCompareCB = function(a, b)
+		if a.text ~= "" and b.text ~= "" then
+			if a.text == b.text and a.icon and not b.icon then
+				return true
+			end
+
+			return a.text < b.text
+
+		elseif a.text ~= "" then
+			return true
+
+		elseif a.icon and not b.icon then
+			return true
+		end
+
+		return false
+	end,
+
 	buildGui = function(self)
 		self.guiElems.root = self.guiElems.parent.add
 		{
@@ -208,8 +226,11 @@ markerSelectionGui =
 			direction = "vertical",
 		}
 
+		local tagList = self.player.force.find_chart_tags(self.player.surface)
+		quickSort(tagList, self.tagCompareCB)
+
 		self.guiElems.btns = {}
-		for k, curTag in pairs(self.player.force.find_chart_tags(self.player.surface)) do
+		for k, curTag in pairs(tagList) do
 			table.insert(self.guiElems.btns, self:buildBtnFromTag(self.guiElems.table, curTag))
 		end
 		

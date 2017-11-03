@@ -682,15 +682,17 @@ heliBase = {
 		local baseVec = math3d.vector2.rotate({0,1}, math.pi * 2 * self.baseEnt.orientation)
 		local vec = math3d.vector2.mul(baseVec, self.baseEnt.speed)
 
-		self.childs.bodyEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.bodyOffset - self.curBobbing})
-		self.childs.rotorEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.rotorOffset - self.curBobbing})
+		local basePos = self.baseEnt.position
+
+		self.childs.bodyEnt.teleport({x = basePos.x - vec[1], y = basePos.y - vec[2] + self.bodyOffset - self.curBobbing})
+		self.childs.rotorEnt.teleport({x = basePos.x - vec[1], y = basePos.y - vec[2] + self.rotorOffset - self.curBobbing})
 		
-		self.childs.rotorEntShadow.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.height})
-		self.childs.bodyEntShadow.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2] + self.height})
+		self.childs.rotorEntShadow.teleport({x = basePos.x - vec[1], y = basePos.y - vec[2] + self.height})
+		self.childs.bodyEntShadow.teleport({x = basePos.x - vec[1], y = basePos.y - vec[2] + self.height})
 
 		if self.childs.floodlightEnt then
 			local lightOffsetVec = math3d.vector2.mul(baseVec, self.height)
-			self.childs.floodlightEnt.teleport({x = self.baseEnt.position.x - vec[1] - lightOffsetVec[1], y = self.baseEnt.position.y - vec[2] - lightOffsetVec[2] + self.height})
+			self.childs.floodlightEnt.teleport({x = basePos.x - vec[1] - lightOffsetVec[1], y = basePos.y - vec[2] - lightOffsetVec[2] + self.height})
 		end
 		
 		if self.childs.collisionEnt then
@@ -704,18 +706,18 @@ heliBase = {
 				end
 
 				vec = math3d.vector2.mul(math3d.vector2.rotate(initVec, math.pi * 2 * self.baseEnt.orientation), mul)
-				self.childs.collisionEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2]})
+				self.childs.collisionEnt.teleport({x = basePos.x - vec[1], y = basePos.y - vec[2]})
 				self.childs.collisionEnt.speed = self.baseEnt.speed
 
 			else
-				self.childs.collisionEnt.teleport({x = self.baseEnt.position.x - vec[1], y = self.baseEnt.position.y - vec[2]})
+				self.childs.collisionEnt.teleport({x = basePos.x - vec[1], y = basePos.y - vec[2]})
 				self.childs.collisionEnt.speed = self.baseEnt.speed
 			end
 		end
 
 
 		local off = (1 - math.sin(math.pi*self.baseEnt.orientation)) * 0.7
-		local center = {x = self.baseEnt.position.x, y = self.baseEnt.position.y - off}
+		local center = {x = basePos.x, y = basePos.y - off}
 		local radius = 2
 		snap = self.baseEnt.orientation
 		snap = snap * (1 - math.sin(math.pi * snap)*0.05) 
