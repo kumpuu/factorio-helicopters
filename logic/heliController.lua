@@ -51,13 +51,13 @@ heliController =
 			obj.targetPos = target
 		end
 
-		if not heli.baseEnt.passenger then
+		if not heli.baseEnt.get_driver() then
 			obj.driverIsBot = true
 			obj.driver = heli.surface.create_entity{name = "player", force = player.force, position = player.position}
-			heli.baseEnt.passenger = obj.driver
+			heli.baseEnt.set_driver(obj.driver)
 		else
 			obj.driverIsBot = false
-			obj.driver = heli.baseEnt.passenger
+			obj.driver = heli.baseEnt.get_driver()
 		end
 
 		heli.hasRemoteController = true
@@ -88,26 +88,28 @@ heliController =
 	end,
 
 	OnTick = function(self)
+		local curDriver = self.heli.baseEnt.get_driver()
+
 		if not (self.heli.valid and self.heli.baseEnt.valid) then
 			self:destroy()
 
-		elseif not (self.heli.baseEnt.passenger and self.heli.baseEnt.passenger.valid) then
+		elseif not (curDriver and curDriver.valid) then
 			if self.driverIsBot then
 				self:destroy()
 			else
 				self.driverIsBot = true
 				self.driver = self.heli.surface.create_entity{name = "player", force = self.owner.force, position = self.owner.position}
-				self.heli.baseEnt.passenger = self.driver
+				self.heli.baseEnt.set_driver(self.driver)
 				self.heli:OnUp()
 			end
 
-		elseif self.driverIsBot and self.heli.baseEnt.passenger ~= self.driver then
+		elseif self.driverIsBot and curDriver ~= self.driver then
 			if self.driver and self.driver.valid then
 				self.driver.destroy()
-				self.driver = self.heli.baseEnt.passenger
+				self.driver = curDriver
 				self.driverIsBot = false
 			end
-			if self.targetIsPlayer and self.heli.baseEnt.passenger == self.targetPlayer.character then
+			if self.targetIsPlayer and curDriver == self.targetPlayer.character then
 				self:destroy()
 				return
 			end

@@ -1,7 +1,7 @@
-data.raw["gui-style"].default["listbox_button_style"] =
+data.raw["gui-style"].default["listbox_button"] =
 {
   type = "button_style",
-  parent = "button_style",
+  parent = "button",
   font = "default-bold",
   align = "left",
   scalable = true,
@@ -16,7 +16,7 @@ data.raw["gui-style"].default["listbox_button_style"] =
   left_click_sound =
   {
     {
-      filename = "__core__/sound/listbox-click.ogg",
+      filename = "__core__/sound/list-box-click.ogg",
       volume = 1
     }
   },

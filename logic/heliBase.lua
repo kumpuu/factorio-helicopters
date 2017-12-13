@@ -295,7 +295,7 @@ heliBase = {
 
 			if not (heli.burnerDriver and heli.burnerDriver.valid) then
 				heli.burnerDriver = heli.surface.create_entity{name="player", force = game.forces.neutral, position = heli.baseEnt.position}
-				heli.childs.burnerEnt.passenger = heli.burnerDriver
+				heli.childs.burnerEnt.set_driver(heli.burnerDriver)
 			end
 
 			if heli.floodlightEnabled then
@@ -414,7 +414,7 @@ heliBase = {
 		name = "engineStopping",
 		
 		init = function(heli)
-			heli.childs.burnerEnt.passenger = nil
+			heli.childs.burnerEnt.set_driver(nil)
 
 			if heli.burnerDriver and heli.burnerDriver.valid then
 				heli.burnerDriver.destroy()
@@ -462,7 +462,8 @@ heliBase = {
 	end,
 
 	landIfEmpty = function(self)
-		if not self.baseEnt.passenger or not self.baseEnt.passenger.valid or IsEntityBurnerOutOfFuel(self.baseEnt) then
+		local driver = self.baseEnt.get_driver()
+		if not driver or not driver.valid or IsEntityBurnerOutOfFuel(self.baseEnt) then
 			self:OnDown()
 		end
 	end,
@@ -490,25 +491,58 @@ heliBase = {
 		end
 	end,
 
+	insertIntoCar = function(self, car, player)
+		if car and car.valid and player and player.valid then
+			if not car.get_driver() then
+				car.set_driver(player)
+				printA("moved into driver")
+				return true
+			end
+
+			if not car.get_passenger() then
+				car.set_passenger(player)
+				printA("moving into passenger")
+				return true
+			end
+
+			return false
+		end
+	end,
+
 	redirectPassengers = function(self)
-		for k,v in pairs(self.childs) do
-			if v and v.passenger then
-				if k == "burnerEnt" and self.burnerDriver then
-					if v.passenger ~= self.burnerDriver then
-						self.baseEnt.passenger = v.passenger
-						v.passenger = self.burnerDriver
-					end
+		for k, curChild in pairs(self.childs) do
+			if curChild and curChild.valid then
+				local curDriver = curChild.get_driver()
+				local curPassenger = curChild.get_passenger()
 
-				elseif k == "floodlightEnt" and self.floodlightDriver then
-					if v.passenger ~= self.floodlightDriver then
-						self.baseEnt.passenger = v.passenger
-						v.passenger = self.floodlightDriver
-					end
+				if curDriver and curDriver.valid then
+					if k == "burnerEnt" and self.burnerDriver then
+						if curDriver ~= self.burnerDriver then
+							self:insertIntoCar(self.baseEnt, curDriver)
+							curChild.set_driver(self.burnerDriver)
+							printA("moving out of burner")
+						end
+					
+					elseif k == "floodlightEnt" and self.floodlightDriver then
+						if curDriver ~= self.floodlightDriver then
+							self:insertIntoCar(self.baseEnt, curDriver)
+							curChild.set_driver(self.floodlightDriver)
+							printA("moving out of floodlight")
+						end
 
-				else
-					local p = v.passenger
-					v.passenger = nil
-					self.baseEnt.passenger = p
+					else
+						printA("in child, moving")
+						if not self:insertIntoCar(self.baseEnt, curDriver) then
+							curChild.set_driver(nil)
+							printA("couldnt move, eject")
+						end
+					end
+				end
+
+				if curPassenger and curPassenger.valid then
+					if not self:insertIntoCar(self.baseEnt, curPassenger) then
+						curChild.set_passenger(nil)
+					end
 				end
 			end
 		end
@@ -521,7 +555,7 @@ heliBase = {
 			self.hasLandedCollider = false
 		end
 
-		if name == "landed" then
+		if name == "landede" then
 			self.childs.collisionEnt = self.surface.create_entity{
 				name = "heli-landed-collision-entity-_-",
 				force = game.forces.neutral,
@@ -556,7 +590,7 @@ heliBase = {
 				self.floodlightDriver = self.surface.create_entity{name="player", force = game.forces.neutral, position = self.baseEnt.position}
 			end
 
-			self.childs.floodlightEnt.passenger = self.floodlightDriver
+			self.childs.floodlightEnt.set_driver(self.floodlightDriver)
 		else
 
 			if self.childs.floodlightEnt and self.childs.floodlightEnt.valid then
@@ -594,14 +628,16 @@ heliBase = {
 				local mod = self.baseEnt.effectivity_modifier
 				self.baseEnt.effectivity_modifier = 0
 
-				if self.baseEnt.passenger and self.baseEnt.passenger.valid then
-					self.baseEnt.passenger.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
+				local driver = self.baseEnt.get_driver()
+				if driver and driver.valid then
+					driver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
 				
 				else	
-					self.baseEnt.passenger = self.surface.create_entity{name = "player", force = self.baseEnt.force, position = self.baseEnt.position}
-					self.baseEnt.passenger.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
-					self.baseEnt.passenger.destroy()
-					self.baseEnt.passenger = nil
+					driver = self.surface.create_entity{name = "player", force = self.baseEnt.force, position = self.baseEnt.position}
+					self.baseEnt.set_driver(driver)
+					driver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
+					driver.destroy()
+					self.baseEnt.set_driver(nil)
 				end
 
 				self.baseEnt.effectivity_modifier = mod

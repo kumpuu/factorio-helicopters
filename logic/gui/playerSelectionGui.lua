@@ -84,7 +84,7 @@ playerSelectionGui =
 		{
 			type = "button",
 			name = self.prefix .. "btn_" .. player.name,
-			style = "listbox_button_style",
+			style = "listbox_button",
 			caption = player.name,
 		}
 		btn.style.minimal_width = 290
@@ -103,7 +103,7 @@ playerSelectionGui =
 			type = "frame",
 			name = self.prefix .. "rootFrame",
 			caption = "Select player to fly to",
-			style = "frame_style",
+			style = "frame",
 		}
 
 		els.scroller = els.root.add
@@ -119,7 +119,7 @@ playerSelectionGui =
 		{
 			type = "flow",
 			name = self.prefix .. "flow",
-			style = "achievements_flow_style",
+			style = "achievements_vertical_flow",
 			direction = "vertical",
 		}
 
