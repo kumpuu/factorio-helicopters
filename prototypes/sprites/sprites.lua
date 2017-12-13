@@ -48,4 +48,16 @@ data:extend({
     height = 400,
     flags = {"icon"},
   },
+
+  {
+    type = "sprite",
+    name = "heli_search_icon",
+    filename = "__Helicopters__/graphics/icons/search-icon.png",
+    priority = "medium",
+    width = 15,
+    height = 15,
+    shift = {-17, 1},
+    --scale = 0.5,
+    flags = {"icon"},
+  },
 })

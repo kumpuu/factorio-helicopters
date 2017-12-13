@@ -72,6 +72,26 @@ markerSelectionGui =
 		end
 	end,
 
+	OnGuiTextChanged = function(self, e)
+		local name = e.element.name
+
+		if name:match("^" .. self.prefix .. "btn_%d+$") then
+			local ID = tonumber(e.element.name:match("%d+"))
+
+			for k, curBtn in pairs(self.guiElems.btns) do
+				if curBtn.tag.tag_number == ID then
+					if curBtn.tag.valid then
+						self.manager:OnChildEvent(self, "selectedPosition", curBtn.tag.position)
+					end
+					break
+				end
+			end
+
+		elseif name == self.prefix .. "rootFrame" and e.button == defines.mouse_button_type.right then
+			self.manager:OnChildEvent(self, "cancel")
+		end
+	end,
+
 	refreshList = function(self)
 		local newTags = self.player.force.find_chart_tags(self.player.surface)
 
@@ -207,7 +227,39 @@ markerSelectionGui =
 			name = self.prefix .. "rootFrame",
 			caption = "Select map marker to fly to",
 			style = "frame_style",
+			direction = "vertical",
 		}
+
+		--[[
+		self.guiElems.searchFlow = self.guiElems.root.add
+		{
+			type = "flow",
+			name = self.prefix .. "searchFlow",
+			style = "heli_search_flow_style",
+			direction = "horizontal",
+		}
+		]]
+		
+			
+
+			self.guiElems.searchField = self.guiElems.root.add
+			{
+				type = "textfield",
+				name = self.prefix .. "searchField",
+				style = "search_textfield_style",
+			}
+			self.guiElems.searchField.style.left_padding = 22
+			self.guiElems.searchField.style.minimal_height = 26
+			self.guiElems.searchField.style.maximal_height = 26
+
+			self.guiElems.searchField.add
+			{
+				type = "sprite",
+				name = self.prefix .. "searchIcon",
+				sprite = "heli_search_icon",
+				--style = "heli_search_icon_style",
+			}
+			
 
 		self.guiElems.scroller = self.guiElems.root.add
 		{

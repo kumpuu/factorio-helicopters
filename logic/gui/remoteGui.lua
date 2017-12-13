@@ -102,6 +102,16 @@ remoteGui =
 		end
 	end,
 
+	OnGuiTextChanged = function(self, e)
+		local name = e.element.name
+
+		for k, curGui in pairs(self.guis) do
+			if name:match("^" .. curGui.prefix .. ".+") and curGui.OnGuiTextChanged then
+				curGui:OnGuiTextChanged(e)
+			end
+		end
+	end,
+
 	OnChildEvent = function(self, child, evtName, ...)
 		if evtName == "showTargetSelectionGui" then
 			local prot = ...
