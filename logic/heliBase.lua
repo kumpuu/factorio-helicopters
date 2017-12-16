@@ -1,6 +1,6 @@
-local math3d = require("math3d")
 require("logic.basicAnimator")
 require("logic.basicState")
+require("logic.emptyBoxCollider")
 
 function getHeliFromBaseEntity(ent)
 	for k,v in pairs(global.helis) do
@@ -237,6 +237,12 @@ heliBase = {
 
 		elseif self.height ~= 0 or self.rotorTargetRPF > 0 then
 			self:setFloodlightEntities(true)
+		end
+	end,
+
+	OnPlayerEjected = function(self)
+		if self.childs.collisionEnt and self.hasLandedCollider then
+			self.childs.collisionEnt.ejectPlayers()
 		end
 	end,
 
@@ -555,12 +561,22 @@ heliBase = {
 			self.hasLandedCollider = false
 		end
 
-		if name == "landede" then
-			self.childs.collisionEnt = self.surface.create_entity{
-				name = "heli-landed-collision-entity-_-",
-				force = game.forces.neutral,
+		if name == "landed" then
+			self.childs.collisionEnt = emptyBoxCollider.new({
+				surface = self.surface,
 				position = self.baseEnt.position,
-			}
+				orientation = self.baseEnt.orientation,
+				force = game.forces.neutral,
+				boxLengths = 
+				{
+					ends = 3,
+					sides = 4.8,
+				},
+				nameEnds = "heli-landed-collision-end-entity-_-",
+				nameSides = "heli-landed-collision-side-entity-_-",
+			})
+			
+			self.childs.collisionEnt.ejectPlayers()
 			self.hasLandedCollider = true
 
 		elseif name == "flying" then

@@ -33,7 +33,8 @@ setmetatable(heliAttack, {__index = heliBase})
 heliEntityNames = heliEntityNames .. concatStrTable({
 	"heli-entity-_-",
 	"heli-body-entity-_-",
-	"heli-landed-collision-entity-_-",
+	"heli-landed-collision-end-entity-_-",
+	"heli-landed-collision-side-entity-_-",
 	"heli-shadow-entity-_-",
 	"heli-flying-collision-entity-_-",
 	"heli-burner-entity-_-",

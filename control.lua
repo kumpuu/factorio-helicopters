@@ -1,3 +1,5 @@
+math3d = require("math3d")
+
 require("logic.util")
 
 require("logic.heliBase")
@@ -226,6 +228,20 @@ function OnPlayerRespawned(e)
 	callInGlobal("remoteGuis", "OnPlayerRespawned", game.players[e.player_index])
 end
 
+function OnDrivingStateChanged(e)
+	local p = game.players[e.player_index]
+	local ent = e.entity
+	local entName = ent.name
+
+	if not p.driving and string.find(heliEntityNames, entName .. ",", 1, true) then
+		for i,val in ipairs(global.helis) do
+			if val:isBaseOrChild(ent) then
+				val:OnPlayerEjected(p)
+			end
+		end
+	end
+end
+
 script.on_event(defines.events.on_built_entity, OnBuilt)
 script.on_event(defines.events.on_robot_built_entity, OnBuilt)
 
@@ -254,3 +270,4 @@ script.on_event(defines.events.on_player_left_game, OnPlayerLeft)
 script.on_event(defines.events.on_player_respawned, OnPlayerRespawned)
 
 script.on_event(defines.events.on_player_armor_inventory_changed, OnArmorInventoryChanged)
+script.on_event(defines.events.on_player_driving_changed_state, OnDrivingStateChanged)
