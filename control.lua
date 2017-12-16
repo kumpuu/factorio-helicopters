@@ -34,9 +34,9 @@ function OnConfigChanged(e)
 		for k, curHeli in pairs(global.helis) do
 			if not curHeli.curState then
 				if curHeli.goUp then
-					curHeli:changeState(heli.engineStarting)
+					curHeli:changeState(curHeli.engineStarting)
 				else
-					curHeli:changeState(heli.descend)
+					curHeli:changeState(curHeli.descend)
 				end
 			end
 
@@ -46,6 +46,10 @@ function OnConfigChanged(e)
 
 			if not curHeli.type then
 				curHeli.type = "heliAttack"
+			end
+
+			if curHeli.hasLandedCollider and not curHeli.childs.collisionEnt.valid then
+				curHeli:setCollider("landed")
 			end
 		end
 	end

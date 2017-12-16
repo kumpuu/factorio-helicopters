@@ -198,6 +198,7 @@ emptyBoxCollider =
 		local b2X = right[1]
 		local b2Y = right[2]
 
+		--https://i.imgur.com/zQrgq0B.png
 		local a = (tY * b2X - tX * b2Y) / (b1Y * b2X - b1X * b2Y)
 		local b = (tY * b1X - tX * b1Y) / (b2Y * b1X - b2X * b1Y)
 
