@@ -504,13 +504,11 @@ heliBase = {
 		if car and car.valid and player and player.valid then
 			if not car.get_driver() then
 				car.set_driver(player)
-				printA("moved into driver")
 				return true
 			end
 
 			if not car.get_passenger() then
 				car.set_passenger(player)
-				printA("moving into passenger")
 				return true
 			end
 
@@ -529,21 +527,17 @@ heliBase = {
 						if curDriver ~= self.burnerDriver then
 							self:insertIntoCar(self.baseEnt, curDriver)
 							curChild.set_driver(self.burnerDriver)
-							printA("moving out of burner")
 						end
 					
 					elseif k == "floodlightEnt" and self.floodlightDriver then
 						if curDriver ~= self.floodlightDriver then
 							self:insertIntoCar(self.baseEnt, curDriver)
 							curChild.set_driver(self.floodlightDriver)
-							printA("moving out of floodlight")
 						end
 
 					else
-						printA("in child, moving")
 						if not self:insertIntoCar(self.baseEnt, curDriver) then
 							curChild.set_driver(nil)
-							printA("couldnt move, eject")
 						end
 					end
 				end

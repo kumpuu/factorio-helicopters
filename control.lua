@@ -61,6 +61,10 @@ function OnConfigChanged(e)
 			end
 		end
 	end
+
+	for k, p in pairs(game.players) do
+		OnArmorInventoryChanged({player_index = p.index})
+	end
 end
 
 function OnTick(e)
@@ -246,6 +250,14 @@ function OnDrivingStateChanged(e)
 	end
 end
 
+function OnPlayerJoined(e)
+	OnArmorInventoryChanged(e)
+end
+
+function OnPlayerCreated(e)
+	OnArmorInventoryChanged(e)
+end
+
 script.on_event(defines.events.on_built_entity, OnBuilt)
 script.on_event(defines.events.on_robot_built_entity, OnBuilt)
 
@@ -272,6 +284,8 @@ script.on_event(defines.events.on_player_changed_force, OnPlayerChangedForce)
 script.on_event(defines.events.on_player_died, OnPlayerDied)
 script.on_event(defines.events.on_player_left_game, OnPlayerLeft)
 script.on_event(defines.events.on_player_respawned, OnPlayerRespawned)
+script.on_event(defines.events.on_player_joined_game, OnPlayerJoined)
+script.on_event(defines.events.on_player_created, OnPlayerCreated)
 
 script.on_event(defines.events.on_player_armor_inventory_changed, OnArmorInventoryChanged)
 script.on_event(defines.events.on_player_driving_changed_state, OnDrivingStateChanged)
