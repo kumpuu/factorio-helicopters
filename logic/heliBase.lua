@@ -141,7 +141,7 @@ heliBase = {
 
 	------------------------------------------------------------
 
-	new = function(placementEnt, baseEnt, childEnts)
+	new = function(placementEnt, baseEnt, childEnts, mt)
 		transferGridEquipment(placementEnt, baseEnt)
 		baseEnt.health = placementEnt.health
 
@@ -165,7 +165,8 @@ heliBase = {
 			v.destructible = false
 		end
 
-		heliBase.changeState(obj, heli.landed)
+		setmetatable(obj, mt)
+		obj:changeState(obj.landed)
 
 		return obj
 	end,
