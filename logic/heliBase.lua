@@ -198,6 +198,9 @@ heliBase = {
 		if self.previousState then
 			setmetatable(self.previousState, basicState.mt)
 		end
+		if self.hasLandedCollider and self.childs.collisionEnt then
+			setmetatable(self.childs.collisionEnt, emptyBoxCollider.mt)
+		end
 	end,
 
 	---------------- events ----------------
