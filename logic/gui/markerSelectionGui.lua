@@ -73,6 +73,10 @@ markerSelectionGui =
 
 		elseif name == self.prefix .. "rootFrame" and e.button == defines.mouse_button_type.right then
 			self.manager:OnChildEvent(self, "cancel")
+
+		elseif name == self.prefix .. "searchFieldClearBtn" then
+			self.guiElems.searchField.text = ""
+			self:OnGuiTextChanged({element = self.guiElems.searchField})
 		end
 	end,
 
@@ -198,7 +202,7 @@ markerSelectionGui =
 		{
 			type = "button",
 			name = self.prefix .. "btn_" .. tostring(tag.tag_number),
-			style = "listbox_button",
+			style = "heli-listbox_button",
 			caption = "                " .. tag.text,
 		}
 		btn.style.minimal_height = 38
@@ -264,26 +268,43 @@ markerSelectionGui =
 			style = "frame",
 		}
 
-		self.guiElems.searchField = self.guiElems.root.add
+		self.guiElems.searchFieldFlow = self.guiElems.root.add
 		{
-			type = "textfield",
-			name = self.prefix .. "searchField",
-			style = "search_textfield",
-		}
-		self.guiElems.searchField.style.left_padding = 22
-		self.guiElems.searchField.style.minimal_height = 26
-		self.guiElems.searchField.style.maximal_height = 26
+			type = "flow",
+			name = self.prefix .. "searchFieldFlow",
+			direction = "horizontal",
 
-		self.guiElems.searchField.add
-		{
-			type = "sprite",
-			name = self.prefix .. "searchIcon",
-			sprite = "heli_search_icon",
-			--style = "heli_search_icon_style",
 		}
 
-		self.lastSearchFieldText = ""
+			self.guiElems.searchField = self.guiElems.searchFieldFlow.add
+			{
+				type = "textfield",
+				name = self.prefix .. "searchField",
+				style = "search_textfield",
+			}
+			self.guiElems.searchField.style.left_padding = 22
+			self.guiElems.searchField.style.minimal_height = 26
+			self.guiElems.searchField.style.maximal_height = 32
+
+			self.lastSearchFieldText = ""
 			
+				self.guiElems.searchField.add{
+					type = "sprite",
+					name = self.prefix .. "searchIcon",
+					sprite = "heli_search_icon",
+					--style = "heli_search_icon_style",
+				}
+
+
+			self.guiElems.searchFieldClearBtn = self.guiElems.searchFieldFlow.add
+			{
+				type = "button",
+				name = self.prefix .. "searchFieldClearBtn",
+				--sprite = "heli_clear_text",
+				style = "heli-clear_text_button",
+			}
+			--self.guiElems.searchFieldClearBtn.style.top_padding = 80
+		
 
 		self.guiElems.scroller = self.guiElems.root.add
 		{

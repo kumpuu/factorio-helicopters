@@ -84,7 +84,7 @@ playerSelectionGui =
 		{
 			type = "button",
 			name = self.prefix .. "btn_" .. player.name,
-			style = "listbox_button",
+			style = "heli-listbox_button",
 			caption = player.name,
 		}
 		btn.style.minimal_width = 290

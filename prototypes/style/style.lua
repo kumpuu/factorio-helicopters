@@ -1,4 +1,4 @@
-data.raw["gui-style"].default["listbox_button"] =
+data.raw["gui-style"].default["heli-listbox_button"] =
 {
   type = "button_style",
   parent = "button",
@@ -49,5 +49,64 @@ data.raw["gui-style"].default["listbox_button"] =
     priority = "extra-high-no-scale",
     corner_size = {0, 0},
     position = {0, 0}
+  },
+}
+
+data.raw["gui-style"].default["heli-clear_text_button"] =
+{
+  type = "button_style",
+  parent = "button",
+  scalable = true,
+
+  width = 15,
+  height = 15,
+
+  top_padding = 4,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+
+  default_graphical_set =
+  {
+    type = "monolith",
+    --monolith_border = 1,
+    monolith_image =
+    {
+      filename = "__Helicopters__/graphics/icons/clear-text.png",
+      priority = "extra-high-no-scale",
+      width = 15,
+      height = 15
+    },
+    stretch_monolith_image_to_size = false
+  },
+
+  hovered_graphical_set =
+  {
+    type = "monolith",
+    --monolith_border = 1,
+    monolith_image =
+    {
+      filename = "__Helicopters__/graphics/icons/clear-text.png",
+      priority = "extra-high-no-scale",
+      width = 15,
+      height = 15,
+      x = 15,
+    },
+    stretch_monolith_image_to_size = false
+  },
+
+  clicked_graphical_set =
+  {
+    type = "monolith",
+    --monolith_border = 1,
+    monolith_image =
+    {
+      filename = "__Helicopters__/graphics/icons/clear-text.png",
+      priority = "extra-high-no-scale",
+      width = 15,
+      height = 15,
+      x = 30,
+    },
+    stretch_monolith_image_to_size = false
   },
 }
