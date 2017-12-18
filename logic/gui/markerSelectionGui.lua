@@ -24,6 +24,10 @@ markerSelectionGui =
 
 		obj:buildGui()
 
+		if p.mod_settings["heli-auto-focus-searchfields"].value then 
+			obj.guiElems.searchField.focus()
+		end
+
 		return obj
 	end,
 
@@ -40,7 +44,7 @@ markerSelectionGui =
 
 		if self.curRefreshCooldown == 0 then
 			self.curRefreshCooldown = self.refreshCooldown
-			self:refreshList()
+			self:refreshBtnList()
 		end
 	end,
 
@@ -74,33 +78,48 @@ markerSelectionGui =
 
 	OnGuiTextChanged = function(self, e)
 		local name = e.element.name
+		local newText = e.element.text
 
-		if name:match("^" .. self.prefix .. "btn_%d+$") then
-			local ID = tonumber(e.element.name:match("%d+"))
-
-			for k, curBtn in pairs(self.guiElems.btns) do
-				if curBtn.tag.tag_number == ID then
-					if curBtn.tag.valid then
-						self.manager:OnChildEvent(self, "selectedPosition", curBtn.tag.position)
-					end
-					break
-				end
+		if name == self.prefix .. "searchField" then
+			if newText:contains(self.lastSearchFieldText) then
+				self:filterBtnList(newText)
+			else
+				self:buildBtnList()
 			end
 
-		elseif name == self.prefix .. "rootFrame" and e.button == defines.mouse_button_type.right then
-			self.manager:OnChildEvent(self, "cancel")
+			self.lastSearchFieldText = newText
 		end
 	end,
 
-	refreshList = function(self)
+	removeBtnIndex = function(self, index)
+		self.guiElems.btns[index].btn.destroy()
+		table.remove(self.guiElems.btns, index)
+	end,
+
+	filterBtnList = function(self, filterStr)
+		for i = #self.guiElems.btns, 1, -1 do --iterate backwards so table.remove doesnt mess up the indices
+			local curBtn = self.guiElems.btns[i]
+			if not curBtn.text:contains(filterStr) then
+				self:removeBtnIndex(i)
+			end
+		end
+		self:setNothingAvailableIfNecessary()
+	end,
+
+	refreshBtnList = function(self)
 		local newTags = self.player.force.find_chart_tags(self.player.surface)
+
+		for i = #newTags, 1, -1 do
+			if not newTags[i].text:contains(self.guiElems.searchField.text) then
+				table.remove(newTags, i)
+			end
+		end
 
 		for i = #self.guiElems.btns, 1, -1 do --iterate backwards so table.remove doesnt mess up the indices
 			local curBtn = self.guiElems.btns[i]
 
 			if not curBtn.tag.valid then
-				curBtn.btn.destroy()
-				table.remove(self.guiElems.btns, i)
+				self:removeBtnIndex(i)
 			
 			else
 				for i, curTag in ipairs(newTags) do
@@ -129,8 +148,8 @@ markerSelectionGui =
 			end
 		end
 
-		for k, curTag in pairs(newTags) do
-			table.insert(self.guiElems.btns, self:buildBtnFromTag(self.guiElems.table, curTag))
+		if #newTags > 0 then
+			self:buildBtnList()
 		end
 
 		self:setNothingAvailableIfNecessary()
@@ -138,10 +157,10 @@ markerSelectionGui =
 
 	setNothingAvailableIfNecessary = function(self)
 		local els = self.guiElems
-		local nec = #els.btns == 0
+		local listIsEmpty = #els.btns == 0
 
-		if nec and not els.nothingAvailable then
-			els.nothingAvailable = els.table.add
+		if listIsEmpty and not els.nothingAvailable then
+			els.nothingAvailable = els.scroller.add
 			{
 				type = "label",
 				name = self.prefix .. "nothingAvailable",
@@ -150,7 +169,7 @@ markerSelectionGui =
 			els.nothingAvailable.style.font = "default-bold"
 			els.nothingAvailable.style.font_color = {r = 1, g = 0, b = 0}
 
-		elseif not nec and els.nothingAvailable then
+		elseif not listIsEmpty and els.nothingAvailable then
 			els.nothingAvailable.destroy()
 			els.nothingAvailable = nil
 		end
@@ -202,18 +221,33 @@ markerSelectionGui =
 		}
 	end,
 
+	buildBtnList = function(self)
+		local tagList = self.player.force.find_chart_tags(self.player.surface)
+		table.sort(tagList, self.tagCompareCB)
+
+		self.guiElems.btns = {}
+		self.guiElems.table.clear()
+		for k, curTag in pairs(tagList) do
+			if curTag.text:contains(self.guiElems.searchField.text) then
+				table.insert(self.guiElems.btns, self:buildBtnFromTag(self.guiElems.table, curTag))
+			end
+		end
+		
+		self:setNothingAvailableIfNecessary()
+	end,
+
 	tagCompareCB = function(a, b)
-		if a.text ~= "" and b.text ~= "" then
-			if a.text == b.text and a.icon and not b.icon then
+		if a.text ~= "" and b.text ~= "" then --both have text
+			if a.text == b.text and a.icon and not b.icon then --same text but a has icon
 				return true
 			end
 
 			return a.text < b.text
 
-		elseif a.text ~= "" then
+		elseif a.text ~= "" then --only a has text
 			return true
 
-		elseif a.icon and not b.icon then
+		elseif a.icon and not b.icon then --only a has icon
 			return true
 		end
 
@@ -230,35 +264,25 @@ markerSelectionGui =
 			style = "frame",
 		}
 
-		--[[
-		self.guiElems.searchFlow = self.guiElems.root.add
+		self.guiElems.searchField = self.guiElems.root.add
 		{
-			type = "flow",
-			name = self.prefix .. "searchFlow",
-			style = "heli_search_flow_style",
-			direction = "horizontal",
+			type = "textfield",
+			name = self.prefix .. "searchField",
+			style = "search_textfield",
 		}
-		]]
-		
-			
+		self.guiElems.searchField.style.left_padding = 22
+		self.guiElems.searchField.style.minimal_height = 26
+		self.guiElems.searchField.style.maximal_height = 26
 
-			self.guiElems.searchField = self.guiElems.root.add
-			{
-				type = "textfield",
-				name = self.prefix .. "searchField",
-				style = "search_textfield",
-			}
-			self.guiElems.searchField.style.left_padding = 22
-			self.guiElems.searchField.style.minimal_height = 26
-			self.guiElems.searchField.style.maximal_height = 26
+		self.guiElems.searchField.add
+		{
+			type = "sprite",
+			name = self.prefix .. "searchIcon",
+			sprite = "heli_search_icon",
+			--style = "heli_search_icon_style",
+		}
 
-			self.guiElems.searchField.add
-			{
-				type = "sprite",
-				name = self.prefix .. "searchIcon",
-				sprite = "heli_search_icon",
-				--style = "heli_search_icon_style",
-			}
+		self.lastSearchFieldText = ""
 			
 
 		self.guiElems.scroller = self.guiElems.root.add
@@ -278,14 +302,6 @@ markerSelectionGui =
 			direction = "vertical",
 		}
 
-		local tagList = self.player.force.find_chart_tags(self.player.surface)
-		quickSort(tagList, self.tagCompareCB)
-
-		self.guiElems.btns = {}
-		for k, curTag in pairs(tagList) do
-			table.insert(self.guiElems.btns, self:buildBtnFromTag(self.guiElems.table, curTag))
-		end
-		
-		self:setNothingAvailableIfNecessary()
+		self:buildBtnList()
 	end,
 }

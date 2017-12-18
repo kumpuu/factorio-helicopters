@@ -145,52 +145,22 @@ function concatStrTable(t, c)
 	return s
 end
 
-function quickSort(t, compareCB)
-	-- compareCB(a, b) == true -> a < b
-
-	quickSort_sub(t, compareCB, 1, #t)
-end
-
-function swap(t, i, j)
-	local tmp = t[i]
-	t[i] = t[j]
-	t[j] = tmp
-end
-
-function quickSort_sub(t, compareCB, start, stop)
-	if start < stop then
-		local i = start
-		local j = stop - 1
-		local pivot = t[stop]
-
-		while i < j do
-			while i < stop and compareCB(t[i], pivot) do
-				i = i + 1
-			end
-
-			while j > start and not compareCB(t[j], pivot) do
-				j = j - 1
-			end
-
-			if i < j then
-				swap(t, i, j)
-			end
-		end
-
-		if compareCB(pivot, t[i]) then
-			swap(t, i, stop)
-		end
-
-		quickSort_sub(t, compareCB, start, i - 1)
-
-		quickSort_sub(t, compareCB, i + 1, stop)
-	end
-end
-
 function getIndexedPos(pos)
 	if pos[1] and pos[2] then
 		return {pos[1], pos[2]}
 	elseif pos.x and pos.y then
 		return {pos.x, pos.y}
 	end	
+end
+
+string.startswith = function(str, strSub)
+  if str:len() < strSub:len() then
+    return false
+  end
+  
+  return str:sub(1, strSub:len()) == strSub
+end
+
+string.contains = function(str, strSub)
+	return str:find(strSub, 1, true) ~= nil
 end
