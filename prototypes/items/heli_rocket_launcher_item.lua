@@ -3,6 +3,7 @@ data:extend({
 	type = "gun",
 	name = "heli-rocket-launcher-item",
 	icon = "__Helicopters__/graphics/icons/rocket_pod.png",
+	icon_size = 32,
 	flags = {"goes-to-main-inventory", "hidden"},
 	subgroup = "gun",
 	order = "d[rocket-launcher]",

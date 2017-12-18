@@ -164,7 +164,7 @@ heliPadSelectionGui =
 			type = "frame",
 			name = self.prefix .. "rootFrame",
 			caption = "Select helicopter pad to fly to",
-			style = "frame_style",
+			style = "frame",
 			direction = "vertical",
 		}
 
@@ -185,7 +185,7 @@ heliPadSelectionGui =
 				{
 					type = "table",
 					name = self.prefix .. "camTable",
-					colspan = 4,
+					column_count = 4,
 				}
 				els.camTable.style.horizontal_spacing = 10
 				els.camTable.style.vertical_spacing = 10

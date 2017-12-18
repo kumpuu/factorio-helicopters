@@ -297,7 +297,7 @@ heliSelectionGui =
 			type = "frame",
 			name = self.prefix .. "rootFrame",
 			caption = "Helicopter remote control",
-			style = "frame_style",
+			style = "frame",
 			direction = "vertical",
 		}
 
@@ -357,7 +357,7 @@ heliSelectionGui =
 				{
 					type = "table",
 					name = self.prefix .. "camTable",
-					colspan = 4,
+					column_count = 4,
 				}
 				els.camTable.style.horizontal_spacing = 10
 				els.camTable.style.vertical_spacing = 10
@@ -367,9 +367,11 @@ heliSelectionGui =
 
 					if global.helis then
 						for k, curHeli in pairs(global.helis) do
+							local curDriver = curHeli.baseEnt.get_driver()
+							
 							if curHeli.baseEnt.force == self.player.force and 
-								(curHeli.baseEnt.passenger == nil or curHeli.hasRemoteController or
-									(curHeli.baseEnt.passenger.player and curHeli.baseEnt.passenger.player.valid and curHeli.baseEnt.passenger.player.name == self.player.name)) then
+								(curDriver == nil or curHeli.hasRemoteController or
+									(curDriver.player and curDriver.player.valid and curDriver.player.name == self.player.name)) then
 
 								local controller = searchInTable(global.heliControllers, curHeli, "heli")
 								local flow, cam = self:buildCam(els.camTable, self.curCamID, curHeli.baseEnt.position, 0.3, false, curHeli.hasRemoteController)

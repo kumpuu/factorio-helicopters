@@ -6,7 +6,9 @@ data:extend({
 		type = "car",
 		name = "heli-placement-entity-_-",
 		icon = "__Helicopters__/graphics/icons/heli.png",
+		icon_size = 32,
 		flags = {"pushable", "placeable-off-grid", "player-creation"},
+		has_belt_immunity = true,
 		minable = {mining_time = 1, result = "heli-item"},
 		max_health = 2500,
 		corpse = "medium-remnants",
@@ -91,7 +93,9 @@ data:extend({
 		type = "car",
 		name = "heli-entity-_-",
 		icon = "__Helicopters__/graphics/icons/heli.png",
+		icon_size = 32,
 		flags = {"pushable", "placeable-off-grid", "player-creation"},
+		has_belt_immunity = true,
 		minable = {mining_time = 1, result = "heli-item"},
 		max_health = 2500,
 		corpse = "medium-remnants",
@@ -224,8 +228,10 @@ data:extend({
 		type = "car",
 		name = "heli-flying-collision-entity-_-",
 		icon = "__Helicopters__/graphics/icons/heli.png",
+		icon_size = 32,
 		flags = {"not-on-map"},
 		minable = {mining_time = 1, result = "heli-item"},
+		has_belt_immunity = true,
 		max_health = 999999,
 		corpse = "medium-remnants",
 		selection_box = {{0,0},{0,0}},
@@ -296,14 +302,81 @@ data:extend({
 ----------------------landed collision--------------------
 	{
 		type = "car",
-		name = "heli-landed-collision-entity-_-",
+		name = "heli-landed-collision-side-entity-_-",
 		icon = "__Helicopters__/graphics/icons/heli.png",
+		icon_size = 32,
 		flags = {"not-on-map"},
+		minable = {mining_time = 1, result = "heli-item"},
+		has_belt_immunity = true,
+		max_health = 999999,
+		corpse = "medium-remnants",
+		selection_box = {{0,0},{0,0}},
+		collision_box = {{-0.1, -2.4}, {0.1, 2.4}}, --{{-0.1, -1.8}, {0.1, 3}},
+		energy_per_hit_point = 1,
+		effectivity = 0.3,
+		breaking_speed = 0.03,
+		burner = {
+			effectivity = 0.5,
+			emissions = 0,
+			fuel_inventory_size = 1,
+		},
+		consumption = "1W",
+		braking_power = "1W",
+		friction = 0.002,
+		terrain_friction_modifier = 0,
+		weight = 3000,
+
+		rotation_speed = 0.005,
+		inventory_size = 0,
+
+		animation = {
+			layers = {
+				{
+					priority = "high",
+					width = 1,
+					height = 1,
+					frame_count = 1,
+					direction_count = 1,
+					shift = {0, 0},
+					animation_speed = 8,
+					max_advance = 0.2,
+					stripes =
+					{
+						{
+							filename = "__Helicopters__/graphics/void.png",
+							width_in_frames = 1,
+							height_in_frames = 1,
+						},
+					}
+				},
+			}
+		},
+
+		crash_trigger = {
+			type = "play-sound",
+			sound =
+			{
+				{
+				filename = "__base__/sound/car-crash.ogg",
+				volume = 0.25
+				},
+			}
+		},
+		vehicle_impact_sound = { filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65 },
+	},
+
+	{
+		type = "car",
+		name = "heli-landed-collision-end-entity-_-",
+		icon = "__Helicopters__/graphics/icons/heli.png",
+		icon_size = 32,
+		flags = {"not-on-map"},
+		has_belt_immunity = true,
 		minable = {mining_time = 1, result = "heli-item"},
 		max_health = 999999,
 		corpse = "medium-remnants",
 		selection_box = {{0,0},{0,0}},
-		collision_box = {{-1.8, -1.8}, {1.2, 3}},
+		collision_box = {{-1.5, -0.1}, {1.5, 0.1}}, --{{-1.8, -0.1}, {1.2, 0.1}} --{{-1.8, -1.8}, {1.2, 3}}
 		energy_per_hit_point = 1,
 		effectivity = 0.3,
 		breaking_speed = 0.03,
@@ -366,13 +439,16 @@ data:extend({
 
 
 
+
 	---------------body--------------
 	{
 		type = "car",
 		name = "heli-body-entity-_-",
 		icon = "__Helicopters__/graphics/icons/heli.png",
+		icon_size = 32,
 		flags = {"not-on-map"},
 		minable = {mining_time = 1, result = "heli-item"},
+		has_belt_immunity = true,
 		max_health = 1500,
 		corpse = "medium-remnants",
 		selection_box = {{0,0},{0,0}},
@@ -444,8 +520,10 @@ data:extend({
 		type = "car",
 		name = "heli-shadow-entity-_-",
 		icon = "__Helicopters__/graphics/icons/heli.png",
+		icon_size = 32,
 		flags = {"not-on-map"},
 		minable = {mining_time = 1, result = "heli-item"},
+		has_belt_immunity = true,
 		max_health = 1500,
 		corpse = "medium-remnants",
 		selection_box = {{0,0},{0,0}},
@@ -518,8 +596,10 @@ data:extend({
 		type = "car",
 		name = "heli-burner-entity-_-",
 		icon = "__Helicopters__/graphics/icons/heli.png",
+		icon_size = 32,
 		flags = {"not-on-map"},
 		minable = {mining_time = 1, result = "heli-item"},
+		has_belt_immunity = true,
 		max_health = 999999,
 		corpse = "medium-remnants",
 		selection_box = {{0,0},{0,0}},
@@ -611,8 +691,10 @@ data:extend({
 		type = "car",
 		name = "heli-floodlight-entity-_-",
 		icon = "__Helicopters__/graphics/icons/heli.png",
+		icon_size = 32,
 		flags = {"not-on-map"},
 		minable = {mining_time = 1, result = "heli-item"},
+		has_belt_immunity = true,
 		max_health = 999999,
 		corpse = "medium-remnants",
 		selection_box = {{0,0},{0,0}},

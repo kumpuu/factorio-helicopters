@@ -1,3 +1,5 @@
+math3d = require("math3d")
+
 require("logic.util")
 
 require("logic.heliBase")
@@ -32,9 +34,9 @@ function OnConfigChanged(e)
 		for k, curHeli in pairs(global.helis) do
 			if not curHeli.curState then
 				if curHeli.goUp then
-					curHeli:changeState(heli.engineStarting)
+					curHeli:changeState(curHeli.engineStarting)
 				else
-					curHeli:changeState(heli.descend)
+					curHeli:changeState(curHeli.descend)
 				end
 			end
 
@@ -45,6 +47,10 @@ function OnConfigChanged(e)
 			if not curHeli.type then
 				curHeli.type = "heliAttack"
 			end
+
+			if curHeli.hasLandedCollider and not curHeli.childs.collisionEnt.valid then
+				curHeli:setCollider("landed")
+			end
 		end
 	end
 
@@ -54,6 +60,10 @@ function OnConfigChanged(e)
 				curPad.surface = curPad.baseEnt.surface
 			end
 		end
+	end
+
+	for k, p in pairs(game.players) do
+		OnArmorInventoryChanged({player_index = p.index})
 	end
 end
 
@@ -239,6 +249,31 @@ function OnPlayerRespawned(e)
 	callInGlobal("remoteGuis", "OnPlayerRespawned", game.players[e.player_index])
 end
 
+function OnDrivingStateChanged(e)
+	local p = game.players[e.player_index]
+	local ent = e.entity
+
+	if ent then
+		local entName = ent.name
+
+		if not p.driving and string.find(heliEntityNames, entName .. ",", 1, true) then
+			for i,val in ipairs(global.helis) do
+				if val:isBaseOrChild(ent) then
+					val:OnPlayerEjected(p)
+				end
+			end
+		end
+	end
+end
+
+function OnPlayerJoined(e)
+	OnArmorInventoryChanged(e)
+end
+
+function OnPlayerCreated(e)
+	OnArmorInventoryChanged(e)
+end
+
 script.on_event(defines.events.on_built_entity, OnBuilt)
 script.on_event(defines.events.on_robot_built_entity, OnBuilt)
 
@@ -266,5 +301,8 @@ script.on_event(defines.events.on_player_changed_force, OnPlayerChangedForce)
 script.on_event(defines.events.on_player_died, OnPlayerDied)
 script.on_event(defines.events.on_player_left_game, OnPlayerLeft)
 script.on_event(defines.events.on_player_respawned, OnPlayerRespawned)
+script.on_event(defines.events.on_player_joined_game, OnPlayerJoined)
+script.on_event(defines.events.on_player_created, OnPlayerCreated)
 
 script.on_event(defines.events.on_player_armor_inventory_changed, OnArmorInventoryChanged)
+script.on_event(defines.events.on_player_driving_changed_state, OnDrivingStateChanged)

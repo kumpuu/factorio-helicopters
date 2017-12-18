@@ -1,9 +1,9 @@
  {
      "name": "Helicopters",
-     "version": "0.2.7",
+     "version": "0.2.9",
      "title": "Helicopters",
      "author": "Kumpu",
-     "dependencies": ["base >= 0.15"],
-     "factorio_version": "0.15",
+     "dependencies": ["base >= 0.16"],
+     "factorio_version": "0.16",
      "description": "Adds a fully animated attack helicopter to the game. Ideal for getting from A to B quickly, exploring the map, building islands and nuking biters from the sky."
  }

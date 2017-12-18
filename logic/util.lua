@@ -1,9 +1,29 @@
 function tableToString(table)
 	local s = ""
 	for k,v in pairs(table) do
-		s = s .. "'" .. k .. "': " .. tostring(v) .. "\n"
+		s = s .. type(v) .. " '" .. k .. "': " .. tostring(v) .. "\n"
 	end
 	return s
+end
+
+function printTable(t, prefix)
+	if not prefix then
+		prefix = ""
+	end
+
+	for k,v in pairs(t) do
+		local typ = "[" .. type(v) .. "] "
+		local name = "'" .. k .. "' ="
+		local val = " " .. tostring(v)
+
+		if type(v) == "table" then
+			printA(prefix .. typ .. name)
+			printTable(v, prefix .. "___")
+
+		else
+			printA(prefix .. typ .. name .. val)
+		end
+	end
 end
 
 function printA(...)
@@ -165,4 +185,12 @@ function quickSort_sub(t, compareCB, start, stop)
 
 		quickSort_sub(t, compareCB, i + 1, stop)
 	end
+end
+
+function getIndexedPos(pos)
+	if pos[1] and pos[2] then
+		return {pos[1], pos[2]}
+	elseif pos.x and pos.y then
+		return {pos.x, pos.y}
+	end	
 end

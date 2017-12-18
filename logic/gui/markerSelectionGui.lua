@@ -179,7 +179,7 @@ markerSelectionGui =
 		{
 			type = "button",
 			name = self.prefix .. "btn_" .. tostring(tag.tag_number),
-			style = "listbox_button_style",
+			style = "listbox_button",
 			caption = "                " .. tag.text,
 		}
 		btn.style.minimal_height = 38
@@ -226,8 +226,8 @@ markerSelectionGui =
 			type = "frame",
 			name = self.prefix .. "rootFrame",
 			caption = "Select map marker to fly to",
-			style = "frame_style",
 			direction = "vertical",
+			style = "frame",
 		}
 
 		--[[
@@ -246,7 +246,7 @@ markerSelectionGui =
 			{
 				type = "textfield",
 				name = self.prefix .. "searchField",
-				style = "search_textfield_style",
+				style = "search_textfield",
 			}
 			self.guiElems.searchField.style.left_padding = 22
 			self.guiElems.searchField.style.minimal_height = 26
@@ -274,7 +274,7 @@ markerSelectionGui =
 		{
 			type = "flow",
 			name = self.prefix .. "flow",
-			style = "achievements_flow_style",
+			style = "achievements_vertical_flow",
 			direction = "vertical",
 		}
 

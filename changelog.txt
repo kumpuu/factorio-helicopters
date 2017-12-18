@@ -1,0 +1,95 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.2.8
+Date: 17. 12. 2017
+  Bugfixes:
+    - Fixed error when heli destroyed while having a driver (thanks to @LuziferSenpai).
+---------------------------------------------------------------------------------------------------
+Version: 0.2.7
+Date: 17. 12. 2017
+  Changes:
+    - Added changelog.
+  Bugfixes:
+    - Fixed nil value and metatable bugs (thanks to @LuziferSenpai).
+---------------------------------------------------------------------------------------------------
+Version: 0.2.6
+Date: 17. 12. 2017
+  Changes:
+    - 0.16 compatibility. 
+    - Changed landed collider to new custom collider that ejects trapped players and should work much nicer with inserters. 
+    - Added belt immunity.
+    - Compatibility with "NewOldConcrete" mod.
+---------------------------------------------------------------------------------------------------
+Version: 0.2.5
+Date: 2017
+  Changes:
+    - Compatibility update for "New Game+" mod.
+---------------------------------------------------------------------------------------------------
+Version: 0.2.4
+Date: 2017
+  Changes:
+    - Decreased heli pad selection box size, to ensure that a landed helicopter is always selectable.
+    - Made heli recipe more expensive.
+---------------------------------------------------------------------------------------------------
+Version: 0.2.3
+Date: 2017
+  Changes:
+    - Added floodlight. Press Shift+L to activate at night.
+---------------------------------------------------------------------------------------------------
+Version: 0.2.2
+Date: 2017
+  Changes:
+    - Remote control will cancel when targeted player enters heli.
+  Bugfixes:
+    - Fixed bug with metatables.
+---------------------------------------------------------------------------------------------------
+Version: 0.2.1
+Date: 2017
+  Bugfixes:
+    - Fixed bug when loading save
+---------------------------------------------------------------------------------------------------
+Version: 0.2.0
+Date: 2017
+  Changes:
+    - Added remote control for helis. 
+    - Added heli pads. 
+    - Switched to state based model for helis which results in much cleaner code.
+    - General code refactoring.
+    - Changed default controls to Shift+E and Shift+Q for up/down (will not change if you had a previous version installed), due to an issue where you could not move up and down while placing ghosts.
+---------------------------------------------------------------------------------------------------
+Version: 0.0.6
+Date: 2017
+  Changes:
+    - Increased turret rotation speed.
+  Bugfixes:
+    - Fixed issue with trains stopping. 
+    - Fixed that fuel level can go into negative when hovering. 
+    - Partial fix for inserters accessing wrong entity.
+---------------------------------------------------------------------------------------------------
+Version: 0.0.5
+Date: 2017
+  Changes:
+    - Compatibility update for Vehicle Grid mod.
+---------------------------------------------------------------------------------------------------
+Version: 0.0.4
+Date: 2017
+  Changes:
+    - Small fix that prevents a glitch when mining a helicopter while not having enough inventory space.
+---------------------------------------------------------------------------------------------------
+Version: 0.0.3
+Date: 2017
+  Changes:
+    - Heli will consume fuel at all times when in air.
+  Bugfixes:
+    - Fixed loading error with AAI mod. 
+    - Fixed excessive pollution.
+---------------------------------------------------------------------------------------------------
+Version: 0.0.2
+Date: 2017
+  Changes:
+    - Updated short description.
+    - Heli will land if you jump out of it.
+---------------------------------------------------------------------------------------------------
+Version: 0.0.1
+Date: 2017
+  Changes:
+    - Initial release.

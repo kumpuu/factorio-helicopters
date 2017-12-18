@@ -1,6 +1,6 @@
 data:extend({
     {
-      type = "smoke",
+      type = "trivial-smoke",
       name = "heli-smoke",
       flags = {"not-on-map"},
       duration = 50,
