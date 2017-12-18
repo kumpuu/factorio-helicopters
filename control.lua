@@ -239,12 +239,15 @@ end
 function OnDrivingStateChanged(e)
 	local p = game.players[e.player_index]
 	local ent = e.entity
-	local entName = ent.name
 
-	if not p.driving and string.find(heliEntityNames, entName .. ",", 1, true) then
-		for i,val in ipairs(global.helis) do
-			if val:isBaseOrChild(ent) then
-				val:OnPlayerEjected(p)
+	if ent then
+		local entName = ent.name
+
+		if not p.driving and string.find(heliEntityNames, entName .. ",", 1, true) then
+			for i,val in ipairs(global.helis) do
+				if val:isBaseOrChild(ent) then
+					val:OnPlayerEjected(p)
+				end
 			end
 		end
 	end

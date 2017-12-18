@@ -1,10 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.8
+Date: 17. 12. 2017
+  Bugfixes:
+    - Fixed error when heli destroyed while having a driver (thanks to @LuziferSenpai).
+---------------------------------------------------------------------------------------------------
 Version: 0.2.7
 Date: 17. 12. 2017
   Changes:
     - Added changelog.
   Bugfixes:
-    - Fixed nil value and metatable bugs.
+    - Fixed nil value and metatable bugs (thanks to @LuziferSenpai).
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.6
 Date: 17. 12. 2017

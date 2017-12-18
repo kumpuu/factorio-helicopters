@@ -1,6 +1,6 @@
  {
      "name": "Helicopters",
-     "version": "0.2.7",
+     "version": "0.2.8",
      "title": "Helicopters",
      "author": "Kumpu",
      "dependencies": ["base >= 0.16"],
