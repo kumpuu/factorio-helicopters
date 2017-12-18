@@ -2,7 +2,7 @@
 Version: 0.2.9
 Date: 18. 12. 2017
   Changes:
-    - Added search field to map marker gui.
+    - Added search field to map marker gui (enable auto focus in settings).
     - Added tooltips to guis.
     - Added release months to changelog (thanks to @SuicidalKid)
 ---------------------------------------------------------------------------------------------------
