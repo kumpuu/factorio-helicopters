@@ -266,6 +266,7 @@ markerSelectionGui =
 			caption = "Select map marker to fly to",
 			direction = "vertical",
 			style = "frame",
+			tooltip = {"heli-gui-remote-frame"},
 		}
 
 		self.guiElems.searchFieldFlow = self.guiElems.root.add

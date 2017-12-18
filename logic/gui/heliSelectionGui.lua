@@ -252,6 +252,7 @@ heliSelectionGui =
 			name = self.prefix .. "cam_" .. tostring(ID),
 			position = position,
 			zoom = zoom,
+			tooltip = {"heli-gui-remote-cam"},
 		}
 		cam.style.top_padding = padding
 		cam.style.left_padding = padding
@@ -299,6 +300,7 @@ heliSelectionGui =
 			caption = "Helicopter remote control",
 			style = "frame",
 			direction = "vertical",
+			tooltip = {"heli-gui-remote-frame"},
 		}
 
 		els.root.style.maximal_width = 1000
@@ -317,6 +319,7 @@ heliSelectionGui =
 					name = self.prefix .. "btn_toPlayer",
 					sprite = "heli_to_player",
 					style = mod_gui.button_style,
+					tooltip = {"heli-gui-remote-to-player-btn"},
 				}
 
 				els.btnToMap = els.buttonFlow.add

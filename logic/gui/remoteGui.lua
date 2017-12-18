@@ -14,6 +14,7 @@ function setRemoteBtn(p, show)
 			name = "heli_remote_btn",
 			sprite = "item/heli-remote-equipment",
 			style = mod_gui.button_style,
+			tooltip = {"heli-gui-remote-btn"},
 		}
 
 	elseif (not show) and flow.heli_remote_btn and flow.heli_remote_btn.valid then

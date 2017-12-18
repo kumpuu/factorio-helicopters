@@ -114,6 +114,7 @@ heliPadSelectionGui =
 			name = self.prefix .. "cam_" .. tostring(ID),
 			position = position,
 			zoom = zoom,
+			tooltip = {"heli-gui-remote-cam"},
 		}
 		cam.style.top_padding = padding
 		cam.style.left_padding = padding
@@ -166,6 +167,7 @@ heliPadSelectionGui =
 			caption = "Select helicopter pad to fly to",
 			style = "frame",
 			direction = "vertical",
+			tooltip = {"heli-gui-remote-frame"},
 		}
 
 		els.root.style.maximal_width = 1000
