@@ -111,13 +111,7 @@ markerSelectionGui =
 	end,
 
 	refreshBtnList = function(self)
-		local newTags = self.player.force.find_chart_tags(self.player.surface)
-
-		for i = #newTags, 1, -1 do
-			if not newTags[i].text:contains(self.guiElems.searchField.text) then
-				table.remove(newTags, i)
-			end
-		end
+		local newTags = self:getFilteredChartTags()
 
 		for i = #self.guiElems.btns, 1, -1 do --iterate backwards so table.remove doesnt mess up the indices
 			local curBtn = self.guiElems.btns[i]
@@ -153,6 +147,19 @@ markerSelectionGui =
 		end
 
 		if #newTags > 0 then
+			--[[
+			local tagList = self:getFilteredChartTags()
+
+			if #tagList > 500 then
+				for k, curTag in pairs(newTags) do
+					table.insert(self.guiElems.btns, self:buildBtnFromTag(self.guiElems.table, curTag))
+				end
+
+			else
+				self:buildBtnList(tagList)
+			end
+			]]
+
 			self:buildBtnList()
 		end
 
@@ -177,6 +184,18 @@ markerSelectionGui =
 			els.nothingAvailable.destroy()
 			els.nothingAvailable = nil
 		end
+	end,
+
+	getFilteredChartTags = function(self)
+		local tagList = self.player.force.find_chart_tags(self.player.surface)
+
+		for i = #tagList, 1, -1 do
+			if not tagList[i].text:contains(self.guiElems.searchField.text) then
+				table.remove(tagList, i)
+			end
+		end
+
+		return tagList
 	end,
 
 	buildIconFromTag = function(self, parent, tag)
@@ -225,14 +244,8 @@ markerSelectionGui =
 		}
 	end,
 
-	buildBtnList = function(self)
-		local tagList = self.player.force.find_chart_tags(self.player.surface)
-
-		for i = #tagList, 1, -1 do
-			if not tagList[i].text:contains(self.guiElems.searchField.text) then
-				table.remove(tagList, i)
-			end
-		end
+	buildBtnList = function(self, _tagList)
+		local tagList = _tagList or self:getFilteredChartTags()
 
 		table.sort(tagList, self.tagCompareCB)
 
