@@ -227,31 +227,49 @@ markerSelectionGui =
 
 	buildBtnList = function(self)
 		local tagList = self.player.force.find_chart_tags(self.player.surface)
+
+		for i = #tagList, 1, -1 do
+			if not tagList[i].text:contains(self.guiElems.searchField.text) then
+				table.remove(tagList, i)
+			end
+		end
+
 		table.sort(tagList, self.tagCompareCB)
 
 		self.guiElems.btns = {}
 		self.guiElems.table.clear()
 		for k, curTag in pairs(tagList) do
-			if curTag.text:contains(self.guiElems.searchField.text) then
-				table.insert(self.guiElems.btns, self:buildBtnFromTag(self.guiElems.table, curTag))
-			end
+			table.insert(self.guiElems.btns, self:buildBtnFromTag(self.guiElems.table, curTag))
 		end
 		
 		self:setNothingAvailableIfNecessary()
 	end,
 
 	tagCompareCB = function(a, b)
-		if a.text ~= "" and b.text ~= "" then --both have text
-			if a.text == b.text and a.icon and not b.icon then --same text but a has icon
-				return true
+		local aText = a.text ~= ""
+		local aIcon = a.icon
+
+		local bText = b.text ~= ""
+		local bIcon = b.icon
+
+		local sameText = a.text == b.text
+
+		if aText and bText then --both have text
+			if sameText then
+				return aIcon and not bIcon
 			end
 
 			return a.text < b.text
 
-		elseif a.text ~= "" then --only a has text
+		elseif aText then --only a has text
 			return true
 
-		elseif a.icon and not b.icon then --only a has icon
+		elseif bText then --only b has text
+			return false
+
+		--neither has text
+
+		elseif aIcon and not bIcon then --only a has icon
 			return true
 		end
 

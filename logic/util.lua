@@ -39,6 +39,8 @@ function printA(...)
 	for k,v in pairs(game.players) do
 		v.print(s)
 	end
+
+	return s
 end
 
 function getDistance(pos1, pos2)
