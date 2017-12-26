@@ -111,7 +111,13 @@ markerSelectionGui =
 	end,
 
 	refreshBtnList = function(self)
-		local newTags = self:getFilteredChartTags()
+		local allTags = self:getFilteredChartTags()
+
+		local numNewTags = #allTags
+		local newTags = {}
+		for k,v in pairs(allTags) do
+			newTags[v.tag_number] = v
+		end
 
 		for i = #self.guiElems.btns, 1, -1 do --iterate backwards so table.remove doesnt mess up the indices
 			local curBtn = self.guiElems.btns[i]
@@ -120,11 +126,9 @@ markerSelectionGui =
 				self:removeBtnIndex(i)
 			
 			else
-				for i, curTag in ipairs(newTags) do
-					if curTag == curBtn.tag then
-						table.remove(newTags, i)
-						break
-					end
+				if newTags[curBtn.tag.tag_number] then
+					newTags[curBtn.tag.tag_number] = nil
+					numNewTags = numNewTags - 1
 				end
 
 				if curBtn.text ~= curBtn.tag.text then
@@ -146,21 +150,15 @@ markerSelectionGui =
 			end
 		end
 
-		if #newTags > 0 then
-			--[[
-			local tagList = self:getFilteredChartTags()
-
-			if #tagList > 500 then
+		if numNewTags > 0 then
+			if #allTags > 666 then
 				for k, curTag in pairs(newTags) do
 					table.insert(self.guiElems.btns, self:buildBtnFromTag(self.guiElems.table, curTag))
 				end
 
 			else
-				self:buildBtnList(tagList)
+				self:buildBtnList(allTags)
 			end
-			]]
-
-			self:buildBtnList()
 		end
 
 		self:setNothingAvailableIfNecessary()
