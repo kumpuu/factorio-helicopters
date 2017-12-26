@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.10
+Date: 26. 12. 2017
+  Changes:
+    - Optimized map marker refresh code.
+    - Marker sorting during refresh skipped past certain treshold to avoid having to rebuild gui.
+  Bugfixes:
+    - Fixed sort func callback bug in markerSelectionGui.
+---------------------------------------------------------------------------------------------------
 Version: 0.2.9
 Date: 18. 12. 2017
   Changes:
