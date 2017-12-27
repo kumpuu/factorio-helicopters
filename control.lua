@@ -51,6 +51,10 @@ function OnConfigChanged(e)
 			if curHeli.hasLandedCollider and not curHeli.childs.collisionEnt.valid then
 				curHeli:setCollider("landed")
 			end
+
+			if not curHeli.deactivatedInserters then
+				curHeli.deactivatedInserters = {}
+			end
 		end
 	end
 

@@ -139,6 +139,8 @@ heliBase = {
 
 	baseEngineConsumption = 20000,
 
+	inserterScanRadius = 5,
+
 	------------------------------------------------------------
 
 	new = function(placementEnt, baseEnt, childEnts, mt)
@@ -154,6 +156,8 @@ heliBase = {
 			childs = childEnts,
 
 			surface = placementEnt.surface,
+
+			deactivatedInserters = {},
 		}
 
 		placementEnt.destroy()
@@ -344,6 +348,8 @@ heliBase = {
 			heli:updateEntityRotations()
 			heli:consumeBaseFuel()
 			heli:landIfEmpty()
+			heli:deactivateNearbyInserters()
+			heli:reactivateNonTargetingInserters()
 
 			--if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
 			--	heli.curBobbing = heli.bobbingAnimator:nextFrame()
@@ -374,6 +380,8 @@ heliBase = {
 			heli:updateEntityRotations()
 			heli:consumeBaseFuel()
 			heli:landIfEmpty()
+			heli:deactivateNearbyInserters()
+			heli:reactivateNonTargetingInserters()
 
 			--[[
 			local isDone
@@ -398,10 +406,16 @@ heliBase = {
 			--heli.bobbingAnimator = basicAnimator.new(heli.curBobbing, 0, time*60, "linear")
 		end,
 
+		deinit = function(heli)
+			heli:reactivateAllInserters()
+		end,
+
 		OnTick = function(heli)
 			heli:updateEntityRotations()
 			heli:consumeBaseFuel()
-			
+			heli:deactivateNearbyInserters()
+			heli:reactivateNonTargetingInserters()
+
 			--if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
 			--	heli.curBobbing = heli.bobbingAnimator:nextFrame()
 			--end
@@ -439,6 +453,49 @@ heliBase = {
 
 
 	---------------- utility ---------------
+
+	reactivateAllInserters = function(self)
+		for k, curInserter in pairs(self.deactivatedInserters) do
+			if curInserter.valid then
+				curInserter.active = true
+			end
+		end
+
+		self.deactivatedInserters = {}
+	end,
+
+	reactivateNonTargetingInserters = function(self)
+		for i = #self.deactivatedInserters, 1, -1 do
+			local curInserter = self.deactivatedInserters[i]
+
+			if not curInserter.valid then
+				table.remove(self.deactivatedInserters, i)
+
+			elseif getDistance(curInserter.position, self.baseEnt.position) > self.inserterScanRadius then
+				curInserter.active = true
+				table.remove(self.deactivatedInserters, i)
+			end
+		end
+	end,
+
+	deactivateNearbyInserters = function(self)
+		local p = self.baseEnt.position
+		local area = {{p.x - self.inserterScanRadius, p.y - self.inserterScanRadius}, {p.x + self.inserterScanRadius, p.y + self.inserterScanRadius}}
+
+		local inserters = self.surface.find_entities_filtered{
+			type = "inserter",
+			area = area,
+		}
+
+		for k, curInserter in pairs(inserters) do
+			if curInserter.active then
+				if curInserter.pickup_target == self.baseEnt or curInserter.drop_target == self.baseEnt then
+					curInserter.active = false
+					table.insert(self.deactivatedInserters, curInserter)
+				end
+			end
+		end
+	end,
 
 	setTargetHeight = function(self, targetHeight)
 		self.targetHeight = targetHeight
