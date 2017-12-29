@@ -348,8 +348,7 @@ heliBase = {
 			heli:updateEntityRotations()
 			heli:consumeBaseFuel()
 			heli:landIfEmpty()
-			heli:deactivateNearbyInserters()
-			heli:reactivateNonTargetingInserters()
+			heli:handleInserters()
 
 			--if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
 			--	heli.curBobbing = heli.bobbingAnimator:nextFrame()
@@ -380,8 +379,7 @@ heliBase = {
 			heli:updateEntityRotations()
 			heli:consumeBaseFuel()
 			heli:landIfEmpty()
-			heli:deactivateNearbyInserters()
-			heli:reactivateNonTargetingInserters()
+			heli:handleInserters()
 
 			--[[
 			local isDone
@@ -413,8 +411,7 @@ heliBase = {
 		OnTick = function(heli)
 			heli:updateEntityRotations()
 			heli:consumeBaseFuel()
-			heli:deactivateNearbyInserters()
-			heli:reactivateNonTargetingInserters()
+			heli:handleInserters()
 
 			--if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
 			--	heli.curBobbing = heli.bobbingAnimator:nextFrame()
@@ -489,11 +486,19 @@ heliBase = {
 
 		for k, curInserter in pairs(inserters) do
 			if curInserter.active then
-				if curInserter.pickup_target == self.baseEnt or curInserter.drop_target == self.baseEnt then
-					curInserter.active = false
-					table.insert(self.deactivatedInserters, curInserter)
-				end
+				curInserter.active = false
+				table.insert(self.deactivatedInserters, curInserter)
 			end
+		end
+	end,
+
+	handleInserters = function(self)
+		if settings.global["heli-deactivate-inserters"].value then
+			self:deactivateNearbyInserters()
+			self:reactivateNonTargetingInserters()
+
+		elseif #self.deactivatedInserters > 0 then
+			self:reactivateAllInserters()
 		end
 	end,
 
@@ -532,6 +537,16 @@ heliBase = {
 		local driver = self.baseEnt.get_driver()
 		if not driver or not driver.valid or IsEntityBurnerOutOfFuel(self.baseEnt) then
 			self:OnDown()
+		end
+	end,
+
+	reassignCurState = function(self)
+		if self.curState then
+			local s = self[self.curState.name]
+
+			if s and type(s) == "table" and s.name == self.curState.name then
+				self.curState = s
+			end
 		end
 	end,
 

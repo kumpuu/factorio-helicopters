@@ -5,4 +5,10 @@ data:extend({
         setting_type = "runtime-per-user",
         default_value = false
     },
+    {
+        type = "bool-setting",
+        name = "heli-deactivate-inserters",
+        setting_type = "runtime-global",
+        default_value = true
+    },
 })

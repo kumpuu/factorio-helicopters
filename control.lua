@@ -55,6 +55,8 @@ function OnConfigChanged(e)
 			if not curHeli.deactivatedInserters then
 				curHeli.deactivatedInserters = {}
 			end
+
+			curHeli:reassignCurState()
 		end
 	end
 
