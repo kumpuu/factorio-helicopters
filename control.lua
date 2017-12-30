@@ -69,6 +69,12 @@ function OnConfigChanged(e)
 	end
 
 	for k, p in pairs(game.players) do
+		local flow = mod_gui.get_button_flow(p)
+
+		if flow.heli_remote_btn and flow.heli_remote_btn.valid then
+			flow.heli_remote_btn.destroy()
+		end
+
 		OnArmorInventoryChanged({player_index = p.index})
 	end
 end
