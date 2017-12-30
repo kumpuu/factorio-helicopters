@@ -82,11 +82,37 @@ heliPad =
 		for i = -3, 3 do
 			for j = -3, 3 do
 				if self.surface.get_tile(self.baseEnt.position.x + i, self.baseEnt.position.y + j).name == "heli-pad-concrete" then
+					self:migrateTile(self.replacedTiles[i][j])
+
 					table.insert(restoredTiles, self.replacedTiles[i][j])
 				end
 			end
 		end
 
 		self.surface.set_tiles(restoredTiles, true)
-	end
+	end,
+
+	tile_migrations =
+	{
+		{
+			{"grass", "grass-1"},
+			{"grass-medium", "grass-3"},
+			{"grass-dry", "grass-2"},
+			{"dirt", "dirt-3"},
+			{"dirt-dark", "dirt-6"},
+			{"sand", "sand-1"},
+			{"sand-dark", "sand-3"}
+		},
+	},
+
+	migrateTile = function(self, tile)
+		for i, curMigrationTable in ipairs(self.tile_migrations) do
+			for k, curMigration in pairs(curMigrationTable) do
+				if curMigration[1] == tile.name then
+					tile.name = curMigration[2]
+					break
+				end
+			end
+		end
+	end,
 }
