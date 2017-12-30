@@ -216,7 +216,7 @@ heliSelectionGui =
 			{
 				type = "label",
 				name = self.prefix .. "nothingAvailable",
-				caption = "NO HELICOPTERS AVAILABLE",
+				caption = {"heli-gui-heliSelection-noHelisAvailable"},
 			}
 			els.nothingAvailable.style.font = "default-bold"
 			els.nothingAvailable.style.font_color = {r = 1, g = 0, b = 0}
@@ -252,7 +252,7 @@ heliSelectionGui =
 			name = self.prefix .. "cam_" .. tostring(ID),
 			position = position,
 			zoom = zoom,
-			tooltip = {"heli-gui-remote-cam"},
+			tooltip = {"heli-gui-cam-tt"},
 		}
 		cam.style.top_padding = padding
 		cam.style.left_padding = padding
@@ -264,7 +264,7 @@ heliSelectionGui =
 			local label = cam.add
 			{
 				type = "label",
-				caption = "  CONTROLLED",
+				caption = {"heli-gui-heliSelection-controlled"},
 			}
 
 			label.style.font = "pixelated"
@@ -297,10 +297,10 @@ heliSelectionGui =
 		{
 			type = "frame",
 			name = self.prefix .. "rootFrame",
-			caption = "Helicopter remote control",
+			caption = {"heli-gui-heliSelection-frame-caption"},
 			style = "frame",
 			direction = "vertical",
-			tooltip = {"heli-gui-remote-frame"},
+			tooltip = {"heli-gui-frame-tt"},
 		}
 
 		els.root.style.maximal_width = 1000
@@ -319,7 +319,7 @@ heliSelectionGui =
 					name = self.prefix .. "btn_toPlayer",
 					sprite = "heli_to_player",
 					style = mod_gui.button_style,
-					tooltip = {"heli-gui-remote-to-player-btn"},
+					tooltip = {"heli-gui-heliSelection-to-player-btn-tt"},
 				}
 
 				els.btnToMap = els.buttonFlow.add

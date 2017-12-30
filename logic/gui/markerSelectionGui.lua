@@ -292,10 +292,10 @@ markerSelectionGui =
 		{
 			type = "frame",
 			name = self.prefix .. "rootFrame",
-			caption = "Select map marker to fly to",
+			caption = {"heli-gui-markerSelection-frame-caption"},
 			direction = "vertical",
 			style = "frame",
-			tooltip = {"heli-gui-remote-frame"},
+			tooltip = {"heli-gui-frame-tt"},
 		}
 
 		self.guiElems.searchFieldFlow = self.guiElems.root.add

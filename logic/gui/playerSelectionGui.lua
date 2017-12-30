@@ -86,7 +86,7 @@ playerSelectionGui =
 			name = self.prefix .. "btn_" .. player.name,
 			style = "heli-listbox_button",
 			caption = player.name,
-			tooltip = {"heli-gui-remote-playerSelection-btn"},
+			tooltip = {"heli-gui-playerSelection-listbox-btn-tt"},
 		}
 		btn.style.minimal_width = 290
 
@@ -103,9 +103,9 @@ playerSelectionGui =
 		{
 			type = "frame",
 			name = self.prefix .. "rootFrame",
-			caption = "Select player to fly to",
+			caption = {"heli-gui-playerSelection-frame-caption"},
 			style = "frame",
-			tooltip = {"heli-gui-remote-frame"},
+			tooltip = {"heli-gui-frame-tt"},
 		}
 
 		els.scroller = els.root.add

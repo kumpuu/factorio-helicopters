@@ -114,7 +114,7 @@ heliPadSelectionGui =
 			name = self.prefix .. "cam_" .. tostring(ID),
 			position = position,
 			zoom = zoom,
-			tooltip = {"heli-gui-remote-cam"},
+			tooltip = {"heli-gui-cam-tt"},
 		}
 		cam.style.top_padding = padding
 		cam.style.left_padding = padding
@@ -146,7 +146,7 @@ heliPadSelectionGui =
 			{
 				type = "label",
 				name = self.prefix .. "nothingAvailable",
-				caption = "NO HELICOPTER PADS AVAILABLE",
+				caption = {"heli-gui-padSelection-noPadsAvailable"},
 			}
 			els.nothingAvailable.style.font = "default-bold"
 			els.nothingAvailable.style.font_color = {r = 1, g = 0, b = 0}
@@ -164,10 +164,10 @@ heliPadSelectionGui =
 		{
 			type = "frame",
 			name = self.prefix .. "rootFrame",
-			caption = "Select helicopter pad to fly to",
+			caption = {"heli-gui-padSelection-frame-caption"},
 			style = "frame",
 			direction = "vertical",
-			tooltip = {"heli-gui-remote-frame"},
+			tooltip = {"heli-gui-frame-tt"},
 		}
 
 		els.root.style.maximal_width = 1000
