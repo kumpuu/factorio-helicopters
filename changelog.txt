@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.12
+Date: 31. 12. 2017
+  Changes:
+    - Added german translation (thanks to @ST-DDT).
+  Bugfixes:
+    - Fixed error when mining heli pad that was built in 0.15.
+---------------------------------------------------------------------------------------------------
 Version: 0.2.11
 Date: 29. 12. 2017
   Changes:
