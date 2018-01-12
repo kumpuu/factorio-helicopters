@@ -29,18 +29,18 @@ dim.hr = dimHr
 
 ---------------------------
 
-local off = {chassis = {0,20}}
-off.chassisShadow = math3d.vector2.add(off.chassis, {35,70})
+local off = {chassis = {0,0}}
+off.chassisShadow = math3d.vector2.add(off.chassis, {35,50})
 
-off.gun = math3d.vector2.add(off.chassis, {0,45})
+off.gun = math3d.vector2.add(off.chassis, {0,25})
 off.gunShadow = math3d.vector2.add(off.gun, {5,8})
 
-off.rotor = math3d.vector2.add(off.chassis, {0,0})
-off.rotorShadow = math3d.vector2.add(off.rotor, {50,76})
+off.rotor = math3d.vector2.add(off.chassis, {0,-17})
+off.rotorShadow = math3d.vector2.add(off.rotor, {50,73})
 
 offHr = {}
 for k,v in pairs(off) do
-	offHr[k] = by_pixel(math3d.vector2.mul(v, 2))
+	offHr[k] = by_pixel(v)
 	off[k] = by_pixel(v)
 end
 off.hr = offHr
@@ -63,7 +63,7 @@ data:extend({
 		icon_size = 32,
 		flags = {"pushable", "placeable-off-grid", "player-creation"},
 		has_belt_immunity = true,
-		minable = {mining_time = 1, result = "heli-item"},
+		minable = {mining_time = 1, result = "heli-scout-item"},
 		max_health = 2500,
 		corpse = "medium-remnants",
 		dying_explosion = "medium-explosion",
@@ -96,7 +96,7 @@ data:extend({
 					height = dim.chassis[2],
 					frame_count = 1,
 					direction_count = 1,
-					shift = off.chassis,
+					shift = {off.chassis[1], off.chassis[2] + 5},
 					animation_speed = 8,
 					max_advance = 0.2,
 					stripes =
@@ -106,7 +106,28 @@ data:extend({
 							width_in_frames = 1,
 							height_in_frames = 1,
 						},
-					}
+					},
+
+					hr_version = 
+					{
+						priority = "high",
+						width = dim.hr.chassis[1],
+						height = dim.hr.chassis[2],
+						frame_count = 1,
+						direction_count = 1,
+						shift = {off.hr.chassis[1], off.hr.chassis[2] + 5},
+						animation_speed = 8,
+						max_advance = 0.2,
+						stripes =
+						{
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/Chassis_Hi-0.png",
+								width_in_frames = 1,
+								height_in_frames = 1,
+							},
+						},
+						scale = 0.5,
+					},
 				},
 
 				{
@@ -115,7 +136,7 @@ data:extend({
 					height = dim.rotor[2],
 					frame_count = 1,
 					direction_count = 1,
-					shift = off.rotor,
+					shift = {off.rotor[1], off.rotor[2] + 5.1},
 					animation_speed = 8,
 					max_advance = 0.2,
 					stripes =
@@ -125,7 +146,28 @@ data:extend({
 							width_in_frames = 1,
 							height_in_frames = 1,
 						},
-					}
+					},
+
+					hr_version = 
+					{
+						priority = "high",
+						width = dim.hr.rotor[1],
+						height = dim.hr.rotor[2],
+						frame_count = 1,
+						direction_count = 1,
+						shift = {off.hr.rotor[1], off.hr.rotor[2] + 5.1},
+						animation_speed = 8,
+						max_advance = 0.2,
+						stripes =
+						{
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/Rotor_Hi-0.png",
+								width_in_frames = 1,
+								height_in_frames = 1,
+							},
+						},
+						scale = 0.5,
+					},
 				},	
 			}
 		},
@@ -150,7 +192,7 @@ data:extend({
 		icon_size = 32,
 		flags = {"pushable", "placeable-off-grid", "player-creation"},
 		has_belt_immunity = true,
-		minable = {mining_time = 1, result = "heli-item"},
+		minable = {mining_time = 1, result = "heli-scout-item"},
 		max_health = 1500,
 		corpse = "medium-remnants",
 		dying_explosion = "medium-explosion",
@@ -284,7 +326,7 @@ data:extend({
 		icon = "__Helicopters__/graphics/icons/heli.png",
 		icon_size = 32,
 		flags = {"not-on-map"},
-		minable = {mining_time = 1, result = "heli-item"},
+		minable = {mining_time = 1, result = "heli-scout-item"},
 		has_belt_immunity = true,
 		max_health = 999999,
 		corpse = "medium-remnants",
@@ -360,7 +402,7 @@ data:extend({
 		icon = "__Helicopters__/graphics/icons/heli.png",
 		icon_size = 32,
 		flags = {"not-on-map"},
-		minable = {mining_time = 1, result = "heli-item"},
+		minable = {mining_time = 1, result = "heli-scout-item"},
 		has_belt_immunity = true,
 		max_health = 999999,
 		corpse = "medium-remnants",
@@ -426,7 +468,7 @@ data:extend({
 		icon_size = 32,
 		flags = {"not-on-map"},
 		has_belt_immunity = true,
-		minable = {mining_time = 1, result = "heli-item"},
+		minable = {mining_time = 1, result = "heli-scout-item"},
 		max_health = 999999,
 		corpse = "medium-remnants",
 		selection_box = {{0,0},{0,0}},
@@ -501,7 +543,7 @@ data:extend({
 		icon = "__Helicopters__/graphics/icons/heli.png",
 		icon_size = 32,
 		flags = {"not-on-map"},
-		minable = {mining_time = 1, result = "heli-item"},
+		minable = {mining_time = 1, result = "heli-scout-item"},
 		has_belt_immunity = true,
 		max_health = 1500,
 		corpse = "medium-remnants",
@@ -553,7 +595,43 @@ data:extend({
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
-					}
+					},
+
+					hr_version = 
+					{
+						priority = "high",
+						width = dim.hr.chassis[1],
+						height = dim.hr.chassis[2],
+						frame_count = 1,
+						direction_count = 64,
+						shift = off.hr.chassis,
+						animation_speed = 8,
+						max_advance = 0.2,
+						stripes =
+						{
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/Chassis_Hi-0.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/Chassis_Hi-1.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/Chassis_Hi-2.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/Chassis_Hi-3.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+						},
+						scale = 0.5,
+					},
 				},
 			}
 		},
@@ -576,7 +654,7 @@ data:extend({
 		icon = "__Helicopters__/graphics/icons/heli.png",
 		icon_size = 32,
 		flags = {"not-on-map"},
-		minable = {mining_time = 1, result = "heli-item"},
+		minable = {mining_time = 1, result = "heli-scout-item"},
 		has_belt_immunity = true,
 		max_health = 1500,
 		corpse = "medium-remnants",
@@ -604,7 +682,7 @@ data:extend({
 					frame_count = 1,
 					draw_as_shadow = true,
 					direction_count = 64,
-					shift = off.shadow,
+					shift = off.chassisShadow,
 					animation_speed = 8,
 					max_advance = 0.2,
 					stripes =
@@ -629,7 +707,44 @@ data:extend({
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
-					}
+					},
+
+					hr_version = 
+					{
+						priority = "very-low",
+						width = dim.hr.chassisShadow[1],
+						height = dim.hr.chassisShadow[2],
+						frame_count = 1,
+						draw_as_shadow = true,
+						direction_count = 64,
+						shift = off.hr.chassisShadow,
+						animation_speed = 8,
+						max_advance = 0.2,
+						stripes =
+						{
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/ChassisShadow_Hi-0.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/ChassisShadow_Hi-1.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/ChassisShadow_Hi-2.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/ChassisShadow_Hi-3.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+						},
+						scale = 0.5,
+					},
 				},
 			}
 		},
@@ -652,7 +767,7 @@ data:extend({
 		icon = "__Helicopters__/graphics/icons/heli.png",
 		icon_size = 32,
 		flags = {"not-on-map"},
-		minable = {mining_time = 1, result = "heli-item"},
+		minable = {mining_time = 1, result = "heli-scout-item"},
 		has_belt_immunity = true,
 		max_health = 999999,
 		corpse = "medium-remnants",
@@ -671,19 +786,11 @@ data:extend({
 				{
 					name = "heli-smoke",
 					deviation = {0,0},
-					frequency = 200,
-					position = {-1, 0},
+					frequency = 120,
+					position = {0, 0.1},
 					starting_frame = 0,
 					starting_frame_deviation = 60
 				},
-				{
-					name = "heli-smoke",
-					deviation = {0,0},
-					frequency = 200,
-					position = {0.45, 0},
-					starting_frame = 0,
-					starting_frame_deviation = 60
-				}
 			}
 		},
 		consumption = "1W",
@@ -720,15 +827,15 @@ data:extend({
 
 		working_sound = {
 			sound = {
-				filename = "__Helicopters__/sound/heli_loop.ogg",
+				filename = "__Helicopters__/sound/scout_loop.ogg",
 				volume = 0.6
 			},
 			activate_sound = {
-				filename = "__Helicopters__/sound/heli_startup.ogg",
+				filename = "__Helicopters__/sound/scout_startup.ogg",
 				volume = 0.6
 			},
 			deactivate_sound = {
-				filename = "__Helicopters__/sound/heli_shutdown.ogg",
+				filename = "__Helicopters__/sound/scout_shutdown.ogg",
 				volume = 0.6
 			},
 			--match_speed_to_activity = true,
@@ -747,7 +854,7 @@ data:extend({
 		icon = "__Helicopters__/graphics/icons/heli.png",
 		icon_size = 32,
 		flags = {"not-on-map"},
-		minable = {mining_time = 1, result = "heli-item"},
+		minable = {mining_time = 1, result = "heli-scout-item"},
 		has_belt_immunity = true,
 		max_health = 999999,
 		corpse = "medium-remnants",
@@ -837,7 +944,7 @@ data:extend({
 		icon = "__base__/graphics/icons/car.png",
 		icon_size = 32,
 		flags = {"not-on-map"},
-		minable = {mining_time = 1, result = "heli-item"},
+		minable = {mining_time = 1, result = "heli-scout-item"},
 		has_belt_immunity = true,
 		max_health = 1500,
 		corpse = "medium-remnants",
@@ -889,7 +996,43 @@ data:extend({
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
-					}
+					},
+
+					hr_version = 
+					{
+						priority = "high",
+						width = dim.hr.rotor[1],
+						height = dim.hr.rotor[2],
+						frame_count = 1,
+						direction_count = 64,
+						shift = off.hr.rotor,
+						animation_speed = 8,
+						max_advance = 0.2,
+						stripes =
+						{
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/Rotor_Hi-0.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/Rotor_Hi-1.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/Rotor_Hi-2.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/Rotor_Hi-3.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+						},
+						scale = 0.5,
+					},
 				},		
 			}
 		},
@@ -904,7 +1047,7 @@ data:extend({
 		icon = "__base__/graphics/icons/car.png",
 		icon_size = 32,
 		flags = {"not-on-map"},
-		minable = {mining_time = 1, result = "heli-item"},
+		minable = {mining_time = 1, result = "heli-scout-item"},
 		has_belt_immunity = true,
 		max_health = 1500,
 		corpse = "medium-remnants",
@@ -957,7 +1100,44 @@ data:extend({
 							width_in_frames = 4,
 							height_in_frames = 4,
 						},
-					}
+					},
+
+					hr_version = 
+					{
+						priority = "very-low",
+						width = dim.hr.rotorShadow[1],
+						height = dim.hr.rotorShadow[2],
+						frame_count = 1,
+						draw_as_shadow = true,
+						direction_count = 64,
+						shift = off.hr.rotorShadow,
+						animation_speed = 8,
+						max_advance = 0.2,
+						stripes =
+						{
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/RotorShadow_Hi-0.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/RotorShadow_Hi-1.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/RotorShadow_Hi-2.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+							{
+								filename = "__Helicopters__/graphics/entities/heli_scout/hr/RotorShadow_Hi-3.png",
+								width_in_frames = 4,
+								height_in_frames = 4,
+							},
+						},
+						scale = 0.5,
+					},
 				},
 			}
 		},

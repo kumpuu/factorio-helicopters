@@ -25,4 +25,31 @@ data:extend({
     },
     order = "e-d"
   },
+
+  {
+    type = "technology",
+    name = "heli-scout-technology",
+    icon = "__Helicopters__/graphics/icons/heli-scout-technology.png",
+    icon_size = 128,
+    effects =
+    {
+      {
+        type = "unlock-recipe",
+        recipe = "heli-scout-recipe"
+      },
+    },
+    prerequisites = {"automobilism", "flying"},
+    unit =
+    {
+      count = 1,
+      ingredients =
+      {
+        {"science-pack-1", 1},
+        {"science-pack-2", 1},
+        {"science-pack-3", 2},
+      },
+      time = 30
+    },
+    order = "e-d"
+  },
 })

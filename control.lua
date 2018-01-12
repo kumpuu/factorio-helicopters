@@ -4,6 +4,7 @@ require("logic.util")
 
 require("logic.heliBase")
 require("logic.heliAttack")
+require("logic.heliScout")
 
 require("logic.heliPad")
 require("logic.heliController")
@@ -18,6 +19,9 @@ function OnLoad(e)
 		for k, curHeli in pairs(global.helis) do
 			if not curHeli.type or curHeli.type == "heliAttack" then
 				setmetatable(curHeli, {__index = heliAttack})
+
+			elseif curHeli.type == "heliScout" then
+				setmetatable(curHeli, {__index = heliScout})
 			end
 		end
 	end
@@ -90,6 +94,10 @@ function OnBuilt(e)
 
 	if ent.name == "heli-placement-entity-_-" then
 		local newHeli = insertInGlobal("helis", heliAttack.new(ent))
+		callInGlobal("remoteGuis", "OnHeliBuilt", newHeli)
+
+	elseif ent.name == "heli-scout-placement-entity-_-" then
+		local newHeli = insertInGlobal("helis", heliScout.new(ent))
 		callInGlobal("remoteGuis", "OnHeliBuilt", newHeli)
 
 	elseif ent.name == "heli-pad-placement-entity" then

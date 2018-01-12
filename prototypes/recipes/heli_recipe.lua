@@ -12,5 +12,15 @@ data:extend({
 			{"rocket-launcher", 10},
 		},
 		result = "heli-item",
-	}
+	},
+
+	{
+		type = "recipe",
+		name = "heli-scout-recipe",
+		enabled = false,
+		ingredients = {
+			{"iron-gear-wheel", 1},
+		},
+		result = "heli-scout-item",
+	},
 })
