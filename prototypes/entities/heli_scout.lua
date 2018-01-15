@@ -11,14 +11,14 @@ local namePre = "heli-scout-"
 ---------------------------
 local dim =
 {
-	chassis = {304,244},
-	chassisShadow = {332,228},
+	chassis = {300,240},
+	chassisShadow = {290,178},
 
-	gun = {104,80},
-	gunShadow = {108,78},
+	gun = {100,76},
+	gunShadow = {90,60},
 
 	rotor = {202,140},
-	rotorShadow = {198,140},
+	rotorShadow = {198,120},
 }
 
 local dimHr = {}
