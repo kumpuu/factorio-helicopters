@@ -30,13 +30,13 @@ dim.hr = dimHr
 ---------------------------
 
 local off = {chassis = {0,0}}
-off.chassisShadow = math3d.vector2.add(off.chassis, {35,50})
+off.chassisShadow = math3d.vector2.add(off.chassis, {36.5,33})
 
-off.gun = math3d.vector2.add(off.chassis, {0,25})
-off.gunShadow = math3d.vector2.add(off.gun, {5,8})
+off.gun = math3d.vector2.add(off.chassis, {0.5,25.5})
+off.gunShadow = math3d.vector2.add(off.gun, {6,8})
 
-off.rotor = math3d.vector2.add(off.chassis, {0,-17})
-off.rotorShadow = math3d.vector2.add(off.rotor, {50,73})
+off.rotor = math3d.vector2.add(off.chassis, {0,-11})
+off.rotorShadow = math3d.vector2.add(off.rotor, {53,39.5})
 
 offHr = {}
 for k,v in pairs(off) do
