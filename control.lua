@@ -83,6 +83,8 @@ function OnTick(e)
 	checkAndTickInGlobal("helis")
 	checkAndTickInGlobal("remoteGuis")
 	checkAndTickInGlobal("heliControllers")
+	
+	--OnTimerTick()
 end
 
 function OnBuilt(e)
@@ -95,6 +97,9 @@ function OnBuilt(e)
 	elseif ent.name == "heli-pad-placement-entity" then
 		local newPad = insertInGlobal("heliPads", heliPad.new(ent)) 
 		callInGlobal("remoteGuis", "OnHeliPadBuilt", newPad)
+
+	elseif ent.type == "inserter" then
+		ent.active = true
 	end
 end
 

@@ -194,6 +194,8 @@ heliBase = {
 		if self.floodlightDriver and self.floodlightDriver.valid then
 			self.floodlightDriver.destroy()
 		end
+
+		self:reactivateAllInserters()
 	end,
 
 	OnLoad = function(self)
@@ -211,6 +213,11 @@ heliBase = {
 	---------------- events ----------------
 
 	OnTick = function(self)
+		if not self.baseEnt.valid then
+			self:destroy()
+			return
+		end
+
 		self:redirectPassengers()
 		self:updateRotor()
 		self:updateHeight()
