@@ -87,14 +87,16 @@ heliController =
 		end
 	end,
 
-	OnTick = function(self)
+	OnTick = function(self)		
+		if not (self.heli.valid and self.heli.baseEnt.valid and self.owner.valid) then
+			self:destroy()
+			return
+		end
+
 		local curDriver = self.heli.baseEnt.get_driver()
 		local curPassenger = self.heli.baseEnt.get_passenger()
 
-		if not (self.heli.valid and self.heli.baseEnt.valid and self.owner.valid) then
-			self:destroy()
-
-		elseif not (curDriver and curDriver.valid) then
+		if not (curDriver and curDriver.valid) then
 			if self.driverIsBot then
 				self:destroy()
 			else
