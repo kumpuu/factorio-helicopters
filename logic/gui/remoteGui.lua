@@ -28,6 +28,17 @@ function setRemoteBtn(p, show)
 	end
 end
 
+function toggleRemoteGui(player)
+	local i = searchIndexInTable(global.remoteGuis, player, "player")
+
+	if not i then
+		insertInGlobal("remoteGuis", remoteGui.new(player))
+	else
+		global.remoteGuis[i]:destroy()
+		table.remove(global.remoteGuis, i)
+	end
+end
+
 function OnHeliControllerCreated(controller)
 	callInGlobal("remoteGuis", "OnHeliControllerCreated", controller)
 end
@@ -123,13 +134,7 @@ remoteGui =
 			local pos = ...
 			local heli = self.guis.heliSelection.selectedCam.heli
 
-			local oldControllerIndex = searchIndexInTable(global.heliControllers, heli, "heli")
-			if oldControllerIndex then
-				global.heliControllers[oldControllerIndex]:destroy()
-				table.remove(global.heliControllers, oldControllerIndex)
-			end
-
-			insertInGlobal("heliControllers", heliController.new(self.player, self.guis.heliSelection.selectedCam.heli, pos))
+			assignHeliController(self.player, heli, pos, false)
 
 			if child ~= self.guis.heliSelection then
 				child:destroy()
@@ -141,13 +146,7 @@ remoteGui =
 			local p = ...
 			local heli = self.guis.heliSelection.selectedCam.heli
 
-			local oldControllerIndex = searchIndexInTable(global.heliControllers, heli, "heli")
-			if oldControllerIndex then
-				global.heliControllers[oldControllerIndex]:destroy()
-				table.remove(global.heliControllers, oldControllerIndex)
-			end
-
-			insertInGlobal("heliControllers", heliController.new(self.player, self.guis.heliSelection.selectedCam.heli, p, true))
+			assignHeliController(self.player, heli, p, true)
 
 			if child ~= self.guis.heliSelection then
 				child:destroy()

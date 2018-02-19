@@ -28,6 +28,17 @@ function getHeliControllerByHeli(heli)
 	if i then return global.heliControllers[i] end
 end
 
+function assignHeliController(owner, heli, target, targetIsPlayer)
+	local oldControllerIndex = searchIndexInTable(global.heliControllers, heli, "heli")
+	
+	if oldControllerIndex then
+		global.heliControllers[oldControllerIndex]:destroy()
+		table.remove(global.heliControllers, oldControllerIndex)
+	end
+
+	insertInGlobal("heliControllers", heliController.new(owner, heli, target, targetIsPlayer))
+end
+
 
 heliController = 
 {
@@ -61,6 +72,7 @@ heliController =
 		end
 
 		heli.hasRemoteController = true
+		heli.remoteController = obj
 
 		setmetatable(obj, {__index = heliController})
 
@@ -71,6 +83,7 @@ heliController =
 	destroy = function(self)
 		self.valid = false
 		self.heli.hasRemoteController = nil
+		self.heli.remoteController = nil
 
 		if self.driverIsBot and self.driver and self.driver.valid then
 			self.driver.destroy()

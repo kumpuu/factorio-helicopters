@@ -77,6 +77,14 @@ function OnConfigChanged(e)
 
 		OnArmorInventoryChanged({player_index = p.index})
 	end
+
+	if global.heliControllers then
+		for k, curController in pairs(global.heliControllers) do
+			if not curController.heli.remoteController then
+				curController.heli.remoteController = curController
+			end
+		end
+	end
 end
 
 function OnTick(e)
@@ -167,6 +175,27 @@ function OnHeliToggleFloodlight(e)
 	end
 end
 
+function OnHeliFollow(e)
+	local p = game.players[e.player_index]
+
+	local heli = findNearestAvailableHeli(p.position, p.force, p)
+
+	if heli then
+		assignHeliController(p, heli, p, true)
+	end
+end
+
+function OnRemoteOpen(e)
+	local p = game.players[e.player_index]
+	
+	if p.character and p.character.valid and
+		p.character.grid and p.character.grid.valid and
+			equipmentGridHasItem(p.character.grid, "heli-remote-equipment") then
+
+		toggleRemoteGui(p)
+	end
+end
+
 function OnPlacedEquipment(e)
 	if e.equipment.name == "heli-remote-equipment" then
 		local p = game.players[e.player_index]
@@ -206,14 +235,7 @@ function OnGuiClick(e)
 		local i = searchIndexInTable(global.remoteGuis, p, "player")
 		
 		if name == "heli_remote_btn" then
-			if not global.remoteGuis then global.remoteGuis = {} end
-
-			if not i then
-				table.insert(global.remoteGuis, remoteGui.new(p))
-			else
-				global.remoteGuis[i]:destroy()
-				table.remove(global.remoteGuis, i)
-			end
+			toggleRemoteGui(p)
 		
 		else
 			if i then
@@ -307,6 +329,8 @@ script.on_event("heli-down", OnHeliDown)
 script.on_event("heli-zaa-height-increase", OnHeliIncreaseMaxHeight)
 script.on_event("heli-zab-height-decrease", OnHeliDecreaseMaxHeight)
 script.on_event("heli-zba-toogle-floodlight", OnHeliToggleFloodlight)
+script.on_event("heli-zca-remote-heli-follow", OnHeliFollow)
+script.on_event("heli-zcb-remote-open", OnRemoteOpen)
 
 
 script.on_event(defines.events.on_player_placed_equipment, OnPlacedEquipment)

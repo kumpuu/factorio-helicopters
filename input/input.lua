@@ -19,6 +19,8 @@ data:extend({
     consuming = "none"
   },
 
+  ------------------
+
   {
     type = "custom-input",
     name = "heli-zaa-height-increase",
@@ -33,10 +35,29 @@ data:extend({
     consuming = "none"
   },
 
+  ------------------
+
   {
     type = "custom-input",
     name = "heli-zba-toogle-floodlight",
     key_sequence = "SHIFT + L",
+    consuming = "none"
+  },
+
+
+  ------------------
+
+  {
+    type = "custom-input",
+    name = "heli-zca-remote-heli-follow",
+    key_sequence = "SHIFT + F",
+    consuming = "none"
+  },
+
+  {
+    type = "custom-input",
+    name = "heli-zcb-remote-open",
+    key_sequence = "SHIFT + G",
     consuming = "none"
   },
 })
