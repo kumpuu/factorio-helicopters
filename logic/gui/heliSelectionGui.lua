@@ -165,6 +165,10 @@ heliSelectionGui =
 		end
 	end,
 
+	getDefaultZoom = function(self)
+		return self.player.mod_settings["heli-gui-heliSelection-defaultZoom"].value
+	end,
+
 	getCamIndexById = function(self, ID)
 		for i, curCam in ipairs(self.guiElems.cams) do
 			if curCam.ID == ID then return i end
@@ -377,7 +381,7 @@ heliSelectionGui =
 									(curDriver.player and curDriver.player.valid and curDriver.player.name == self.player.name)) then
 
 								local controller = searchInTable(global.heliControllers, curHeli, "heli")
-								local flow, cam = self:buildCam(els.camTable, self.curCamID, curHeli.baseEnt.position, 0.3, false, curHeli.hasRemoteController)
+								local flow, cam = self:buildCam(els.camTable, self.curCamID, curHeli.baseEnt.position, self:getDefaultZoom(), false, curHeli.hasRemoteController)
 
 								table.insert(els.cams,
 								{
