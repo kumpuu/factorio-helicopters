@@ -235,3 +235,8 @@ function OnTimerTick()
 		end 
 	end
 end
+
+function chopDecimal(val, place)
+	local mult = 10^(place or 0)
+	return math.floor(val * mult + 0.5) / mult
+end

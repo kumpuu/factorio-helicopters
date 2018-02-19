@@ -34,7 +34,7 @@ function findNearestAvailableHeli(pos, force, requestingPlayer)
 		end
 	end
 
-	return nearestHeli
+	return nearestHeli, nearestDist
 end
 
 local frameFixes = {

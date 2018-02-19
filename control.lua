@@ -178,10 +178,11 @@ end
 function OnHeliFollow(e)
 	local p = game.players[e.player_index]
 
-	local heli = findNearestAvailableHeli(p.position, p.force, p)
+	local heli, dist = findNearestAvailableHeli(p.position, p.force, p)
 
 	if heli then
 		assignHeliController(p, heli, p, true)
+		p.add_custom_alert(heli.baseEnt, {type = "item", name = "heli-item"}, {"heli-alert-follow", chopDecimal(dist)}, true)
 	end
 end
 
