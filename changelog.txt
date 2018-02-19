@@ -1,4 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.13
+Date: 19. 02. 2018
+  Changes:
+    - Added russian translation (thanks to @IgorLutiy)
+    - Added Shift+F hotkey to send nearest heli to player
+    - Added Shift+G hotkey to open remote gui
+    - Added default zoom settings for heli and helipad guis
+  Bugfixes:
+    - Fixed crash when heli destroyed while under remote control (thanks to @Rynvar)
+    - Reactivate all inserters when heli destroyed, set all newly built inserters to active to prevent zombies (thanks to @tekin)
+---------------------------------------------------------------------------------------------------
 Version: 0.2.12
 Date: 31. 12. 2017
   Changes:
