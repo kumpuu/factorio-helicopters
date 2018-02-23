@@ -60,4 +60,39 @@ data:extend({
     --scale = 0.5,
     flags = {"icon"},
   },
+
+  {
+    type = "sprite",
+    name = "heli_gauge_fuel_speed",
+    filename = "__Helicopters__/graphics/gui/gauges/gauge_fuel_speed.png",
+    priority = "medium",
+    width = 128,
+    height = 128,
+    --flags = {"icon"},
+  },
+
+  {
+    type = "sprite",
+    name = "heli_gauge_height_rpm",
+    filename = "__Helicopters__/graphics/gui/gauges/gauge_height_rpm.png",
+    priority = "medium",
+    width = 128,
+    height = 128,
+    --flags = {"icon"},
+  },
 })
+
+gauge_pointers = {}
+
+for i = 0, 127 do
+	table.insert(gauge_pointers, {
+		type = "sprite",
+	    name = "heli_gauge_pointer_" .. tostring(i),
+	    filename = "__Helicopters__/graphics/gui/gauges/pointers/pointer-" .. tostring(i) .. ".png",
+	    priority = "medium",
+	    width = 128,
+	    height = 128,
+	})
+end
+
+data:extend(gauge_pointers)

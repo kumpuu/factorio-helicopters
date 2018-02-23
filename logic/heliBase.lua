@@ -249,6 +249,11 @@ heliBase = {
 		self:updateEntityPositions()
 		self.curState.OnTick(self)
 		self:handleColliderDamage()
+
+		local d = self.baseEnt.get_driver()
+		if d and self.gauge then
+			self.gauge:setGauge("speed", self.baseEnt.speed*60*60*60 / 1000)
+		end
 	end,
 
 	OnUp = function(self)
@@ -413,6 +418,11 @@ heliBase = {
 			heli:landIfEmpty()
 			heli:handleInserters()
 
+			if heli.gauge then
+				heli.gauge:setGauge("height", heli.height + math.random() * 1)
+				heli.gauge:setGauge("rpm", heli.rotorRPF * 3600 + math.random() * 10)
+			end
+
 			--[[
 			local isDone
 			heli.curBobbing, isDone = heli.bobbingAnimator:nextFrame()
@@ -562,6 +572,10 @@ heliBase = {
 			--causing the shadow to move down.
 			--probably because of precision loss from lua->c++ / double->float
 			self.height = self.height + oldY - self.baseEnt.position.y
+		end
+
+		if self.gauge then
+			self.gauge:setGauge("height", self.height)
 		end
 	end,
 
@@ -793,6 +807,10 @@ heliBase = {
 			else
 				self.rotorRPF = math.max(self.rotorRPF - self.rotorRPFacceleration, self.rotorTargetRPF)
 			end
+
+			if self.gauge then
+			self.gauge:setGauge("rpm", self.rotorRPF * 60 * 60)
+			end
 		end
 
 		if self.rotorRPF > 0 then
@@ -904,6 +922,10 @@ heliBase = {
 			if v == ent then
 				return true
 			end
+		end
+
+		if self.hasLandedCollider and self.childs.collisionEnt then
+			return self.childs.collisionEnt.isChildEntity(ent)
 		end
 
 		return false

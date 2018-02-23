@@ -8,6 +8,7 @@ require("logic.heliAttack")
 require("logic.heliPad")
 require("logic.heliController")
 require("logic.gui.remoteGui")
+require("logic.gui.gaugeGui")
 
 function playerIsInHeli(p)
 	return p.driving and string.find(heliBaseEntityNames, p.vehicle.name .. ",", 1, true)
@@ -296,11 +297,27 @@ function OnDrivingStateChanged(e)
 	if ent then
 		local entName = ent.name
 
-		if not p.driving and string.find(heliEntityNames, entName .. ",", 1, true) then
-			for i,val in ipairs(global.helis) do
-				if val:isBaseOrChild(ent) then
-					val:OnPlayerEjected(p)
+		printA(entName)
+
+		if string.find(heliEntityNames, entName .. ",", 1, true)  then
+			local heli
+			for i, curHeli in ipairs(global.helis) do
+				if curHeli:isBaseOrChild(ent) then
+					printA("found!!!!!!!!")
+					heli = curHeli
+					break
 				end
+			end
+
+			printA(heli)
+
+			if p.driving then
+				if not searchInTable(global.gaugeGuis, p, "player") then
+					insertInGlobal("gaugeGuis", gaugeGui.new(p, heli))
+				end
+
+			else
+				heli:OnPlayerEjected(p)
 			end
 		end
 	end

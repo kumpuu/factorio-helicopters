@@ -245,6 +245,18 @@ emptyBoxCollider =
 			end
 		end
 	end,
+
+	isChildEntity = function(self, ent)
+		for k,v in pairs(self.childColliders) do
+			printA(v.name)
+			if v == ent then
+				printA("yaa!!")
+				return true
+			end
+		end
+
+		return false
+	end,
 }
 
 emptyBoxCollider.mt =
