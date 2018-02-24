@@ -73,6 +73,16 @@ data:extend({
 
   {
     type = "sprite",
+    name = "heli_gauge_fuel_speed_led_1",
+    filename = "__Helicopters__/graphics/gui/gauges/gauge_fuel_speed_led_1.png",
+    priority = "medium",
+    width = 128,
+    height = 128,
+    --flags = {"icon"},
+  },
+
+  {
+    type = "sprite",
     name = "heli_gauge_height_rpm",
     filename = "__Helicopters__/graphics/gui/gauges/gauge_height_rpm.png",
     priority = "medium",

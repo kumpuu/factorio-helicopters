@@ -28,7 +28,7 @@ gaugeGui =
 		{
 			min = 0,
 			max = 25,
-			fMin = 0.5390625 * pointerFrames+1,
+			fMin = 0.5390625 * pointerFrames,
 			fMax = 0.965 * pointerFrames,
 			clockwise = true,
 		},
@@ -36,8 +36,8 @@ gaugeGui =
 		rpm = 
 		{
 			min = 0,
-			max = 300,
-			fMin = 0.4609375 * pointerFrames+1,
+			max = 3000,
+			fMin = 0.4609375 * pointerFrames,
 			fMax = 0.035 * pointerFrames,
 			clockwise = false,
 		},
@@ -78,31 +78,58 @@ gaugeGui =
 
 	setGauge = function(self, name, val)
 		local gd = self.gaugeData[name]
+		local pointer = self.guiElems.pointers[name]
 
-		local pc = math.min(math.max(val / (gd.max - gd.min), gd.min), gd.max)
-		local frameDelta = math.abs(gd.fMax - gd.fMin)
+		if pointer.lastVal ~= val then
+			pointer.lastVal = val
 
-		local frame
-		if gd.clockwise then
-			frame = gd.fMin + pc * frameDelta
-		else
-			frame = gd.fMin - pc * frameDelta
+			local pc = math.min(math.max(val / (gd.max - gd.min), gd.min), gd.max)
+			local frameDelta = math.abs(gd.fMax - gd.fMin)
+
+			local frame
+			if gd.clockwise then
+				frame = gd.fMin + pc * frameDelta
+			else
+				frame = gd.fMin - pc * frameDelta
+			end
+
+			if frame < 0 then
+				frame = pointerFrames + frame
+			end
+			frame = math.floor(frame % pointerFrames)
+
+
+			if pointer.elem then
+				pointer.elem.destroy() 
+			end
+
+			pointer.elem = pointer.parent.add
+			{
+				type = "sprite",
+				name = "gauge_pointer_" .. name,
+				sprite = "heli_gauge_pointer_" .. frame,
+			}
+		end
+	end,
+
+	setLed = function(self, gaugeName, ledName, on)
+		local els = self.guiElems
+
+		local fullName = gaugeName .. "_" .. ledName
+
+		if els[fullName] then
+			els[fullName].destroy()
+		
 		end
 
-		if frame < 0 then
-			frame = pointerFrames + frame
+		if on then
+			els[fullName] = els[gaugeName].add
+			{
+				type = "sprite",
+				name = self.prefix .. ledName,
+				sprite = "heli_" .. fullName,
+			}
 		end
-		frame = math.floor(frame % pointerFrames)
-
-		local gaugePointer = self.guiElems.pointers[name]
-
-		gaugePointer.elem.destroy()
-		gaugePointer.elem = gaugePointer.parent.add
-		{
-			type = "sprite",
-			name = "gauge_pointer_" .. name,
-			sprite = "heli_gauge_pointer_" .. frame,
-		}
 	end,
 
 	buildGui = function(self)
@@ -191,5 +218,12 @@ gaugeGui =
 		self:setGauge("height", self.gaugeData.height.min)
 		self:setGauge("rpm", self.gaugeData.rpm.min)
 
+		self:setLed("gauge_fuel_speed", "led_1", true)
+
+		ledon = true
+		setInterval(function()
+			ledon = not ledon
+			self:setLed("gauge_fuel_speed", "led_1", ledon)
+		end, 60)
 	end,
 }

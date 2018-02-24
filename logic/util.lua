@@ -43,6 +43,10 @@ function printA(...)
 	return s
 end
 
+function printAF(...)
+	printA(...,math.random())
+end
+
 function getDistance(pos1, pos2)
 	return math.sqrt((pos2.x - pos1.x)^2 + (pos2.y - pos1.y)^2)
 end
@@ -201,7 +205,7 @@ function createTimer(func, frames, isInterval)
 		timer.runTick = game.tick + timer.remaining
 	end
 
-	table.insert(timers, timer)
+	insertInGlobal("timers", timer)
 	return timer
 end
 
@@ -220,7 +224,7 @@ function OnTimerTick()
 		for i = #timers, 1, -1 do
 			local curTimer = timers[i]
 
-			if (not curTimer.paused) and curTimer.runTick >= game.tick then
+			if (not curTimer.paused) and curTimer.runTick <= game.tick then
 				curTimer.callback(curTimer)
 
 				if curTimer.interval then

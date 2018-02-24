@@ -93,7 +93,7 @@ function OnTick(e)
 	checkAndTickInGlobal("remoteGuis")
 	checkAndTickInGlobal("heliControllers")
 	
-	--OnTimerTick()
+	OnTimerTick()
 end
 
 function OnBuilt(e)

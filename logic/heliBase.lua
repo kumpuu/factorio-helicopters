@@ -150,12 +150,9 @@ heliBase = {
 	maxHeightUperLimit = 20,
 	maxHeightLowerLimit = 3,
 
-
 	rotorOrient = 0,
 	rotorRPF = 0,
 	rotorTargetRPF = 0,
-	rotorRPFacceleration = 0.0002,
-	rotorMaxRPF = 200/60/60, --revolutions per frame
 
 	hasLandedCollider = false,
 	landedColliderCreationDelay = 1, --frames. workaround for inserters trying to access collider inventory when created at the same time.
@@ -420,7 +417,7 @@ heliBase = {
 
 			if heli.gauge then
 				heli.gauge:setGauge("height", heli.height + math.random() * 1)
-				heli.gauge:setGauge("rpm", heli.rotorRPF * 3600 + math.random() * 10)
+				heli.gauge:setGauge("rpm", heli.rotorRPF * 3600 * 7.5 + math.random() * 20)
 			end
 
 			--[[
@@ -809,7 +806,7 @@ heliBase = {
 			end
 
 			if self.gauge then
-			self.gauge:setGauge("rpm", self.rotorRPF * 60 * 60)
+			self.gauge:setGauge("rpm", self.rotorRPF * 60 * 60 * self.engineReduction)
 			end
 		end
 
