@@ -248,8 +248,8 @@ heliBase = {
 		self:handleColliderDamage()
 
 		local d = self.baseEnt.get_driver()
-		if d and self.gauge then
-			self.gauge:setGauge("speed", self.baseEnt.speed*60*60*60 / 1000)
+		if d and self.gaugeGui then
+			self.gaugeGui:setGauge("gauge_fs", "speed", self.baseEnt.speed*60*60*60 / 1000)
 		end
 	end,
 
@@ -356,7 +356,7 @@ heliBase = {
 				heli.baseEnt.orientation = heli.lockedBaseOrientation
 			end
 
-			heli:consumeBaseFuel()
+			heli:handleFuelConsumption()
 			heli:landIfEmpty()
 
 			if heli.rotorRPF == heli.rotorMaxRPF then
@@ -380,7 +380,7 @@ heliBase = {
 
 		OnTick = function(heli)
 			heli:updateEntityRotations()
-			heli:consumeBaseFuel()
+			heli:handleFuelConsumption()
 			heli:landIfEmpty()
 			heli:handleInserters()
 
@@ -411,13 +411,13 @@ heliBase = {
 
 		OnTick = function(heli)
 			heli:updateEntityRotations()
-			heli:consumeBaseFuel()
+			heli:handleFuelConsumption()
 			heli:landIfEmpty()
 			heli:handleInserters()
 
 			if heli.gauge then
-				heli.gauge:setGauge("height", heli.height + math.random() * 1)
-				heli.gauge:setGauge("rpm", heli.rotorRPF * 3600 * 7.5 + math.random() * 20)
+				heli.gauge:setGauge("gauge_fs", "height", heli.height + math.random() * 1)
+				heli.gauge:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * 7.5 + math.random() * 20)
 			end
 
 			--[[
@@ -449,7 +449,7 @@ heliBase = {
 
 		OnTick = function(heli)
 			heli:updateEntityRotations()
-			heli:consumeBaseFuel()
+			heli:handleFuelConsumption()
 			heli:handleInserters()
 
 			--if heli.bobbingAnimator and not heli.bobbingAnimator.isDone then
@@ -571,8 +571,8 @@ heliBase = {
 			self.height = self.height + oldY - self.baseEnt.position.y
 		end
 
-		if self.gauge then
-			self.gauge:setGauge("height", self.height)
+		if self.gaugeGui then
+			self.gaugeGui:setGauge("gauge_hr", "height", self.height)
 		end
 	end,
 
@@ -749,11 +749,39 @@ heliBase = {
 		return true
 	end,
 
-	consumeBaseFuel = function(self)
-		self.baseEnt.burner.remaining_burning_fuel = self.baseEnt.burner.remaining_burning_fuel - self.baseEngineConsumption
+	handleFuelConsumption = function(self)
+		self:consumeBaseFuel()
 
-		if self.baseEnt.burner.remaining_burning_fuel <= 0 then
-			if self.baseEnt.burner.inventory.is_empty() then
+		if self.gaugeGui then
+			local remainingFuel = self.baseEnt.burner.remaining_burning_fuel
+			local bbInv = self.baseEnt.burner.inventory
+
+			for i = 1, #bbInv do
+				local curStack = bbInv[i]
+
+				if curStack and curStack.valid_for_read then
+					remainingFuel = remainingFuel + curStack.count * curStack.prototype.fuel_value
+				end
+			end
+
+			--printA(remainingFuel, getMaxStackFuelVal(), self.fuelSlots, remainingFuel / (getMaxStackFuelVal() * self.fuelSlots))
+			local fullness = remainingFuel / (getMaxStackFuelVal() * self.fuelSlots)
+			self.gaugeGui:setGauge("gauge_fs", "fuel", fullness)
+			if fullness <= 1/6 then
+				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", true, 60)
+			else
+				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", false)
+			end
+		end
+	end,
+
+	consumeBaseFuel = function(self)
+		local baseBurner = self.baseEnt.burner
+
+		baseBurner.remaining_burning_fuel = baseBurner.remaining_burning_fuel - self.baseEngineConsumption
+
+		if baseBurner.remaining_burning_fuel <= 0 then
+			if baseBurner.inventory.is_empty() then
 				local mod = self.baseEnt.effectivity_modifier
 				self.baseEnt.effectivity_modifier = 0
 
@@ -772,18 +800,18 @@ heliBase = {
 				self.baseEnt.effectivity_modifier = mod
 			else
 				local fuelItemStack = nil
-				for i = 1, #self.baseEnt.burner.inventory do
-					if self.baseEnt.burner.inventory[i] and self.baseEnt.burner.inventory[i].valid_for_read then
-						fuelItemStack = self.baseEnt.burner.inventory[i]
+				for i = 1, #baseBurner.inventory do
+					if baseBurner.inventory[i] and baseBurner.inventory[i].valid_for_read then
+						fuelItemStack = baseBurner.inventory[i]
 						break
 					end
 				end
 
 				if fuelItemStack then
-					self.baseEnt.burner.currently_burning = fuelItemStack.name
-					self.baseEnt.burner.remaining_burning_fuel = fuelItemStack.prototype.fuel_value
+					baseBurner.currently_burning = fuelItemStack.name
+					baseBurner.remaining_burning_fuel = fuelItemStack.prototype.fuel_value
 
-					self.baseEnt.burner.inventory.remove({name = fuelItemStack.name})
+					baseBurner.inventory.remove({name = fuelItemStack.name})
 				end
 			end
 		end
@@ -805,8 +833,8 @@ heliBase = {
 				self.rotorRPF = math.max(self.rotorRPF - self.rotorRPFacceleration, self.rotorTargetRPF)
 			end
 
-			if self.gauge then
-			self.gauge:setGauge("rpm", self.rotorRPF * 60 * 60 * self.engineReduction)
+			if self.gaugeGui then
+			self.gaugeGui:setGauge("gauge_hr", "rpm", self.rotorRPF * 60 * 60 * self.engineReduction)
 			end
 		end
 

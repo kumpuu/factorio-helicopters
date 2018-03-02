@@ -63,8 +63,8 @@ data:extend({
 
   {
     type = "sprite",
-    name = "heli_gauge_fuel_speed",
-    filename = "__Helicopters__/graphics/gui/gauges/gauge_fuel_speed.png",
+    name = "heli_void_128",
+    filename = "__Helicopters__/graphics/gui/gauges/void_128.png",
     priority = "medium",
     width = 128,
     height = 128,
@@ -73,8 +73,8 @@ data:extend({
 
   {
     type = "sprite",
-    name = "heli_gauge_fuel_speed_led_1",
-    filename = "__Helicopters__/graphics/gui/gauges/gauge_fuel_speed_led_1.png",
+    name = "heli_gauge_fs",
+    filename = "__Helicopters__/graphics/gui/gauges/gauge_fs.png",
     priority = "medium",
     width = 128,
     height = 128,
@@ -83,8 +83,18 @@ data:extend({
 
   {
     type = "sprite",
-    name = "heli_gauge_height_rpm",
-    filename = "__Helicopters__/graphics/gui/gauges/gauge_height_rpm.png",
+    name = "heli_gauge_fs_led_fuel",
+    filename = "__Helicopters__/graphics/gui/gauges/gauge_fs_led_fuel.png",
+    priority = "medium",
+    width = 128,
+    height = 128,
+    --flags = {"icon"},
+  },
+
+  {
+    type = "sprite",
+    name = "heli_gauge_hr",
+    filename = "__Helicopters__/graphics/gui/gauges/gauge_hr.png",
     priority = "medium",
     width = 128,
     height = 128,
