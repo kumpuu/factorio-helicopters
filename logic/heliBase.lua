@@ -500,7 +500,7 @@ heliBase = {
 		self.deactivatedInserters = {}
 	end,
 
-	reactivateNonTargetingInserters = function(self)
+	reactivateSafeInserters = function(self)
 		for i = #self.deactivatedInserters, 1, -1 do
 			local curInserter = self.deactivatedInserters[i]
 
@@ -534,7 +534,7 @@ heliBase = {
 	handleInserters = function(self)
 		if settings.global["heli-deactivate-inserters"].value then
 			self:deactivateNearbyInserters()
-			self:reactivateNonTargetingInserters()
+			self:reactivateSafeInserters()
 
 		elseif #self.deactivatedInserters > 0 then
 			self:reactivateAllInserters()
@@ -548,10 +548,6 @@ heliBase = {
 
 	setRotorTargetRPF = function(self, targetRPF)
 		self.rotorTargetRPF = targetRPF
-	end,
-
-	getAscendTime = function(height)
-		return 4.5 - 4.5 / (height * 0.27 + 1)
 	end,
 
 	changeHeight = function(self, newHeight)
@@ -764,7 +760,6 @@ heliBase = {
 				end
 			end
 
-			--printA(remainingFuel, getMaxStackFuelVal(), self.fuelSlots, remainingFuel / (getMaxStackFuelVal() * self.fuelSlots))
 			local fullness = remainingFuel / (getMaxStackFuelVal() * self.fuelSlots)
 			self.gaugeGui:setGauge("gauge_fs", "fuel", fullness)
 			if fullness <= 1/6 then

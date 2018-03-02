@@ -44,7 +44,7 @@ function printA(...)
 end
 
 function printAF(...)
-	printA(...,math.random())
+	return printA(..., math.random())
 end
 
 function getDistance(pos1, pos2)
@@ -186,7 +186,6 @@ function getMaxStackFuelVal()
 		for k, curItem in pairs(items) do
 			if curItem.fuel_category == "chemical" and curItem.fuel_value then
 				_maxStackFuelVal = math.max(_maxStackFuelVal, curItem.stack_size * curItem.fuel_value)
-				printA(curItem.name, curItem.stack_size * curItem.fuel_value)
 			end
 		end
 	end
