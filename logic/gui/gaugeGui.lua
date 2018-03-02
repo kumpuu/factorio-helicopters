@@ -83,7 +83,7 @@ gaugeGui =
 		if pointer.lastVal ~= val then
 			pointer.lastVal = val
 
-			local pc = math.min(math.max(val / (pD.max - pD.min), pD.min), pD.max)
+			local pc = math.min(math.max(val / (pD.max - pD.min), 0), 1)
 			local frameDelta = math.abs(pD.fMax - pD.fMin)
 
 			local frame
