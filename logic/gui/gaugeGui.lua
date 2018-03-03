@@ -80,6 +80,10 @@ gaugeGui =
 		local pD = self.pointerData[pointerName]
 		local pointer = self.guiElems[gaugeName].pointers[pointerName]
 
+		if pointer.noise then
+			val = val + pointer.noise.advance()
+		end
+
 		if pointer.lastVal ~= val then
 			pointer.lastVal = val
 
@@ -152,6 +156,17 @@ gaugeGui =
 					self:setLed("gauge_fs", "fuel", not led.on)
 				end, interval)
 			end
+		end
+	end,
+
+	setPointerNoise = function(self, gaugeName, pointerName, enable, magnitude, timeAdvance, minFrequency, maxFrequency)
+		local pointer = self.guiElems[gaugeName].pointers[pointerName]
+
+		if enable then
+			pointer.noise = simpleNoise.new(magnitude, timeAdvance, minFrequency, maxFrequency)
+
+		else
+			pointer.noise = nil
 		end
 	end,
 

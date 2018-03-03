@@ -4,9 +4,10 @@
 
 simpleNoise =
 {
-	new = function(timeAdvance, minFrequency, maxFrequency)
+	new = function(magnitude, timeAdvance, minFrequency, maxFrequency)
 		local obj =
 		{
+			magnitude = magnitude or 1,
 			timeAdvance = timeAdvance or 0.2,
 			minFrequency = minFrequency or 1,
 			maxFrequency = maxFrequency or 6,
@@ -43,6 +44,6 @@ simpleNoise =
 			self.transitionTime = math.random() * self.maxFrequency + self.minFrequency
 		end
 
-		return self.lastVal + self.valDelta * self.easing(self.curTime / self.transitionTime)
+		return (self.lastVal + self.valDelta * self.easing(self.curTime / self.transitionTime)) * self.magnitude
 	end,
 }

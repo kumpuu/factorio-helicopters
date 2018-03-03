@@ -2,6 +2,7 @@ math3d = require("math3d")
 
 require("logic.util")
 require("logic.timer")
+require("logic.simpleNoise")
 
 require("logic.heliBase")
 require("logic.heliAttack")
@@ -298,19 +299,14 @@ function OnDrivingStateChanged(e)
 	if ent then
 		local entName = ent.name
 
-		printA(entName)
-
 		if string.find(heliEntityNames, entName .. ",", 1, true)  then
 			local heli
 			for i, curHeli in ipairs(global.helis) do
 				if curHeli:isBaseOrChild(ent) then
-					printA("found!!!!!!!!")
 					heli = curHeli
 					break
 				end
 			end
-
-			printA(heli)
 
 			if p.driving then
 				if not searchInTable(global.gaugeGuis, p, "player") then
