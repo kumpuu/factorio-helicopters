@@ -16,11 +16,12 @@ simpleNoise =
 			lastVal = 0,
 
 			transitionTime = 0,
+			curTime = 0,
 		}
 
 		obj.maxFrequency = obj.maxFrequency - obj.minFrequency
 
-		return setmetatable(obj, simpleNoise)
+		return setmetatable(obj, {__index = simpleNoise})
 	end,
 
 	easing = function(t)

@@ -81,7 +81,7 @@ gaugeGui =
 		local pointer = self.guiElems[gaugeName].pointers[pointerName]
 
 		if pointer.noise then
-			val = val + pointer.noise.advance()
+			val = val + pointer.noise:advance()
 		end
 
 		if pointer.lastVal ~= val then
@@ -109,7 +109,7 @@ gaugeGui =
 					pointer.elem.destroy() 
 				end
 
-				pointer.elem = self.guiElems[gaugeName].elem.add
+				pointer.elem = pointer.root.add
 				{
 					type = "sprite",
 					name = gaugeName .. "_pointer_" .. pointerName,
@@ -189,12 +189,20 @@ gaugeGui =
 			{
 				type = "sprite",
 				name = self.prefix .. name .. "_ledRoot",
-				sprite = "heli_void_128"
+				sprite = "heli_void_128",
 			},
 		}
 
 		for k,v in pairs(pointerNames or {}) do
-			gauge.pointers[v] = {}
+			gauge.pointers[v] = 
+			{
+				root = gauge.elem.add
+				{
+					type = "sprite",
+					name = self.prefix .. name .. "_pointer_" .. v .. "_root",
+					sprite = "heli_void_128",
+				}
+			}
 		end
 
 		for k,v in pairs(ledNames or {}) do
