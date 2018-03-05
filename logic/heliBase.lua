@@ -246,11 +246,6 @@ heliBase = {
 		self:updateEntityPositions()
 		self.curState.OnTick(self)
 		self:handleColliderDamage()
-
-		local d = self.baseEnt.get_driver()
-		if d and self.gaugeGui then
-			self.gaugeGui:setGauge("gauge_fs", "speed", self.baseEnt.speed*60*60*60 / 1000)
-		end
 	end,
 
 	OnUp = function(self)
@@ -303,6 +298,12 @@ heliBase = {
 			heli.landedColliderCreationDelay = 2
 
 			heli:setFloodlightEntities(false)
+
+			if heli.gaugeGui then
+				heli.gaugeGui:setPointerNoise("gauge_fs", "speed", false)
+				heli.gaugeGui:setPointerNoise("gauge_hr", "height", false)
+				heli.gaugeGui:setPointerNoise("gauge_hr", "rpm", false)
+			end
 		end,
 
 		OnTick = function(heli)
@@ -349,6 +350,12 @@ heliBase = {
 			if heli.floodlightEnabled then
 				heli:setFloodlightEntities(true)
 			end
+
+			if heli.gaugeGui then
+				heli.gaugeGui:setPointerNoise("gauge_fs", "speed", true, 5)
+				heli.gaugeGui:setPointerNoise("gauge_hr", "height", true, 0.5, 0.2, 12, 18)
+				heli.gaugeGui:setPointerNoise("gauge_hr", "rpm", true, 50)
+			end
 		end,
 
 		OnTick = function(heli)
@@ -361,6 +368,10 @@ heliBase = {
 
 			if heli.rotorRPF == heli.rotorMaxRPF then
 				heli:changeState(heli.ascend)
+			end
+
+			if heli.gaugeGui then
+				heli.gaugeGui:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * heli.engineReduction)
 			end
 		end,
 	}),
@@ -395,6 +406,11 @@ heliBase = {
 			if heli.height == heli.maxHeight then
 				heli:changeState(heli.hovering)
 			end
+
+			if heli.gaugeGui then
+				heli.gaugeGui:setGauge("gauge_hr", "height", heli.height)
+				heli.gaugeGui:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * heli.engineReduction)
+			end
 		end,
 
 		OnMaxHeightChanged = function(heli)
@@ -428,6 +444,11 @@ heliBase = {
 				heli.bobbingAnimator:reset()
 			end
 			]]
+
+			if heli.gaugeGui then
+				heli.gaugeGui:setGauge("gauge_hr", "height", heli.height)
+				heli.gaugeGui:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * heli.engineReduction)
+			end
 		end,
 
 		OnMaxHeightChanged = function(heli)
@@ -463,6 +484,11 @@ heliBase = {
 			if heli.height == 0 then
 				heli:changeState(heli.engineStopping)
 			end
+
+			if heli.gaugeGui then
+				heli.gaugeGui:setGauge("gauge_hr", "height", heli.height)
+				heli.gaugeGui:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * heli.engineReduction)
+			end
 		end,
 
 		OnUp = function(heli)
@@ -484,6 +510,12 @@ heliBase = {
 			heli:setRotorTargetRPF(0)
 
 			heli:changeState(heli.landed)
+		end,
+
+		OnTick = function(heli)
+			if heli.gaugeGui then
+				heli.gaugeGui:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * heli.engineReduction)
+			end
 		end,
 	}),
 
@@ -565,10 +597,6 @@ heliBase = {
 			--causing the shadow to move down.
 			--probably because of precision loss from lua->c++ / double->float
 			self.height = self.height + oldY - self.baseEnt.position.y
-		end
-
-		if self.gaugeGui then
-			self.gaugeGui:setGauge("gauge_hr", "height", self.height)
 		end
 	end,
 
@@ -745,9 +773,7 @@ heliBase = {
 		return true
 	end,
 
-	handleFuelConsumption = function(self)
-		self:consumeBaseFuel()
-
+	setFuelGauge = function(self)
 		if self.gaugeGui then
 			local remainingFuel = self.baseEnt.burner.remaining_burning_fuel
 			local bbInv = self.baseEnt.burner.inventory
@@ -768,6 +794,11 @@ heliBase = {
 				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", false)
 			end
 		end
+	end,
+
+	handleFuelConsumption = function(self)
+		self:consumeBaseFuel()
+		self:setFuelGauge()
 	end,
 
 	consumeBaseFuel = function(self)
@@ -826,10 +857,6 @@ heliBase = {
 
 			else
 				self.rotorRPF = math.max(self.rotorRPF - self.rotorRPFacceleration, self.rotorTargetRPF)
-			end
-
-			if self.gaugeGui then
-			self.gaugeGui:setGauge("gauge_hr", "rpm", self.rotorRPF * 60 * 60 * self.engineReduction)
 			end
 		end
 
@@ -917,6 +944,10 @@ heliBase = {
 		local vec = math3d.vector2.mul(math3d.vector2.rotate({0,1}, math.pi * 2 * snap), radius)
 
 		self.childs.burnerEnt.teleport({x = center.x + vec[1], y = center.y + vec[2] - self.curBobbing})
+
+		if self.gaugeGui then
+			self.gaugeGui:setGauge("gauge_fs", "speed", self.baseEnt.speed * 216) --speed * 60 = m/s, * 3.6 = km/h
+		end
 	end,
 
 	updateEntityRotations = function(self)
