@@ -14,6 +14,7 @@ require("prototypes.technologies.heli_technology")
 require("prototypes.technologies.remote_technology")
 require("prototypes.equipment.equipment")
 
+require("prototypes.sounds.sounds")
 require("prototypes.sprites.sprites")
 require("prototypes.font.font")
 require("prototypes.style.style")

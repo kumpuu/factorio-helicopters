@@ -309,7 +309,7 @@ heliBase = {
 				heli.gaugeGui:setPointerNoise("gauge_hr", "height", false)
 				heli.gaugeGui:setPointerNoise("gauge_hr", "rpm", false)
 			end
-			
+
 			heli:setFuelGaugeTarget(0)
 		end,
 
@@ -891,7 +891,7 @@ heliBase = {
 		if self.gaugeGui then
 			self.gaugeGui:setGauge("gauge_fs", "fuel", self.fuelGaugeVal)
 			if self.fuelGaugeVal <= 1/6 and self.curState.name ~= "landed" then
-				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", true, 60)
+				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", true, 60, "heli-fuel-warning")
 			else
 				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", false)
 			end

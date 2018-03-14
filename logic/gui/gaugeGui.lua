@@ -140,10 +140,12 @@ gaugeGui =
 		led.on = on
 	end,
 
-	setLedBlinking = function(self, gaugeName, ledName, on, interval)
+	setLedBlinking = function(self, gaugeName, ledName, on, interval, sound)
 		local led = self.guiElems[gaugeName].leds[ledName]
-
+		
 		if not on then
+			led.sound = nil
+
 			if led.blinkInterval then
 				led.blinkInterval.cancel()
 				led.blinkInterval = nil
@@ -151,9 +153,15 @@ gaugeGui =
 			end
 
 		else
+			led.sound = sound
+
 			if not led.blinkInterval then
 				led.blinkInterval = setInterval(function()
 					self:setLed("gauge_fs", "fuel", not led.on)
+
+					if led.sound then
+						self.player.play_sound{path = led.sound}
+					end
 				end, interval)
 			end
 		end
