@@ -62,7 +62,6 @@ gaugeGui =
 
 		obj:buildGui()
 		heli.gaugeGui = obj
-		heli:setFuelGauge()
 
 		return obj
 	end,

@@ -154,6 +154,10 @@ heliBase = {
 	rotorRPF = 0,
 	rotorTargetRPF = 0,
 
+	fuelGaugeVal = 0,
+	fuelGaugeTargetVal = 0,
+	fuelGaugeSpeed = 0.005,
+
 	hasLandedCollider = false,
 	landedColliderCreationDelay = 1, --frames. workaround for inserters trying to access collider inventory when created at the same time.
 
@@ -243,6 +247,7 @@ heliBase = {
 		self:redirectPassengers()
 		self:updateRotor()
 		self:updateHeight()
+		self:updateFuelGauge()
 		self:updateEntityPositions()
 		self.curState.OnTick(self)
 		self:handleColliderDamage()
@@ -304,6 +309,8 @@ heliBase = {
 				heli.gaugeGui:setPointerNoise("gauge_hr", "height", false)
 				heli.gaugeGui:setPointerNoise("gauge_hr", "rpm", false)
 			end
+			
+			heli:setFuelGaugeTarget(0)
 		end,
 
 		OnTick = function(heli)
@@ -369,10 +376,6 @@ heliBase = {
 			if heli.rotorRPF == heli.rotorMaxRPF then
 				heli:changeState(heli.ascend)
 			end
-
-			if heli.gaugeGui then
-				heli.gaugeGui:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * heli.engineReduction)
-			end
 		end,
 	}),
 
@@ -406,11 +409,6 @@ heliBase = {
 			if heli.height == heli.maxHeight then
 				heli:changeState(heli.hovering)
 			end
-
-			if heli.gaugeGui then
-				heli.gaugeGui:setGauge("gauge_hr", "height", heli.height)
-				heli.gaugeGui:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * heli.engineReduction)
-			end
 		end,
 
 		OnMaxHeightChanged = function(heli)
@@ -431,11 +429,6 @@ heliBase = {
 			heli:landIfEmpty()
 			heli:handleInserters()
 
-			if heli.gauge then
-				heli.gauge:setGauge("gauge_fs", "height", heli.height + math.random() * 1)
-				heli.gauge:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * 7.5 + math.random() * 20)
-			end
-
 			--[[
 			local isDone
 			heli.curBobbing, isDone = heli.bobbingAnimator:nextFrame()
@@ -444,11 +437,6 @@ heliBase = {
 				heli.bobbingAnimator:reset()
 			end
 			]]
-
-			if heli.gaugeGui then
-				heli.gaugeGui:setGauge("gauge_hr", "height", heli.height)
-				heli.gaugeGui:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * heli.engineReduction)
-			end
 		end,
 
 		OnMaxHeightChanged = function(heli)
@@ -484,11 +472,6 @@ heliBase = {
 			if heli.height == 0 then
 				heli:changeState(heli.engineStopping)
 			end
-
-			if heli.gaugeGui then
-				heli.gaugeGui:setGauge("gauge_hr", "height", heli.height)
-				heli.gaugeGui:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * heli.engineReduction)
-			end
 		end,
 
 		OnUp = function(heli)
@@ -510,12 +493,6 @@ heliBase = {
 			heli:setRotorTargetRPF(0)
 
 			heli:changeState(heli.landed)
-		end,
-
-		OnTick = function(heli)
-			if heli.gaugeGui then
-				heli.gaugeGui:setGauge("gauge_hr", "rpm", heli.rotorRPF * 3600 * heli.engineReduction)
-			end
 		end,
 	}),
 
@@ -580,6 +557,10 @@ heliBase = {
 
 	setRotorTargetRPF = function(self, targetRPF)
 		self.rotorTargetRPF = targetRPF
+	end,
+
+	setFuelGaugeTarget = function(self, targetFuel)
+		self.fuelGaugeTargetVal = targetFuel
 	end,
 
 	changeHeight = function(self, newHeight)
@@ -773,32 +754,24 @@ heliBase = {
 		return true
 	end,
 
-	setFuelGauge = function(self)
-		if self.gaugeGui then
-			local remainingFuel = self.baseEnt.burner.remaining_burning_fuel
-			local bbInv = self.baseEnt.burner.inventory
+	getFuelFullness = function(self)
+		local remainingFuel = self.baseEnt.burner.remaining_burning_fuel
+		local bbInv = self.baseEnt.burner.inventory
 
-			for i = 1, #bbInv do
-				local curStack = bbInv[i]
+		for i = 1, #bbInv do
+			local curStack = bbInv[i]
 
-				if curStack and curStack.valid_for_read then
-					remainingFuel = remainingFuel + curStack.count * curStack.prototype.fuel_value
-				end
-			end
-
-			local fullness = remainingFuel / (getMaxStackFuelVal() * self.fuelSlots)
-			self.gaugeGui:setGauge("gauge_fs", "fuel", fullness)
-			if fullness <= 1/6 then
-				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", true, 60)
-			else
-				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", false)
+			if curStack and curStack.valid_for_read then
+				remainingFuel = remainingFuel + curStack.count * curStack.prototype.fuel_value
 			end
 		end
+
+		return remainingFuel / (getMaxStackFuelVal() * self.fuelSlots)
 	end,
 
 	handleFuelConsumption = function(self)
 		self:consumeBaseFuel()
-		self:setFuelGauge()
+		self:setFuelGaugeTarget(self:getFuelFullness())
 	end,
 
 	consumeBaseFuel = function(self)
@@ -868,6 +841,11 @@ heliBase = {
 			self.childs.rotorEnt.orientation = frameFix
 			self.childs.rotorEntShadow.orientation = frameFix
 		end
+
+
+		if self.gaugeGui then
+			self.gaugeGui:setGauge("gauge_hr", "rpm", self.rotorRPF * 3600 * self.engineReduction + math.abs(self.baseEnt.speed) * 100)
+		end
 	end,
 
 	updateHeight = function(self)
@@ -894,8 +872,31 @@ heliBase = {
 				self:changeHeight(newHeight)
 			end
 		end
+
+		if self.gaugeGui then
+			self.gaugeGui:setGauge("gauge_hr", "height", self.height)
+		end
 	end,
 
+	updateFuelGauge = function(self)
+		if self.fuelGaugeVal ~= self.fuelGaugeTargetVal then
+			if self.fuelGaugeVal < self.fuelGaugeTargetVal then
+				self.fuelGaugeVal = math.min(self.fuelGaugeVal + self.fuelGaugeSpeed, self.fuelGaugeTargetVal)
+
+			else
+				self.fuelGaugeVal = math.max(self.fuelGaugeVal - self.fuelGaugeSpeed, self.fuelGaugeTargetVal)
+			end
+		end
+
+		if self.gaugeGui then
+			self.gaugeGui:setGauge("gauge_fs", "fuel", self.fuelGaugeVal)
+			if self.fuelGaugeVal <= 1/6 and self.curState.name ~= "landed" then
+				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", true, 60)
+			else
+				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", false)
+			end
+		end
+	end,
 
 	updateEntityPositions = function(self)
 		local baseVec = math3d.vector2.rotate({0,1}, math.pi * 2 * self.baseEnt.orientation)
@@ -946,7 +947,7 @@ heliBase = {
 		self.childs.burnerEnt.teleport({x = center.x + vec[1], y = center.y + vec[2] - self.curBobbing})
 
 		if self.gaugeGui then
-			self.gaugeGui:setGauge("gauge_fs", "speed", self.baseEnt.speed * 216) --speed * 60 = m/s, * 3.6 = km/h
+			self.gaugeGui:setGauge("gauge_fs", "speed", math.abs(self.baseEnt.speed) * 216) --speed * 60 = m/s, * 3.6 = km/h
 		end
 	end,
 
