@@ -44,7 +44,9 @@ function printA(...)
 end
 
 function printAF(...)
-	return printA(..., math.random())
+	local t = {...}
+	table.insert(t, math.random())
+	return printA(unpack(t))
 end
 
 function getDistance(pos1, pos2)

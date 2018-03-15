@@ -158,6 +158,8 @@ heliBase = {
 	fuelGaugeTargetVal = 0,
 	fuelGaugeSpeed = 0.005,
 
+	gaugeGuis = {},
+
 	hasLandedCollider = false,
 	landedColliderCreationDelay = 1, --frames. workaround for inserters trying to access collider inventory when created at the same time.
 
@@ -222,6 +224,10 @@ heliBase = {
 		end
 
 		self:reactivateAllInserters()
+
+		for k, curGG in pairs(self.gaugeGuis) do
+			curGG:destroy()
+		end
 	end,
 
 	OnLoad = function(self)
@@ -304,10 +310,10 @@ heliBase = {
 
 			heli:setFloodlightEntities(false)
 
-			if heli.gaugeGui then
-				heli.gaugeGui:setPointerNoise("gauge_fs", "speed", false)
-				heli.gaugeGui:setPointerNoise("gauge_hr", "height", false)
-				heli.gaugeGui:setPointerNoise("gauge_hr", "rpm", false)
+			for k, curGG in pairs(heli.gaugeGuis) do
+				curGG:setPointerNoise("gauge_fs", "speed", false)
+				curGG:setPointerNoise("gauge_hr", "height", false)
+				curGG:setPointerNoise("gauge_hr", "rpm", false)
 			end
 
 			heli:setFuelGaugeTarget(0)
@@ -358,10 +364,10 @@ heliBase = {
 				heli:setFloodlightEntities(true)
 			end
 
-			if heli.gaugeGui then
-				heli.gaugeGui:setPointerNoise("gauge_fs", "speed", true, 5)
-				heli.gaugeGui:setPointerNoise("gauge_hr", "height", true, 0.5, 0.2, 12, 18)
-				heli.gaugeGui:setPointerNoise("gauge_hr", "rpm", true, 50)
+			for k, curGG in pairs(heli.gaugeGuis) do
+				curGG:setPointerNoise("gauge_fs", "speed", true, 5)
+				curGG:setPointerNoise("gauge_hr", "height", true, 0.5, 0.2, 12, 18)
+				curGG:setPointerNoise("gauge_hr", "rpm", true, 50)
 			end
 		end,
 
@@ -843,8 +849,8 @@ heliBase = {
 		end
 
 
-		if self.gaugeGui then
-			self.gaugeGui:setGauge("gauge_hr", "rpm", self.rotorRPF * 3600 * self.engineReduction + math.abs(self.baseEnt.speed) * 100)
+		for k, curGG in pairs(self.gaugeGuis) do
+			curGG:setGauge("gauge_hr", "rpm", self.rotorRPF * 3600 * self.engineReduction + math.abs(self.baseEnt.speed) * 100)
 		end
 	end,
 
@@ -873,8 +879,8 @@ heliBase = {
 			end
 		end
 
-		if self.gaugeGui then
-			self.gaugeGui:setGauge("gauge_hr", "height", self.height)
+		for k, curGG in pairs(self.gaugeGuis) do
+			curGG:setGauge("gauge_hr", "height", self.height)
 		end
 	end,
 
@@ -888,12 +894,20 @@ heliBase = {
 			end
 		end
 
-		if self.gaugeGui then
-			self.gaugeGui:setGauge("gauge_fs", "fuel", self.fuelGaugeVal)
-			if self.fuelGaugeVal <= 1/6 and self.curState.name ~= "landed" then
-				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", true, 60, "heli-fuel-warning")
+		for k, curGG in pairs(self.gaugeGuis) do
+			curGG:setGauge("gauge_fs", "fuel", self.fuelGaugeVal)
+			if self.curState.name ~= "landed" then
+				if self.fuelGaugeVal <= 1/12 then
+					curGG:setLedBlinking("gauge_fs", "fuel", true, 20, "heli-fuel-warning")
+
+				elseif self.fuelGaugeVal <= 1/6 then
+					curGG:setLedBlinking("gauge_fs", "fuel", true, 60, "heli-fuel-warning")
+
+				else
+					curGG:setLedBlinking("gauge_fs", "fuel", false)
+				end
 			else
-				self.gaugeGui:setLedBlinking("gauge_fs", "fuel", false)
+				curGG:setLedBlinking("gauge_fs", "fuel", false)
 			end
 		end
 	end,
@@ -946,8 +960,8 @@ heliBase = {
 
 		self.childs.burnerEnt.teleport({x = center.x + vec[1], y = center.y + vec[2] - self.curBobbing})
 
-		if self.gaugeGui then
-			self.gaugeGui:setGauge("gauge_fs", "speed", math.abs(self.baseEnt.speed) * 216) --speed * 60 = m/s, * 3.6 = km/h
+		for k, curGG in pairs(self.gaugeGuis) do
+			curGG:setGauge("gauge_fs", "speed", math.abs(self.baseEnt.speed) * 216) --speed * 60 = m/s, * 3.6 = km/h
 		end
 	end,
 
@@ -981,5 +995,22 @@ heliBase = {
 		end
 
 		return false
+	end,
+
+	addGaugeGui = function(self, gg)
+		if #self.gaugeGuis == 0 then
+			self.gaugeGuis = {}
+		end
+
+		table.insert(self.gaugeGuis, gg)
+	end,
+
+	removeGaugeGui = function(self, gg)
+		for i, curGG in ipairs(self.gaugeGuis) do
+			if curGG == gg then
+				table.remove(self.gaugeGuis, i)
+				return
+			end
+		end
 	end,
 }

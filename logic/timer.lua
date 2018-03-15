@@ -3,6 +3,7 @@ function createTimer(func, frames, isInterval)
 
 	local timer = 
 	{
+		valid = true,
 		callback = func,
 		runTick = game.tick + frames,
 		interval = isInterval and frames,
@@ -10,12 +11,7 @@ function createTimer(func, frames, isInterval)
 	}
 
 	timer.cancel = function()
-		for i,v in ipairs(global.timers) do
-			if v == timer then
-				table.remove(global.timers, i)
-				return
-			end
-		end
+		timer.valid = false
 	end
 
 	timer.pause = function()
@@ -47,14 +43,18 @@ function OnTimerTick()
 		for i = #timers, 1, -1 do
 			local curTimer = timers[i]
 
-			if (not curTimer.paused) and curTimer.runTick <= game.tick then
-				curTimer.callback(curTimer)
+			if not curTimer.valid then
+				table.remove(timers, i)
+			
+			else
+				if (not curTimer.paused) and curTimer.runTick <= game.tick then
+					curTimer.callback(curTimer)
 
-				if curTimer.interval then
-					curTimer.runTick = game.tick + curTimer.interval
+					if curTimer.interval then
+						curTimer.runTick = game.tick + curTimer.interval
 
-				else
-					if timers[i] == curTimer then --might have cancelled itself
+					else
+						curTimer.valid = false
 						table.remove(timers, i)
 					end
 				end

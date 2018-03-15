@@ -308,13 +308,19 @@ function OnDrivingStateChanged(e)
 				end
 			end
 
+			local gGui = searchInTable(global.gaugeGuis, p, "player")
+
 			if p.driving then
-				if not searchInTable(global.gaugeGuis, p, "player") then
+				if not gGui then
 					insertInGlobal("gaugeGuis", gaugeGui.new(p, heli))
 				end
 
 			else
 				heli:OnPlayerEjected(p)
+
+				if gGui then
+					gGui:destroy()
+				end
 			end
 		end
 	end

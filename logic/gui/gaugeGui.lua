@@ -61,7 +61,7 @@ gaugeGui =
 		end
 
 		obj:buildGui()
-		heli.gaugeGui = obj
+		heli:addGaugeGui(obj)
 
 		return obj
 	end,
@@ -73,7 +73,9 @@ gaugeGui =
 			self.guiElems.root.destroy()
 		end
 
-		heli.gauge = nil
+		self.heli:removeGaugeGui(self)
+
+		removeInGlobal("gaugeGuis", self)
 	end,
 
 	setGauge = function(self, gaugeName, pointerName, val)
@@ -156,13 +158,20 @@ gaugeGui =
 			led.sound = sound
 
 			if not led.blinkInterval then
-				led.blinkInterval = setInterval(function()
-					self:setLed("gauge_fs", "fuel", not led.on)
+				led.blinkInterval = setInterval(function(timer)
+					if not self.valid then
+						timer.cancel()
+					
+					else
+						self:setLed("gauge_fs", "fuel", not led.on)
 
-					if led.sound then
-						self.player.play_sound{path = led.sound}
+						if led.sound then
+							self.player.play_sound{path = led.sound}
+						end
 					end
 				end, interval)
+			else
+				led.blinkInterval.interval = interval
 			end
 		end
 	end,
