@@ -156,6 +156,7 @@ heliBase = {
 
 	fuelGaugeVal = 0,
 	fuelGaugeTargetVal = 0,
+	lastFuelGaugeTargetVal = 0,
 	fuelGaugeSpeed = 0.005,
 
 	gaugeGuis = {},
@@ -316,7 +317,7 @@ heliBase = {
 				curGG:setPointerNoise("gauge_hr", "rpm", false)
 			end
 
-			heli:setFuelGaugeTarget(0)
+			heli:setFuelGaugeTarget(0, true)
 		end,
 
 		OnTick = function(heli)
@@ -369,6 +370,8 @@ heliBase = {
 				curGG:setPointerNoise("gauge_hr", "height", true, 0.5, 0.2, 12, 18)
 				curGG:setPointerNoise("gauge_hr", "rpm", true, 50)
 			end
+
+			heli.lastFuelGaugeTargetVal = 1
 		end,
 
 		OnTick = function(heli)
@@ -565,8 +568,28 @@ heliBase = {
 		self.rotorTargetRPF = targetRPF
 	end,
 
-	setFuelGaugeTarget = function(self, targetFuel)
+	setFuelGaugeTarget = function(self, targetFuel, suppressAlert)
 		self.fuelGaugeTargetVal = targetFuel
+
+		if not suppressAlert then
+			local alert
+			if self.fuelGaugeTargetVal <= 1/12 and self.lastFuelGaugeTargetVal > 1/12 then
+				alert = {name = "signal-heli-fuel-warning-critical", str = {"heli-alert-fuel-warning-critical"}}
+
+			elseif self.fuelGaugeTargetVal <= 1/6 and self.lastFuelGaugeTargetVal > 1/6 then
+				alert = {name = "signal-heli-fuel-warning", str = {"heli-alert-fuel-warning"}}
+			end
+
+			if alert then
+				local players = self:getPlayers()
+				for k, curPlayer in pairs(players) do
+					if curPlayer.mod_settings["heli-fuel-alert"].value then
+						curPlayer.add_custom_alert(self.baseEnt, {type = "virtual", name = alert.name}, alert.str, false)
+					end
+				end
+			end
+		end
+		self.lastFuelGaugeTargetVal = self.fuelGaugeTargetVal
 	end,
 
 	changeHeight = function(self, newHeight)
@@ -676,6 +699,36 @@ heliBase = {
 				end
 			end
 		end
+	end,
+
+	extractPlayer = function(self, obj)
+		if obj and obj.valid then
+			if obj.is_player() then
+				return obj
+
+			elseif obj.player and obj.player.valid and obj.player.is_player() then
+				return obj.player
+			end
+		end
+
+		return nil
+	end,
+
+	getPlayers = function(self)
+		local d = self:extractPlayer(self.baseEnt.get_driver())
+		local p = self:extractPlayer(self.baseEnt.get_passenger())
+
+		local t = {}
+
+		if d then
+			table.insert(t, d)
+		end
+
+		if p then
+			table.insert(t, p)
+		end
+
+		return t
 	end,
 
 	setCollider = function(self, name)

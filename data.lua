@@ -18,5 +18,6 @@ require("prototypes.sounds.sounds")
 require("prototypes.sprites.sprites")
 require("prototypes.font.font")
 require("prototypes.style.style")
+require("prototypes.signals.signals")
 
 require("input.input")

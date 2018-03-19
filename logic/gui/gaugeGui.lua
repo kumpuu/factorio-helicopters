@@ -165,7 +165,7 @@ gaugeGui =
 					else
 						self:setLed("gauge_fs", "fuel", not led.on)
 
-						if led.sound then
+						if led.sound and self.player.mod_settings["heli-gaugeGui-play-fuel-warning-sound"].value then
 							self.player.play_sound{path = led.sound}
 						end
 					end
@@ -237,6 +237,7 @@ gaugeGui =
 			type = "frame",
 			name = self.prefix .. "rootFrame",
 			style = "frame",
+			tooltip = {"heli-gui-gauges-tt"},
 		}
 
 		els.gauge_fs = self:buildGauge(els.root, "gauge_fs", {"fuel", "speed"}, {"fuel"})

@@ -30,4 +30,25 @@ data:extend({
         minimum_value = 0.025,
         maximum_value = 1.0125,
     },
+
+    {
+        type = "bool-setting",
+        name = "heli-gaugeGui-show",
+        setting_type = "runtime-per-user",
+        default_value = true,
+    },
+
+    {
+        type = "bool-setting",
+        name = "heli-gaugeGui-play-fuel-warning-sound",
+        setting_type = "runtime-per-user",
+        default_value = true,
+    },
+
+    {
+        type = "bool-setting",
+        name = "heli-fuel-alert",
+        setting_type = "runtime-per-user",
+        default_value = false,
+    },
 })

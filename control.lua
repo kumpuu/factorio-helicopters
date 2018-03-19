@@ -311,7 +311,7 @@ function OnDrivingStateChanged(e)
 			local gGui = searchInTable(global.gaugeGuis, p, "player")
 
 			if p.driving then
-				if not gGui then
+				if not gGui and p.mod_settings["heli-gaugeGui-show"].value then
 					insertInGlobal("gaugeGuis", gaugeGui.new(p, heli))
 				end
 
@@ -332,6 +332,29 @@ end
 
 function OnPlayerCreated(e)
 	OnArmorInventoryChanged(e)
+end
+
+function OnRuntimeSettingsChanged(e)
+	local name = e.setting
+
+	if name:match("^heli-") then
+		local p = game.players[e.player_index]
+		local val = p.mod_settings[name].value
+
+		if name == "heli-gaugeGui-show" then
+			local gGui = searchInTable(global.gaugeGuis, p, "player")
+
+			if not val and gGui then
+				gGui:destroy()
+
+			elseif val and not gGui and playerIsInHeli(p) then
+				local heli = getHeliFromBaseEntity(p.vehicle)
+				if heli then
+					insertInGlobal("gaugeGuis", gaugeGui.new(p, heli))
+				end
+			end
+		end	
+	end
 end
 
 script.on_event(defines.events.on_built_entity, OnBuilt)
@@ -368,3 +391,5 @@ script.on_event(defines.events.on_player_created, OnPlayerCreated)
 
 script.on_event(defines.events.on_player_armor_inventory_changed, OnArmorInventoryChanged)
 script.on_event(defines.events.on_player_driving_changed_state, OnDrivingStateChanged)
+
+script.on_event(defines.events.on_runtime_mod_setting_changed, OnRuntimeSettingsChanged)
