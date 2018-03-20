@@ -1,3 +1,19 @@
+function reSetGaugeGui(p)
+	local gg = searchInTable(global.gaugeGuis, p, "player")
+
+	local shouldHaveGG = playerIsInHeli(p) and p.mod_settings["heli-gaugeGui-show"].value
+
+	if gg and not shouldHaveGG then
+		gg:destroy()
+
+	elseif not gg and shouldHaveGG then
+		local heli = getHeliFromBaseEntity(p.vehicle)
+		if heli then
+			insertInGlobal("gaugeGuis", gaugeGui.new(p, heli))
+		end
+	end
+end
+
 local pointerFrames = 128
 
 gaugeGui =
@@ -114,6 +130,7 @@ gaugeGui =
 					type = "sprite",
 					name = gaugeName .. "_pointer_" .. pointerName,
 					sprite = "heli_gauge_pointer_" .. frame,
+					tooltip = {"heli-gui-gauges-tt"},
 				}
 			end
 		end

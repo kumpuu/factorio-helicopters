@@ -83,6 +83,7 @@ function OnConfigChanged(e)
 		end
 
 		OnArmorInventoryChanged({player_index = p.index})
+		reSetGaugeGui(p)
 	end
 
 	if global.heliControllers then
@@ -312,19 +313,10 @@ function OnDrivingStateChanged(e)
 				end
 			end
 
-			local gGui = searchInTable(global.gaugeGuis, p, "player")
+			reSetGaugeGui(p)
 
-			if p.driving then
-				if not gGui and p.mod_settings["heli-gaugeGui-show"].value then
-					insertInGlobal("gaugeGuis", gaugeGui.new(p, heli))
-				end
-
-			else
+			if not p.driving then
 				heli:OnPlayerEjected(p)
-
-				if gGui then
-					gGui:destroy()
-				end
 			end
 		end
 	end
@@ -346,17 +338,7 @@ function OnRuntimeSettingsChanged(e)
 		local val = p.mod_settings[name].value
 
 		if name == "heli-gaugeGui-show" then
-			local gGui = searchInTable(global.gaugeGuis, p, "player")
-
-			if not val and gGui then
-				gGui:destroy()
-
-			elseif val and not gGui and playerIsInHeli(p) then
-				local heli = getHeliFromBaseEntity(p.vehicle)
-				if heli then
-					insertInGlobal("gaugeGuis", gaugeGui.new(p, heli))
-				end
-			end
+			reSetGaugeGui(p)
 		end	
 	end
 end
