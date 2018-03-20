@@ -56,9 +56,7 @@ gaugeGui =
 			},
 		}
 
-		for k,v in pairs(gaugeGui) do
-			obj[k] = v
-		end
+		mtMgr.set(obj, "gaugeGui")
 
 		obj:buildGui()
 		heli:addGaugeGui(obj)
@@ -149,7 +147,7 @@ gaugeGui =
 			led.sound = nil
 
 			if led.blinkInterval then
-				led.blinkInterval.cancel()
+				led.blinkInterval:cancel()
 				led.blinkInterval = nil
 				self:setLed("gauge_fs", "fuel", false)
 			end
@@ -159,17 +157,20 @@ gaugeGui =
 
 			if not led.blinkInterval then
 				led.blinkInterval = setInterval(function(timer)
-					if not self.valid then
-						timer.cancel()
-					
-					else
-						self:setLed("gauge_fs", "fuel", not led.on)
+				    local gg = timer.data.gg
+				    local _led = timer.data.led
 
-						if led.sound and self.player.mod_settings["heli-gaugeGui-play-fuel-warning-sound"].value then
-							self.player.play_sound{path = led.sound}
+					if not gg.valid then
+						timer:cancel()
+
+					else
+						gg:setLed("gauge_fs", "fuel", not _led.on)
+
+						if _led.sound and gg.player.mod_settings["heli-gaugeGui-play-fuel-warning-sound"].value then
+							gg.player.play_sound{path = _led.sound}
 						end
 					end
-				end, interval)
+				end, interval, {gg = self, led = led})
 			else
 				led.blinkInterval.interval = interval
 			end
@@ -249,3 +250,5 @@ gaugeGui =
 		self:setGauge("gauge_hr", "rpm", self.pointerData.rpm.min)
 	end,
 }
+
+mtMgr.assign("gaugeGui", {__index = gaugeGui})

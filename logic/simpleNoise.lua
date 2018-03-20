@@ -21,7 +21,7 @@ simpleNoise =
 
 		obj.maxFrequency = obj.maxFrequency - obj.minFrequency
 
-		return setmetatable(obj, {__index = simpleNoise})
+		return mtMgr.set(obj, "simpleNoise")
 	end,
 
 	easing = function(t)
@@ -48,3 +48,5 @@ simpleNoise =
 		return (self.lastVal + self.valDelta * self.easing(self.curTime / self.transitionTime)) * self.magnitude
 	end,
 }
+
+mtMgr.assign("simpleNoise", {__index = simpleNoise})

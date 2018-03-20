@@ -1,5 +1,7 @@
 math3d = require("math3d")
 
+require("logic.mtMgr")
+
 require("logic.util")
 require("logic.timer")
 require("logic.simpleNoise")
@@ -30,6 +32,8 @@ function OnLoad(e)
 	setMetatablesInGlobal("heliControllers", {__index = heliController})
 
 	callInGlobal("helis", "OnLoad")
+
+	mtMgr.OnLoad()
 end
 
 function OnConfigChanged(e)

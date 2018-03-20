@@ -1,39 +1,42 @@
-function createTimer(func, frames, isInterval)
-	local timers = global.timers
+timer =
+{
+	new = function(func, frames, isInterval, timerData)
+		local timer = 
+		{
+			valid = true,
+			callback = func,
+			runTick = game.tick + frames,
+			interval = isInterval and frames,
+			paused = false,
+			data = timerData,
+		}
 
-	local timer = 
-	{
-		valid = true,
-		callback = func,
-		runTick = game.tick + frames,
-		interval = isInterval and frames,
-		paused = false,
-	}
+		mtMgr.set(timer, "timer")
 
-	timer.cancel = function()
-		timer.valid = false
-	end
+		return insertInGlobal("timers", timer)
+	end,
 
-	timer.pause = function()
-		timer.paused = true
-		timer.remaining = timer.runTick - game.tick
-	end
+	cancel = function(self)
+		self.valid = false
+	end,
 
-	timer.resume = function()
-		timer.paused = false
-		timer.runTick = game.tick + timer.remaining
-	end
+	pause = function(self)
+		self.paused = true
+		self.remaining = self.runTick - game.tick
+	end,
 
-	insertInGlobal("timers", timer)
-	return timer
+	resume = function(self)
+		self.paused = false
+		self.runTick = game.tick + self.remaining
+	end,
+}
+
+function setTimeout(func, frames, timerData)
+	return timer.new(func, frames, false, timerData)
 end
 
-function setTimeout(func, frames)
-	return createTimer(func, frames, false)
-end
-
-function setInterval(func, frames)
-	return createTimer(func, frames, true)
+function setInterval(func, frames, timerData)
+	return timer.new(func, frames, true, timerData)
 end
 
 function OnTimerTick()
@@ -48,7 +51,7 @@ function OnTimerTick()
 			
 			else
 				if (not curTimer.paused) and curTimer.runTick <= game.tick then
-					curTimer.callback(curTimer)
+					curTimer:callback()
 
 					if curTimer.interval then
 						curTimer.runTick = game.tick + curTimer.interval
@@ -62,3 +65,5 @@ function OnTimerTick()
 		end 
 	end
 end
+
+mtMgr.assign("timer", {__index = timer})
