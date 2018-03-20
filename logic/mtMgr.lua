@@ -13,17 +13,20 @@ mtMgr =
 	--which allows updating metatables.
 	assignments = {},
 
+
 	--Use this at the file level to assign a metatable to a type identifier.
 	--The given metatable will be used on objects of this type in OnLoad and set.
 	assign = function(strType, metatable)
 		mtMgr.assignments[strType] = metatable
 	end,
 
+
 	--This will set the metatable assigned in assign() and save the type identifier to the object.
 	set = function(obj, strType)
 		obj.__mtMgr_type = strType
 		return setmetatable(obj, mtMgr.assignments[strType])
 	end,
+
 
 	crawl = function(t, f, lookup)
 		if not lookup then
@@ -44,6 +47,7 @@ mtMgr =
 			end
 		end
 	end,
+
 
 	--Call this in script.on_load.
 	--Walks the entire global table. If it encounters a table with a type identifier,

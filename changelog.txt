@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.14
+Date: 20. 03. 2018
+  Changes:
+    - Added animated instrument pannel that shows fuel, speed, height and engine rpm. Configurable in settings.
+    - Added optional fuel alert, activate in settings.
+    - Removed obsolete "pushable" flags.
+  Bugfixes:
+    - Fixed that player gets trapped when exiting heli while Bob's Character classes is installed (thanks to @jarquafelmu).
+---------------------------------------------------------------------------------------------------
 Version: 0.2.13
 Date: 21. 02. 2018
   Changes:
