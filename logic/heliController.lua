@@ -330,7 +330,12 @@ heliController =
 	end,
 
 	land = function(self)
-		self.heli:OnDown()
+		local d = extractPlayer(self.driver)
+
+		if not ((not self.driverIsBot and d and d.valid) and d.mod_settings["heli-remote-dont-auto-land-player"].value) then
+			self.heli:OnDown()
+		end
+
 		self:destroy()
 	end,
 

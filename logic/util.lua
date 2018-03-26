@@ -194,3 +194,33 @@ function getMaxStackFuelVal()
 
 	return _maxStackFuelVal
 end
+
+function extractPlayer (obj)
+	if obj and obj.valid then
+		if obj.is_player() then
+			return obj
+
+		elseif obj.player and obj.player.valid and obj.player.is_player() then
+			return obj.player
+		end
+	end
+
+	return nil
+end
+
+function getCarPlayers(car)
+	local d = extractPlayer(car.get_driver())
+	local p = extractPlayer(car.get_passenger())
+
+	local t = {}
+
+	if d then
+		table.insert(t, d)
+	end
+
+	if p then
+		table.insert(t, p)
+	end
+
+	return t
+end

@@ -339,7 +339,7 @@ heliBase = {
 
 			local speed = heli.baseEnt.speed
 			if speed > 0.25 then --54 km/h
-				local players = heli:getPlayers()
+				local players = getCarPlayers(heli.baseEnt)
 
 				heli.baseEnt.damage(speed * 210, game.forces.neutral)
 
@@ -589,7 +589,7 @@ heliBase = {
 			end
 
 			if alert then
-				local players = self:getPlayers()
+				local players = getCarPlayers(self.baseEnt)
 				for k, curPlayer in pairs(players) do
 					if curPlayer.mod_settings["heli-fuel-alert"].value then
 						curPlayer.add_custom_alert(self.baseEnt, {type = "virtual", name = alert.name}, alert.str, false)
@@ -709,36 +709,6 @@ heliBase = {
 		end
 	end,
 
-	extractPlayer = function(self, obj)
-		if obj and obj.valid then
-			if obj.is_player() then
-				return obj
-
-			elseif obj.player and obj.player.valid and obj.player.is_player() then
-				return obj.player
-			end
-		end
-
-		return nil
-	end,
-
-	getPlayers = function(self)
-		local d = self:extractPlayer(self.baseEnt.get_driver())
-		local p = self:extractPlayer(self.baseEnt.get_passenger())
-
-		local t = {}
-
-		if d then
-			table.insert(t, d)
-		end
-
-		if p then
-			table.insert(t, p)
-		end
-
-		return t
-	end,
-
 	setCollider = function(self, name)
 		if self.childs.collisionEnt and self.childs.collisionEnt.valid then
 			self.childs.collisionEnt.destroy()
@@ -817,7 +787,7 @@ heliBase = {
 	handleColliderDamage = function(self)
 		if self.childs.collisionEnt then
 			if self.childs.collisionEnt.health ~= colliderMaxHealth then
-				local players = self:getPlayers()
+				local players = getCarPlayers(self.baseEnt)
 				local speed = self.childs.collisionEnt.speed
 
 				self.baseEnt.speed = speed
