@@ -104,7 +104,7 @@ data:extend({
 		collision_box = {{-1.8, -1.8}, {1.2, 3}},
 		collision_mask = {},
 		energy_per_hit_point = 1,
-		effectivity = 0.3,
+		effectivity = 0.4,
 		breaking_speed = 0.03,
 		burner = {
 			effectivity = 0.5,
@@ -112,11 +112,11 @@ data:extend({
 			fuel_inventory_size = fuel_slots,
 			
 		},
-		consumption = "3MW",
+		consumption = "3.2MW",
 		braking_power = "1MW",
 		friction = 0.002,
 		terrain_friction_modifier = 0,
-		weight = 3000,
+		weight = 2800,
 
 		rotation_speed = 0.005,
 		tank_driving = true,

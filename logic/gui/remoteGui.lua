@@ -1,4 +1,3 @@
-require("mod-gui")
 require("logic.gui.heliSelectionGui")
 require("logic.gui.playerSelectionGui")
 require("logic.gui.markerSelectionGui")

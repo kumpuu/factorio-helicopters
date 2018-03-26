@@ -12,7 +12,7 @@ markerSelectionGui =
 
 			guiElems = 
 			{
-				parent = p.gui.left,
+				parent = mod_gui.get_frame_flow(p),
 			},
 
 			curRefreshCooldown = markerSelectionGui.refreshCooldown,

@@ -231,6 +231,8 @@ heliBase = {
 		end
 	end,
 
+	---------------- events ----------------
+
 	OnLoad = function(self)
 		if self.curState then
 			setmetatable(self.curState, basicState.mt)
@@ -242,8 +244,6 @@ heliBase = {
 			setmetatable(self.childs.collisionEnt, emptyBoxCollider.mt)
 		end
 	end,
-
-	---------------- events ----------------
 
 	OnTick = function(self)
 		if not self.baseEnt.valid then
@@ -257,7 +257,10 @@ heliBase = {
 		self:updateFuelGauge()
 		self:updateEntityPositions()
 		self.curState.OnTick(self)
-		self:handleColliderDamage()
+
+		if self.valid then
+			self:handleColliderDamage()
+		end
 	end,
 
 	OnUp = function(self)
@@ -334,12 +337,17 @@ heliBase = {
 				heli.baseEnt.orientation = heli.lockedBaseOrientation
 			end
 
-			if heli.baseEnt.speed > 0.25 then --54 km/h
-				heli.baseEnt.damage(heli.baseEnt.speed*210, game.forces.neutral)
+			local speed = heli.baseEnt.speed
+			if speed > 0.25 then --54 km/h
+				local players = heli:getPlayers()
 
-				if not heli.baseEnt.valid then
-					return
-				end
+				heli.baseEnt.damage(speed * 210, game.forces.neutral)
+
+				if not heli.baseEnt.valid then --destroy event might already be executed
+					heli:dealDestructionDamage(players, speed)
+
+					return false
+				end 
 			end
 		end,
 
@@ -798,14 +806,27 @@ heliBase = {
 		end
 	end,
 
+	dealDestructionDamage = function(self, players, speed)
+		for k, curPlayer in pairs(players) do
+			if curPlayer.character and curPlayer.character.valid then
+				curPlayer.character.damage(150 + speed * 175, game.forces.neutral)
+			end
+		end
+	end,
+
 	handleColliderDamage = function(self)
 		if self.childs.collisionEnt then
 			if self.childs.collisionEnt.health ~= colliderMaxHealth then
-				self.baseEnt.speed = self.childs.collisionEnt.speed
+				local players = self:getPlayers()
+				local speed = self.childs.collisionEnt.speed
+
+				self.baseEnt.speed = speed
 				self.baseEnt.damage(colliderMaxHealth - self.childs.collisionEnt.health, game.forces.neutral)
 
 				if not self.baseEnt.valid then --destroy event might already be executed
-					return false 
+					self:dealDestructionDamage(players, speed)
+
+					return false
 				end 
 				self.childs.collisionEnt.health = colliderMaxHealth
 			end
