@@ -344,7 +344,7 @@ heliBase = {
 				heli.baseEnt.damage(speed * 210, game.forces.neutral)
 
 				if not heli.baseEnt.valid then --destroy event might already be executed
-					heli:dealDestructionDamage(players, speed)
+					heli:dealCrashDamage(players, speed)
 
 					return false
 				end 
@@ -806,10 +806,10 @@ heliBase = {
 		end
 	end,
 
-	dealDestructionDamage = function(self, players, speed)
+	dealCrashDamage = function(self, players, speed)
 		for k, curPlayer in pairs(players) do
 			if curPlayer.character and curPlayer.character.valid then
-				curPlayer.character.damage(150 + speed * 175, game.forces.neutral)
+				curPlayer.character.damage((150 + speed * 175) * settings.global["heli-crash-dmg-mult"].value, game.forces.neutral)
 			end
 		end
 	end,
@@ -824,7 +824,7 @@ heliBase = {
 				self.baseEnt.damage(colliderMaxHealth - self.childs.collisionEnt.health, game.forces.neutral)
 
 				if not self.baseEnt.valid then --destroy event might already be executed
-					self:dealDestructionDamage(players, speed)
+					self:dealCrashDamage(players, speed)
 
 					return false
 				end 

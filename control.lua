@@ -336,11 +336,18 @@ function OnRuntimeSettingsChanged(e)
 
 	if name:match("^heli-") then
 		local p = game.players[e.player_index]
-		local val = p.mod_settings[name].value
 
-		if name == "heli-gaugeGui-show" then
-			reSetGaugeGui(p)
-		end	
+		if e.setting_type == "runtime-per-user" then
+			local val = p.mod_settings[name].value
+
+			if name == "heli-gaugeGui-show" then
+				reSetGaugeGui(p)
+			end
+
+		--elseif e.setting_type == "runtime-global" then
+		--	local val = settings.global[name]
+
+		end
 	end
 end
 

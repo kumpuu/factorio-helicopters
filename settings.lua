@@ -1,16 +1,26 @@
 data:extend({
     {
         type = "bool-setting",
-        name = "heli-auto-focus-searchfields",
-        setting_type = "runtime-per-user",
-        default_value = false,
-    },
-
-    {
-        type = "bool-setting",
         name = "heli-deactivate-inserters",
         setting_type = "runtime-global",
         default_value = true,
+    },
+
+    {
+        type = "double-setting",
+        name = "heli-crash-dmg-mult",
+        setting_type = "runtime-global",
+        default_value = 1,
+        minimum_value = 0,
+    },
+
+    ----------------------------------------------
+
+    {
+        type = "bool-setting",
+        name = "heli-auto-focus-searchfields",
+        setting_type = "runtime-per-user",
+        default_value = false,
     },
 
     {
