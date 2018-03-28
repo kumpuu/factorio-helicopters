@@ -1,4 +1,4 @@
---Metatable manager v1.0 by kumpu
+--Metatable manager v1.1 by kumpu
 --Takes care of reassigning metatables during load.
 --Use for tables stored in global.
 
@@ -50,10 +50,12 @@ mtMgr =
 
 
 	--Call this in script.on_load.
-	--Walks the entire global table. If it encounters a table with a type identifier,
+	--Walks the entire global table or the one you passed. If it encounters a table with a type identifier,
 	--it sets the metatable assigned to the type on that table.
 	--Circular references are safe.
-	OnLoad = function()
+	OnLoad = function(t)
+		t = t or global
+
 		mtMgr.crawl(global, function(t)
 			local mt = mtMgr.assignments[t.__mtMgr_type]
 			if mt then

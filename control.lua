@@ -15,6 +15,8 @@ require("logic.heliController")
 require("logic.gui.remoteGui")
 require("logic.gui.gaugeGui")
 
+require("stdlib.entity.entity")
+
 function playerIsInHeli(p)
 	return p.driving and string.find(heliBaseEntityNames, p.vehicle.name .. ",", 1, true)
 end
