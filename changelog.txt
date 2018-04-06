@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.15
+Date: 06. 04. 2018
+  Changes:
+    - Updated russion locals (thanks to @Schmarotzer).
+    - Added italian locals (thanks to @marxx).
+    - Deal damage to passengers in crashes and explosions (damage multiplier in settings).
+    - Added setting to prevent remote auto-landing when player inside.
+    - Heli selection gui now auto-selects last selected heli when opened.
+  Bugfixes:
+    - Fixed error when heli destroyed by high speed landing.
+    - Fixed error when changing runtime-global setting.
+---------------------------------------------------------------------------------------------------
 Version: 0.2.14
 Date: 20. 03. 2018
   Changes:

@@ -70,7 +70,6 @@ function Entity.get_data(entity, field)
             return nil
         end
     end
-    printA(dest)
 
     return dest
 end
@@ -143,7 +142,6 @@ function Entity.set_data(entity, data, field)
         dest_table[dest_key] = data
     end
 
-    printA(dest_table, dest_key, dest_table[dest_key])
     return prev
 end
 
