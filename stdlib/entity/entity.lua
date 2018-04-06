@@ -28,30 +28,51 @@ end
 -- The user data is stored in the global object and it persists between loads.
 --> The user data will be removed from an entity when the entity becomes invalid.
 -- @tparam LuaEntity entity the entity to look up
+-- @param Optional field to access data like a table
 -- @treturn ?|nil|Mixed the user data, or nil if no data exists for the entity
-function Entity.get_data(entity)
+function Entity.get_data(entity, field)
     Is.Assert(entity, 'missing entity argument')
+
     if not global._entity_data then
         return nil
     end
 
-    local unit_number = entity.unit_number
-    if unit_number then
-        return global._entity_data[unit_number]
+    local dest
+
+    local code, unit_number = pcall(function() return entity.unit_number end)
+    if code then
+        dest = global._entity_data[unit_number]
     else
-        local entity_name = entity.name
-        if not global._entity_data[entity_name] then
+        local prototype_name = entity.name
+        if not global._entity_data[prototype_name] then
             return nil
         end
 
-        local entity_category = global._entity_data[entity_name]
-        for _, entity_data in pairs(entity_category) do
-            if Entity._are_equal(entity_data.entity, entity) then
-                return entity_data.data
+        local prototype_category = global._entity_data[prototype_name]
+
+        for i = #prototype_category, 1, -1 do
+            local cur_entity_data = prototype_category[i]
+
+            if not cur_entity_data.entity.valid then
+                table.remove(prototype_category, i)
+            
+            elseif Entity._are_equal(cur_entity_data.entity, entity) then
+                dest = cur_entity_data.data
+                break
             end
         end
-        return nil
     end
+
+    if dest and field then
+        if type(dest) == "table" then
+            return dest[field]
+        else
+            return nil
+        end
+    end
+    printA(dest)
+
+    return dest
 end
 
 --- Associates the user data to an entity.
@@ -59,45 +80,71 @@ end
 --> The user data will be removed from an entity when the entity becomes invalid.
 -- @tparam LuaEntity entity the entity with which to associate the user data
 -- @tparam ?|nil|Mixed data the data to set, or nil to delete the data associated with the entity
+-- @param Optional field to set data to, treats the entity data like a table
 -- @treturn ?|nil|Mixed the previous data associated with the entity, or nil if the entity had no previous data
-function Entity.set_data(entity, data)
+function Entity.set_data(entity, data, field)
     Is.Assert(entity, 'missing entity argument')
 
     if not global._entity_data then
         global._entity_data = {}
     end
 
-    local unit_number = entity.unit_number
-    if unit_number then
-        local prev = global._entity_data[unit_number]
-        global._entity_data[unit_number] = data
-        return prev
+    local dest_table, dest_key
+
+    local code, unit_number = pcall(function() return entity.unit_number end)
+    if code then
+        dest_table = global._entity_data
+        dest_key = unit_number
     else
-        local entity_name = entity.name
-        if not global._entity_data[entity_name] then
-            global._entity_data[entity_name] = {}
+        local prototype_name = entity.name
+        dest_key = "data"
+
+        if not global._entity_data[prototype_name] then
+            global._entity_data[prototype_name] = {}
         end
 
-        local entity_category = global._entity_data[entity_name]
+        local prototype_category = global._entity_data[prototype_name]
 
-        for i = #entity_category, 1, -1 do
-            local entity_data = entity_category[i]
-            if not entity_data.entity.valid then
-                table.remove(entity_category, i)
-            end
-            if Entity._are_equal(entity_data.entity, entity) then
-                local prev = entity_data.data
-                if data then
-                    entity_data.data = data
-                else
-                    table.remove(entity_category, i)
+        for i = #prototype_category, 1, -1 do
+            local cur_entity_data = prototype_category[i]
+
+            if not cur_entity_data.entity.valid then
+                table.remove(prototype_category, i)
+
+            elseif Entity._are_equal(cur_entity_data.entity, entity) then
+                if not field and data == nil then
+                    local prev = cur_entity_data.data
+                    table.remove(prototype_category, i)
+                    return prev
                 end
-                return prev
+
+                dest_table = cur_entity_data
+                break
             end
         end
-        table.insert(entity_category, {entity = entity, data = data})
+
+        if not dest_table then
+            table.insert(prototype_category, {entity = entity})
+            dest_table = prototype_category[#prototype_category]
+        end
     end
-    return nil
+
+    local prev
+
+    if field then
+        if type(dest_table[dest_key]) ~= "table" then
+            dest_table[dest_key] = {}
+        end
+
+        prev = dest_table[dest_key][field]
+        dest_table[dest_key][field] = data
+    else
+        prev = dest_table[dest_key]
+        dest_table[dest_key] = data
+    end
+
+    printA(dest_table, dest_key, dest_table[dest_key])
+    return prev
 end
 
 --- Freezes an entity, by making it inactive, inoperable, and non-rotatable, or unfreezes by doing the reverse.

@@ -140,11 +140,12 @@ heliSelectionGui =
 	end,
 
 	OnCamClicked = function(self, e)
-
 		if e.button == defines.mouse_button_type.left then
 			local camID = tonumber(e.element.name:match("%d+"))
 			local cam = searchInTable(self.guiElems.cams, camID, "ID")
 			self:setCamStatus(cam, true, cam.heliController)
+
+			Entity.set_data(self.player, cam.heli, "heliSelectionGui_lastSelectedHeli")
 
 		elseif e.button == defines.mouse_button_type.right then
 			local zoomMax = 1.26
@@ -373,6 +374,9 @@ heliSelectionGui =
 					self.curCamID = 0
 
 					if global.helis then
+						local lastSelected = Entity.get_data(self.player, "heliSelectionGui_lastSelectedHeli")
+						local selectedSomething = false
+
 						for k, curHeli in pairs(global.helis) do
 							local curDriver = curHeli.baseEnt.get_driver()
 							
@@ -381,7 +385,7 @@ heliSelectionGui =
 									(curDriver.player and curDriver.player.valid and curDriver.player.name == self.player.name)) then
 
 								local controller = searchInTable(global.heliControllers, curHeli, "heli")
-								local flow, cam = self:buildCam(els.camTable, self.curCamID, curHeli.baseEnt.position, self:getDefaultZoom(), false, curHeli.hasRemoteController)
+								local flow, cam = self:buildCam(els.camTable, self.curCamID, curHeli.baseEnt.position, self:getDefaultZoom(), selected, curHeli.hasRemoteController)
 
 								table.insert(els.cams,
 								{
@@ -392,12 +396,17 @@ heliSelectionGui =
 									ID = self.curCamID,
 								})
 
-								if self.curCamID == 0 then
-									self:setCamStatus(els.cams[1], true, controller)
-								end
-
 								self.curCamID = self.curCamID + 1
+								
+								if curHeli == lastSelected then
+									selectedSomething = true
+									self:setCamStatus(els.cams[self.curCamID], true, heliController)	
+								end						
 							end
+						end
+
+						if not selectedSomething then
+							self:setCamStatus(els.cams[1], true, els.cams[1].heliController)
 						end
 					end
 
