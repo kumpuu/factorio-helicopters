@@ -224,3 +224,9 @@ function getCarPlayers(car)
 
 	return t
 end
+
+function playerHasEquipment(p, equipName)
+	return p.character and p.character.valid and
+		p.character.grid and p.character.grid.valid and
+		equipmentGridHasItem(p.character.grid, equipName)
+end

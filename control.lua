@@ -189,21 +189,20 @@ end
 function OnHeliFollow(e)
 	local p = game.players[e.player_index]
 
-	local heli, dist = findNearestAvailableHeli(p.position, p.force, p)
+	if playerHasEquipment(p, "heli-remote-equipment") then
+		local heli, dist = findNearestAvailableHeli(p.position, p.force, p)
 
-	if heli then
-		assignHeliController(p, heli, p, true)
-		p.add_custom_alert(heli.baseEnt, {type = "item", name = "heli-item"}, {"heli-alert-follow", chopDecimal(dist)}, true)
+		if heli then
+			assignHeliController(p, heli, p, true)
+			p.add_custom_alert(heli.baseEnt, {type = "item", name = "heli-item"}, {"heli-alert-follow", chopDecimal(dist)}, true)
+		end
 	end
 end
 
 function OnRemoteOpen(e)
 	local p = game.players[e.player_index]
 	
-	if p.character and p.character.valid and
-		p.character.grid and p.character.grid.valid and
-			equipmentGridHasItem(p.character.grid, "heli-remote-equipment") then
-
+	if playerHasEquipment(p, "heli-remote-equipment") then
 		toggleRemoteGui(p)
 	end
 end
@@ -229,10 +228,7 @@ end
 function OnArmorInventoryChanged(e)
 	local p = game.players[e.player_index]
 
-	if p.character and p.character.valid and
-		p.character.grid and p.character.grid.valid and
-			equipmentGridHasItem(p.character.grid, "heli-remote-equipment") then
-
+	if playerHasEquipment(p, "heli-remote-equipment") then
 		setRemoteBtn(p, true)
 	else
 		setRemoteBtn(p, false)
