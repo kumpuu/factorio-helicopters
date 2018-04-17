@@ -244,12 +244,20 @@ function OnGuiClick(e)
 
 	if name:match("^heli_") then
 		local p = game.players[e.player_index]
-		local i = searchIndexInTable(global.remoteGuis, p, "player")
 		
 		if name == "heli_remote_btn" then
 			toggleRemoteGui(p)
 		
-		else
+		elseif gaugeGui.hasMyPrefix(name) then
+			local i = searchIndexInTable(global.gaugeGuis, p, "player")
+
+			if i then
+				global.gaugeGuis[i]:OnGuiClick(e)
+			end
+		
+		elseif remoteGui.hasMyPrefix(name) then
+			local i = searchIndexInTable(global.remoteGuis, p, "player")
+			
 			if i then
 				global.remoteGuis[i]:OnGuiClick(e)
 			end

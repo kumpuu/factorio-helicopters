@@ -330,10 +330,8 @@ markerSelectionGui =
 			{
 				type = "button",
 				name = self.prefix .. "searchFieldClearBtn",
-				--sprite = "heli_clear_text",
 				style = "heli-clear_text_button",
 			}
-			--self.guiElems.searchFieldClearBtn.style.top_padding = 80
 		
 
 		self.guiElems.scroller = self.guiElems.root.add

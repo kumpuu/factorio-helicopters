@@ -87,6 +87,13 @@ remoteGui =
 		end
 	end,
 
+	hasMyPrefix = function(str)
+		return string.startswith(str, heliSelectionGui.prefix) or 
+			string.startswith(str, playerSelectionGui.prefix) or 
+			string.startswith(str, markerSelectionGui.prefix) or
+			string.startswith(str, heliPadSelectionGui.prefix)
+	end,
+
 	safeStateCall = function(self, kName, ...)
 		for k, curGui in pairs(self.guis) do
 			if curGui[kName] then

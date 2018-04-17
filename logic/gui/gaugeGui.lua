@@ -92,6 +92,39 @@ gaugeGui =
 		removeInGlobal("gaugeGuis", self)
 	end,
 
+	hasMyPrefix = function(str)
+		return string.startswith(str, gaugeGui.prefix)
+	end,
+
+	OnGuiClick = function(self, e)
+		local name = e.element.name
+
+		if name == self.prefix .. "speaker_on_button" then
+			self:setMuted(true)
+		
+		elseif name == self.prefix .. "speaker_off_button" then
+			self:setMuted(false)
+		end
+	end,
+
+	setMuted = function(self, muted)
+		local els = self.guiElems
+		local s = "on"
+		if muted then s = "off" end
+
+		self.muted = muted
+		Entity.set_data(self.player, muted, "gaugeGui_muted")
+
+		els.gauge_hr.speakerButtonFlow.clear()
+
+		els.gauge_hr.speaker_button = els.gauge_hr.speakerButtonFlow.add
+		{
+			type = "button",
+			name = self.prefix .. "speaker_" .. s .. "_button",
+			style = "heli-speaker_" .. s .. "_button",
+		}
+	end,
+
 	setGauge = function(self, gaugeName, pointerName, val)
 		local pD = self.pointerData[pointerName]
 		local pointer = self.guiElems[gaugeName].pointers[pointerName]
@@ -183,7 +216,7 @@ gaugeGui =
 					else
 						gg:setLed("gauge_fs", "fuel", not _led.on)
 
-						if _led.sound and gg.player.mod_settings["heli-gaugeGui-play-fuel-warning-sound"].value then
+						if _led.sound and (not gg.muted) and gg.player.mod_settings["heli-gaugeGui-play-fuel-warning-sound"].value then
 							gg.player.play_sound{path = _led.sound}
 						end
 					end
@@ -260,6 +293,18 @@ gaugeGui =
 
 		els.gauge_fs = self:buildGauge(els.root, "gauge_fs", {"fuel", "speed"}, {"fuel"})
 		els.gauge_hr = self:buildGauge(els.root, "gauge_hr", {"height", "rpm"})
+
+			els.gauge_hr.speakerButtonFlow = els.gauge_hr.elem.add
+			{
+				type = "flow",
+				name = self.prefix .. "speakerButtonFlow",
+				direction = "horizontal",
+				tooltip = {"heli-gui-gauges-tt"},
+			}
+			els.gauge_hr.speakerButtonFlow.style.left_padding = 119
+			els.gauge_hr.speakerButtonFlow.style.top_padding = 5
+
+			self:setMuted(Entity.get_data(self.player, "gaugeGui_muted"))
 
 		self:setGauge("gauge_fs", "fuel", self.pointerData.fuel.min)
 		self:setGauge("gauge_fs", "speed", self.pointerData.speed.min)
