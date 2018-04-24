@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.16
+Date: 24. 04. 2018
+  Changes:
+    - Added mute button to gauge gui.
+    - Updated russian translation (thanks to @Schmarotzer).
+  Bugfixes:
+    - Fixed that players could dispatch a heli (Shif+F) without remote equipment.
+    - Fixed graphical errors in 0.16.37 (thanks to @Carnivale).
+---------------------------------------------------------------------------------------------------
 Version: 0.2.15
 Date: 06. 04. 2018
   Changes:
