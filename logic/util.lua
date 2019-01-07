@@ -171,10 +171,6 @@ string.startswith = function(str, strSub)
   return str:sub(1, strSub:len()) == strSub
 end
 
-string.contains = function(str, strSub)
-	return str:find(strSub, 1, true) ~= nil
-end
-
 function chopDecimal(val, place)
 	local mult = 10^(place or 0)
 	return math.floor(val * mult + 0.5) / mult

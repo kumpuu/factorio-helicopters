@@ -37,7 +37,7 @@ end
 -- @tparam string contains the substring to test for
 -- @treturn boolean true if the substring was found in the string
 function M.contains(s, contains)
-    return s and s:find(contains) ~= nil
+    return s and s:find(contains, 1, true) ~= nil
 end
 
 --- Tests whether a string is empty.
