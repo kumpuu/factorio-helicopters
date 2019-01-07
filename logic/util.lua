@@ -180,21 +180,6 @@ function chopDecimal(val, place)
 	return math.floor(val * mult + 0.5) / mult
 end
 
-function getMaxStackFuelVal()
-	if not _maxStackFuelVal then
-		_maxStackFuelVal = 0
-		local items = game.item_prototypes
-
-		for k, curItem in pairs(items) do
-			if curItem.fuel_category == "chemical" and curItem.fuel_value then
-				_maxStackFuelVal = math.max(_maxStackFuelVal, curItem.stack_size * curItem.fuel_value)
-			end
-		end
-	end
-
-	return _maxStackFuelVal
-end
-
 function extractPlayer (obj)
 	if obj and obj.valid then
 		if obj.is_player() then

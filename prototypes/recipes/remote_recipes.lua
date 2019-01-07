@@ -5,10 +5,9 @@ data:extend({
 		enabled = false,
 		energy_required = 15,
 		ingredients = {
-			{"processing-unit", 40},
-			{"battery", 20},
-			{"plastic-bar", 20},
-			{"rocket-control-unit", 2},
+			{"processing-unit", 125},
+			{"battery", 50},
+			{"plastic-bar", 40},
 			{"iron-stick", 2},
 		},
 		result = "heli-remote-equipment",

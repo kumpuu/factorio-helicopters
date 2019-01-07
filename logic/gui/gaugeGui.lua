@@ -301,8 +301,8 @@ gaugeGui =
 				direction = "horizontal",
 				tooltip = {"heli-gui-gauges-tt"},
 			}
-			els.gauge_hr.speakerButtonFlow.style.left_padding = 119
-			els.gauge_hr.speakerButtonFlow.style.top_padding = 5
+			els.gauge_hr.speakerButtonFlow.style.left_padding = 145
+			els.gauge_hr.speakerButtonFlow.style.top_padding = 150
 
 			self:setMuted(Entity.get_data(self.player, "gaugeGui_muted"))
 

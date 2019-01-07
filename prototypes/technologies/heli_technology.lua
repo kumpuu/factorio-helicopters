@@ -11,7 +11,7 @@ data:extend({
         recipe = "heli-recipe"
       },
     },
-    prerequisites = {"automobilism", "flying"},
+    prerequisites = {"automobilism", "flying", "advanced-electronics-2", "turrets", "rocketry"},
     unit =
     {
       count = 400,

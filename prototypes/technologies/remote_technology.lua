@@ -15,7 +15,7 @@ data:extend({
         recipe = "heli-pad-recipe"
       },
     },
-    prerequisites = {"heli-technology", "concrete", "advanced-electronics-2", "battery", "rocket-silo"},
+    prerequisites = {"heli-technology", "concrete", "advanced-electronics-2", "battery", "modular-armor"},
     unit =
     {
       count = 450,

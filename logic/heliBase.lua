@@ -170,6 +170,10 @@ heliBase = {
 
 	inserterScanRadius = 5,
 
+	fullTankFlightTime = 10 * 60 * 60, --in ticks
+	tankWarningRatio = 0.2, --2 min
+	tankCriticalWarningRatio = 0.05, --30s
+
 	------------------------------------------------------------
 
 	new = function(placementEnt, baseEnt, childEnts, mt)
@@ -581,10 +585,10 @@ heliBase = {
 
 		if not suppressAlert then
 			local alert
-			if self.fuelGaugeTargetVal <= 1/12 and self.lastFuelGaugeTargetVal > 1/12 then
+			if self.fuelGaugeTargetVal <= self.tankCriticalWarningRatio and self.lastFuelGaugeTargetVal > self.tankCriticalWarningRatio then
 				alert = {name = "signal-heli-fuel-warning-critical", str = {"heli-alert-fuel-warning-critical"}}
 
-			elseif self.fuelGaugeTargetVal <= 1/6 and self.lastFuelGaugeTargetVal > 1/6 then
+			elseif self.fuelGaugeTargetVal <= self.tankWarningRatio and self.lastFuelGaugeTargetVal > self.tankWarningRatio then
 				alert = {name = "signal-heli-fuel-warning", str = {"heli-alert-fuel-warning"}}
 			end
 
@@ -816,7 +820,7 @@ heliBase = {
 			end
 		end
 
-		return remainingFuel / (getMaxStackFuelVal() * self.fuelSlots)
+		return remainingFuel / (self.baseEnt.prototype.consumption + self.baseEngineConsumption) / self.fullTankFlightTime
 	end,
 
 	handleFuelConsumption = function(self)
@@ -941,10 +945,10 @@ heliBase = {
 		for k, curGG in pairs(self.gaugeGuis) do
 			curGG:setGauge("gauge_fs", "fuel", self.fuelGaugeVal)
 			if self.curState.name ~= "landed" then
-				if self.fuelGaugeVal <= 1/12 then
+				if self.fuelGaugeTargetVal <= self.tankCriticalWarningRatio then
 					curGG:setLedBlinking("gauge_fs", "fuel", true, 20, "heli-fuel-warning")
 
-				elseif self.fuelGaugeVal <= 1/6 then
+				elseif self.fuelGaugeTargetVal <= self.tankWarningRatio then
 					curGG:setLedBlinking("gauge_fs", "fuel", true, 60, "heli-fuel-warning")
 
 				else
