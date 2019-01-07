@@ -170,9 +170,9 @@ heliBase = {
 
 	inserterScanRadius = 5,
 
-	fullTankFlightTime = 10 * 60 * 60, --in ticks
-	tankWarningRatio = 0.2, --2 min
-	tankCriticalWarningRatio = 0.05, --30s
+	fullTankFlightTime = 15 * 60 * 60, --in ticks
+	tankWarningRatio = 3 / 15, --3 min
+	tankCriticalWarningRatio = 0.5 / 15, --30s
 
 	------------------------------------------------------------
 
