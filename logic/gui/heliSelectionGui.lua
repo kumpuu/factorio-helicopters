@@ -405,7 +405,7 @@ heliSelectionGui =
 							end
 						end
 
-						if not selectedSomething then
+						if not selectedSomething and #els.cams > 0 then
 							self:setCamStatus(els.cams[1], true, els.cams[1].heliController)
 						end
 					end

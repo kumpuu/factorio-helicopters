@@ -18,7 +18,7 @@ data:extend({
 		enabled = false,
 		energy_required = 5,
 		ingredients = {
-			{"concrete", 50},
+			{"refined-concrete", 50},
 		},
 		result = "heli-pad-item",
 	},
