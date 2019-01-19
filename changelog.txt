@@ -1,4 +1,17 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.17
+Date: 19. 01. 2019
+  Changes:
+    - Added japanese local (thanks to shela).
+    - Fuel gauge is now full at 10min flight time, beeps at 2min, quick beeps at 30s.
+    - Changed heli remote recipe & tech to be accessible earlier in the game.
+    - Changed heli pad to use refined concrete, added hr version. Personally I think the new concretes are really awful but I gotta stick to the theme.
+  Bugfixes:
+    - Fixed that fuel beep mute button would disappear depending on gui scale.
+    - Fixed heli tech prerequisits (it was possible to research it without being able to build one).
+    - Fixed error when entering "[" in map marker gui.
+    - Fixed error when opening heli selection gui while no helis built.
+---------------------------------------------------------------------------------------------------
 Version: 0.2.16
 Date: 24. 04. 2018
   Changes:
