@@ -36,6 +36,13 @@ data:extend({
         filename = "__Helicopters__/graphics/entities/heli_pad.png",
         width = 260,
         height = 260,
+
+        hr_version = {
+          filename = "__Helicopters__/graphics/entities/heli_pad_hr.png",
+          width = 520,
+          height = 520,
+          scale = 0.5,
+        },
       },
     }
   },
