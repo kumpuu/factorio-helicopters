@@ -1,17 +1,15 @@
-data.raw["gui-style"].default["heli-listbox_button"] =
+--[[data.raw["gui-style"].default["heli-listbox_button"] =
 {
   type = "button_style",
   parent = "button",
   font = "default-bold",
   align = "left",
   scalable = true,
-
-  height = 23,
-
-  top_padding = 0,
-  right_padding = 0,
-  bottom_padding = 0,
-  left_padding = 5,
+  
+        --maximal_height = 33,
+        minimal_height = 33,
+        --maximal_width = 33,
+        minimal_width = 33,
 
   left_click_sound =
   {
@@ -27,7 +25,6 @@ data.raw["gui-style"].default["heli-listbox_button"] =
     type = "composition",
     filename = "__Helicopters__/graphics/gui/black.png",
     priority = "extra-high-no-scale",
-    corner_size = {0, 0},
     position = {0, 0}
   },
 
@@ -51,6 +48,33 @@ data.raw["gui-style"].default["heli-listbox_button"] =
     position = {0, 0}
   },
 }
+--]]
+data.raw["gui-style"].default["heli-listbox_button"] =
+    {
+        type = "button_style",
+        parent = "button",
+        font = "farl-small-bold",
+        --maximal_height = 33,
+        minimal_height = 33,
+        --maximal_width = 33,
+        minimal_width = 33,
+        --top_padding = 0,
+        --bottom_padding = 0,
+        --right_padding = 0,
+        --left_padding = 0,
+        left_click_sound = {
+            {
+                filename = "__core__/sound/gui-click.ogg",
+                volume = 1
+            }
+        },
+        right_click_sound = {
+            {
+                filename = "__core__/sound/gui-click.ogg",
+                volume = 1
+            }
+        }
+    }
 
 function makeButtonStyle(width, height, image, padding)
   padding = padding or {}
@@ -68,7 +92,7 @@ function makeButtonStyle(width, height, image, padding)
     bottom_padding = padding.bottom or 0,
     left_padding = padding.left or 0,
   
-    default_graphical_set =
+  --[[  default_graphical_set =
     {
       type = "monolith",
       monolith_image =
@@ -110,7 +134,7 @@ function makeButtonStyle(width, height, image, padding)
         priority = "extra-high-no-scale",
       },
       stretch_monolith_image_to_size = false
-    },
+    },--]]
   }
 end
 
