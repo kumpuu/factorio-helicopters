@@ -53,7 +53,7 @@ data.raw["gui-style"].default["heli-listbox_button"] =
     {
         type = "button_style",
         parent = "button",
-        font = "farl-small-bold",
+        font = "default-bold",
         --maximal_height = 33,
         minimal_height = 33,
         --maximal_width = 33,
