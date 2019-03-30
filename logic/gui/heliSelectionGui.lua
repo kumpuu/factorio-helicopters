@@ -35,9 +35,6 @@ heliSelectionGui =
 	end,
 
 	setVisible = function(self, val)
-		game.print(self.visible)
-		game.print(self.guiElems.visible)
-		game.print(self.guiElems.root.visible)
 		self.guiElems.root.visible = val
 	end,
 
