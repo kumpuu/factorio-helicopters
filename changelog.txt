@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.0
+Date: 30. 03. 2019
+  Changes:
+     - Updated to 0.17! (Tested ~fully on singleplayer only)
+     - Fixed some typos in changelog
+  Bugfixes: (From changing version to now)
+    - Fixed follow heli crashing when pressed.
+    - Fixed go to marker crashing when pressed.
+    - Fixed go to helipad crashing when pressed.
+  Contributors:
+    - DeltaNedas
+---------------------------------------------------------------------------------------------------
 Version: 0.2.17
 Date: 19. 01. 2019
   Changes:
