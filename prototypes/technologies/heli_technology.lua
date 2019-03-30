@@ -11,15 +11,15 @@ data:extend({
         recipe = "heli-recipe"
       },
     },
-    prerequisites = {"automobilism", "flying", "advanced-electronics-2", "turrets", "rocketry"},
+    prerequisites = {"automobilism", "advanced-electronics-2", "turrets", "rocketry"},
     unit =
     {
       count = 400,
       ingredients =
       {
-        {"science-pack-1", 1},
-        {"science-pack-2", 1},
-        {"science-pack-3", 2},
+						{"automation-science-pack", 1},
+						{"logistic-science-pack", 1},
+						{"chemical-science-pack", 2},
       },
       time = 30
     },

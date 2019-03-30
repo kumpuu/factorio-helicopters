@@ -4,7 +4,7 @@ data:extend({
 		name = "heli-item",
 		icon = "__Helicopters__/graphics/icons/heli.png",
 		icon_size = 32,
-		flags = {"goes-to-quickbar"},
+		flags = {},
 		subgroup = "transport",
 		order = "b[personal-transport]-c[heli]",
 		place_result = "heli-placement-entity-_-",
