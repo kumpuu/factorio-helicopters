@@ -310,7 +310,7 @@ markerSelectionGui =
 			{
 				type = "textfield",
 				name = self.prefix .. "searchField",
-				style = "search_textfield",
+				style = "search_textfield_with_fixed_width",
 			}
 			self.guiElems.searchField.style.left_padding = 22
 			self.guiElems.searchField.style.minimal_height = 26

@@ -35,7 +35,7 @@ heliSelectionGui =
 	end,
 
 	setVisible = function(self, val)
-		self.guiElems.root.style.visible = val
+		self.guiElems.root.visible = val
 	end,
 
 	OnTick = function(self)
@@ -44,7 +44,7 @@ heliSelectionGui =
 
 	OnPlayerChangedForce = function(self, player)
 		if player == self.player then
-			local vis = self.guiElems.root.style.visible
+			local vis = self.visible
 			self.guiElems.root.destroy()
 			self.guiElems = {parent = self.guiElems.parent}
 			self.selectedCam = nil

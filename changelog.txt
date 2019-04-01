@@ -1,4 +1,19 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.1
+Date: 31. 03. 2019
+  Changes:
+    - Tested update to 0.17 fully on singleplayer only by DeltaNedas.
+    - Fixed Remote Control, just reopen it (thanks to DeltaNedas).
+  Bugfixes:
+    - Fixed follow heli crashing when pressed.
+    - Fixed go to marker crashing when pressed.
+    - Fixed go to helipad crashing when pressed.
+---------------------------------------------------------------------------------------------------
+Version: 0.3.0
+Date: 30. 03. 2019
+  Changes:
+    - 0.17 compatibility (thanks to Thyberian, ZombiFlu and other persistent guys).
+---------------------------------------------------------------------------------------------------
 Version: 0.2.17
 Date: 19. 01. 2019
   Changes:
