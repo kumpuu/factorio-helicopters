@@ -178,7 +178,9 @@ heliSelectionGui =
 
 	updateCamPositions = function(self)
 		for k, curCam in pairs(self.guiElems.cams) do
-			curCam.cam.position = curCam.heli.baseEnt.position
+			if curCam.valid then
+				curCam.cam.position = curCam.heli.baseEnt.position
+			end
 		end
 	end,
 
