@@ -212,7 +212,7 @@ emptyBoxCollider =
 
 		local players = self.surface.find_entities_filtered{
 			area = {{x - rad, y - rad}, {x + rad, y + rad}},
-			type = "player",
+			type = "character",
 		}
 
 		for k, curPlayer in pairs(players) do

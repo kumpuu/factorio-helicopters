@@ -369,7 +369,7 @@ heliBase = {
 			heli:setRotorTargetRPF(heli.rotorMaxRPF)
 
 			if not (heli.burnerDriver and heli.burnerDriver.valid) then
-				heli.burnerDriver = heli.surface.create_entity{name="player", force = game.forces.neutral, position = heli.baseEnt.position}
+				heli.burnerDriver = heli.surface.create_entity{name="character", force = game.forces.neutral, position = heli.baseEnt.position}
 				heli.childs.burnerEnt.set_driver(heli.burnerDriver)
 			end
 
@@ -762,7 +762,7 @@ heliBase = {
 			self.childs.floodlightEnt.operable = false
 
 			if not (self.floodlightDriver and self.floodlightDriver.valid) then
-				self.floodlightDriver = self.surface.create_entity{name="player", force = game.forces.neutral, position = self.baseEnt.position}
+				self.floodlightDriver = self.surface.create_entity{name="character", force = game.forces.neutral, position = self.baseEnt.position}
 			end
 
 			self.childs.floodlightEnt.set_driver(self.floodlightDriver)
@@ -843,7 +843,7 @@ heliBase = {
 					driver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
 				
 				else	
-					driver = self.surface.create_entity{name = "player", force = self.baseEnt.force, position = self.baseEnt.position}
+					driver = self.surface.create_entity{name = "character", force = self.baseEnt.force, position = self.baseEnt.position}
 					self.baseEnt.set_driver(driver)
 					driver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
 					driver.destroy()
