@@ -1,4 +1,41 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.4
+Date: 11. 05. 2019
+   Changes:
+     - Properly fixed for 0.17.35
+   Bugfixes:
+     - Fixed improper character to player changes, which resulted in remote gui breaking.
+---------------------------------------------------------------------------------------------------
+Version: 0.3.3 or 0.0.1
+Date: 04. 05. 2019
+  Changes:
+    - 0.17.35 compatibility 
+  Notice:
+	- Nice Work from Kumpu, but his Mod is not updating for the Version 0.17.35/36 . He need weeks for rewriting this script. Sorry Bro...  its reality.. :( 
+	  i help the community with this script and i hope you are not angry with me, bro ... 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Version: 0.3.2
+Date: 17. 04. 2019
+  Changes:
+    - Added Korean locale by GimoXagros.
+  Bugfixes:
+    - Fixed error when open the view on a train.
+---------------------------------------------------------------------------------------------------
+Version: 0.3.1
+Date: 31. 03. 2019
+  Changes:
+    - Tested update to 0.17 fully on singleplayer only by DeltaNedas.
+    - Fixed Remote Control, just reopen it (thanks to DeltaNedas).
+  Bugfixes:
+    - Fixed follow heli crashing when pressed.
+    - Fixed go to marker crashing when pressed.
+    - Fixed go to helipad crashing when pressed.
+---------------------------------------------------------------------------------------------------
+Version: 0.3.0
+Date: 30. 03. 2019
+  Changes:
+    - 0.17 compatibility (thanks to Thyberian, ZombiFlu and other persistent guys).
+---------------------------------------------------------------------------------------------------
 Version: 0.2.17
 Date: 19. 01. 2019
   Changes:
