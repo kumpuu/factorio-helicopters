@@ -5,6 +5,7 @@ Date: 11. 05. 2019
      - Properly fixed for 0.17.35
    Bugfixes:
      - Fixed improper character to player changes, which resulted in remote gui breaking.
+     - Fixed cameras not following helicopters in flight.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.3 or 0.0.1
 Date: 04. 05. 2019
