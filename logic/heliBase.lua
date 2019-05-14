@@ -870,15 +870,8 @@ heliBase = {
 
 		if self.burnerDriver and self.burnerDriver.valid then
 			self.burnerDriver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
-			
-			if baseBurner.remaining_burning_fuel < 1000 then
-				--Refuel from trunk
-				trunk = self.baseEnt.get_inventory(defines.inventory.car_trunk)
-				fuel = trunk.find_item_stack("nuclear-fuel")
-				if fuel then
-					baseBurner.inventory.insert(fuel)
-					trunk.remove(fuel)
-				end
+			if self.childs.burnerEnt.burner.remaining_burning_fuel < 1000 then
+				self.childs.burnerEnt.get_inventory(defines.inventory.fuel).insert({name = "coal", count = 1})
 			end
 		end
 	end,
