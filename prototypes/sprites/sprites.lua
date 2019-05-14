@@ -44,8 +44,8 @@ data:extend({
     name = "heli_gui_selected",
     filename = "__Helicopters__/graphics/gui/selected.png",
     priority = "medium",
-    width = 400,
-    height = 400,
+    width = 210,
+    height = 210,
     flags = {"icon"},
   },
 
