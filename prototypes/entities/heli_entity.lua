@@ -18,7 +18,6 @@ data:extend({
 		collision_mask = {"object-layer", "water-tile", "player-layer"},
 		energy_per_hit_point = 1,
 		effectivity = 0.3,
-		breaking_speed = 0.03,
 		burner = {
 			effectivity = 0.5,
 			emissions = 0,
@@ -105,7 +104,6 @@ data:extend({
 		collision_mask = {},
 		energy_per_hit_point = 1,
 		effectivity = 0.4,
-		breaking_speed = 0.03,
 		burner = {
 			effectivity = 0.5,
 			emissions = 0.005,
@@ -238,7 +236,6 @@ data:extend({
 		collision_box = {{-1.8, -0.2}, {1.2, 0.2}},
 		energy_per_hit_point = 1,
 		effectivity = 0.3,
-		breaking_speed = 0.03,
 		burner = {
 			effectivity = 0.5,
 			emissions = 0,
@@ -314,7 +311,6 @@ data:extend({
 		collision_box = {{-0.1, -2.4}, {0.1, 2.4}}, --{{-0.1, -1.8}, {0.1, 3}},
 		energy_per_hit_point = 1,
 		effectivity = 0.3,
-		breaking_speed = 0.03,
 		burner = {
 			effectivity = 0.5,
 			emissions = 0,
@@ -379,7 +375,6 @@ data:extend({
 		collision_box = {{-1.5, -0.1}, {1.5, 0.1}}, --{{-1.8, -0.1}, {1.2, 0.1}} --{{-1.8, -1.8}, {1.2, 3}}
 		energy_per_hit_point = 1,
 		effectivity = 0.3,
-		breaking_speed = 0.03,
 		burner = {
 			effectivity = 0.5,
 			emissions = 0,
@@ -457,7 +452,6 @@ data:extend({
 		energy_per_hit_point = 1,
 		effectivity = 0.5,
 		braking_power = "100kW",
-		breaking_speed = 0.03,
 		burner = {
 			effectivity = 1,
 			emissions = 0,
@@ -532,7 +526,6 @@ data:extend({
 		energy_per_hit_point = 1,
 		effectivity = 0.5,
 		braking_power = "100kW",
-		breaking_speed = 0.03,
 		burner = {
 			effectivity = 1,
 			emissions = 0,
@@ -607,7 +600,6 @@ data:extend({
 		collision_mask = {},
 		energy_per_hit_point = 1,
 		effectivity = 0.01,
-		breaking_speed = 0.01,
 		burner = {
 			effectivity = 0.01,
 			emissions = 0.002,
@@ -702,7 +694,6 @@ data:extend({
 		collision_mask = {},
 		energy_per_hit_point = 1,
 		effectivity = 0.3,
-		breaking_speed = 0.03,
 		burner = {
 			effectivity = 0.5,
 			emissions = 0,

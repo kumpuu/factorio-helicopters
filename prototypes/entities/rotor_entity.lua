@@ -15,7 +15,6 @@ data:extend({
 		energy_per_hit_point = 1,
 		effectivity = 0.5,
 		braking_power = "100kW",
-		breaking_speed = 0.03,
 		burner = {
 			effectivity = 1,
 			emissions = 0,
@@ -82,7 +81,6 @@ data:extend({
 		energy_per_hit_point = 1,
 		effectivity = 0.5,
 		braking_power = "100kW",
-		breaking_speed = 0.03,
 		burner = {
 			effectivity = 1,
 			emissions = 0,
