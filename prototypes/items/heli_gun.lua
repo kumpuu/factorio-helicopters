@@ -12,7 +12,7 @@ data:extend({
           type = "projectile",
           ammo_category = "bullet",
           cooldown = 4,
-          damage_modifier = 3,
+          damage_modifier = 1,
           movement_slow_down_factor = 0.7,
           shell_particle =
           {
