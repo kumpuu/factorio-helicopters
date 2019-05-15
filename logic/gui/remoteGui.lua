@@ -49,20 +49,6 @@ end
 
 remoteGui = 
 {
-	mt = 
-	{
-		__index = function(t, k)
-			if remoteGui[k] then
-				return remoteGui[k]
-
-			elseif type(k) == "string" and k:match("^On.+") then
-				return function(self, ...)
-					remoteGui.safeStateCall(self, k, ...)
-				end
-			end
-		end,
-	},
-
 	new = function(p)
 		local obj = {
 			valid = true,
@@ -72,7 +58,7 @@ remoteGui =
 			guis = {}
 		}
 
-		setmetatable(obj, remoteGui.mt)
+		setmetatable(obj, {__index = remoteGui})
 	
 		obj.guis.heliSelection = heliSelectionGui.new(obj, p)
 		return obj
@@ -94,19 +80,15 @@ remoteGui =
 			string.startswith(str, heliPadSelectionGui.prefix)
 	end,
 
-	safeStateCall = function(self, kName, ...)
-		for k, curGui in pairs(self.guis) do
-			if curGui[kName] then
-				curGui[kName](curGui, ...)
-			end
-		end
-	end,
-
 	OnTick = function(self)
 		if not self.player.valid then
 			self:destroy()
 		else
-			self:safeStateCall("OnTick")
+			for k, curGui in pairs(self.guis) do
+				if curGui.OnTick then
+					curGui:OnTick()
+				end
+			end
 		end
 	end,
 

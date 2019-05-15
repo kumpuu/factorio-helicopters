@@ -17,9 +17,7 @@ heliSelectionGui =
 			curCamID = 0,
 		}
 
-		for k,v in pairs(heliSelectionGui) do
-			obj[k] = v
-		end
+		setmetatable(obj, {__index = heliSelectionGui})
 
 		obj:buildGui()
 

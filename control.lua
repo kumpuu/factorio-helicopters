@@ -23,7 +23,7 @@ end
 
 function OnLoad(e)
 	setMetatablesInGlobal("helis", {__index = heliAttack})
-	setMetatablesInGlobal("remoteGuis", remoteGui.mt)
+	setMetatablesInGlobal("remoteGuis", {__index = remoteGui})
 	setMetatablesInGlobal("heliPads", {__index = heliPad})
 	setMetatablesInGlobal("heliControllers", {__index = heliController})
 
