@@ -12,7 +12,7 @@ data:extend({
           type = "projectile",
           ammo_category = "bullet",
           cooldown = 4,
-          damage_modifier = 1,
+          damage_modifier = settings.startup["heli-gun-damage-modifier"].value,
           movement_slow_down_factor = 0.7,
           shell_particle =
           {

@@ -110,11 +110,11 @@ data:extend({
 			fuel_inventory_size = fuel_slots,
 			
 		},
-		consumption = "3.2MW",
-		braking_power = "1MW",
+		consumption = settings.startup["heli-consumption"].value,
+		braking_power = settings.startup["heli-braking-power"].value,
 		friction = 0.002,
 		terrain_friction_modifier = 0,
-		weight = 2800,
+		weight = settings.startup["heli-weight"].value,
 
 		rotation_speed = 0.005,
 		tank_driving = true,

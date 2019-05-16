@@ -1,5 +1,34 @@
 data:extend({
     {
+        type = "double-setting",
+        name = "heli-gun-damage-modifier",
+        setting_type = "startup",
+        default_value = 1,
+        minimum_value = 0,
+    },
+    {
+        type = "string-setting",
+        name = "heli-consumption",
+        setting_type = "startup",
+        default_value = "3.2MW",
+    },
+    {
+        type = "string-setting",
+        name = "heli-braking-power",
+        setting_type = "startup",
+        default_value = "1MW",
+    },
+    {
+        type = "int-setting",
+        name = "heli-weight",
+        setting_type = "startup",
+        default_value = 2800,
+        minimum_value = 0,
+    },
+    
+    ----------------------------------------------
+
+    {
         type = "bool-setting",
         name = "heli-deactivate-inserters",
         setting_type = "runtime-global",
