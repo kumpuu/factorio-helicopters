@@ -22,7 +22,13 @@ function playerIsInHeli(p)
 end
 
 function OnLoad(e)
-	setMetatablesInGlobal("helis", {__index = heliAttack})
+	if global.helis then
+		for _, heli in pairs(global.helis) do
+			if not heli.type or heli.type == "heliAttack" then
+				setmetatable(heli, {__index = heliAttack})
+			end
+		end
+	end
 	setMetatablesInGlobal("remoteGuis", {__index = remoteGui})
 	setMetatablesInGlobal("heliPads", {__index = heliPad})
 	setMetatablesInGlobal("heliControllers", {__index = heliController})
