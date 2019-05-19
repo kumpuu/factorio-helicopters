@@ -95,6 +95,15 @@ function OnConfigChanged(e)
 			end
 		end
 	end
+
+	--fixing left open guis when saved
+	if global.remoteGuis then
+		global.remoteGuis = {}
+		for _,p in pairs(game.players) do
+			local flow = mod_gui.get_frame_flow(p)
+			flow["heli_heliSelectionGui_rootFrame"].destroy()
+		end
+	end
 end
 
 function OnTick(e)

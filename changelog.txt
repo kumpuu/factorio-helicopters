@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.8
+Date: 19. 05. 2019
+  Bugfixes:
+      - Fixed a bug when game is saved with the GUI open, loading the save will cause an error on clicking it, or when a player removes their remote.
+---------------------------------------------------------------------------------------------------
 Version: 0.3.7
 Date: 19. 05. 2019
   Bugfixes:
