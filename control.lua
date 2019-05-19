@@ -101,7 +101,9 @@ function OnConfigChanged(e)
 		global.remoteGuis = {}
 		for _,p in pairs(game.players) do
 			local flow = mod_gui.get_frame_flow(p)
-			flow["heli_heliSelectionGui_rootFrame"].destroy()
+			if flow["heli_heliSelectionGui_rootFrame"] then
+				flow["heli_heliSelectionGui_rootFrame"].destroy()
+			end
 		end
 	end
 end

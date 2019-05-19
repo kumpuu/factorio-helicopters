@@ -15,6 +15,10 @@ heliSelectionGui =
 			},
 
 			curCamID = 0,
+			
+			setmeta = function(self)
+				setmetatable(self, {__index = heliSelectionGui})
+			end,
 		}
 
 		setmetatable(obj, {__index = heliSelectionGui})

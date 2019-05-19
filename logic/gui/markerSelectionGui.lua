@@ -16,6 +16,10 @@ markerSelectionGui =
 			},
 
 			curRefreshCooldown = markerSelectionGui.refreshCooldown,
+			
+			setmeta = function(self)
+				setmetatable(self, {__index = markerSelectionGui})
+			end,
 		}
 
 		for k,v in pairs(markerSelectionGui) do
