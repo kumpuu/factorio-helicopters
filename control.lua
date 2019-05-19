@@ -34,10 +34,12 @@ function OnLoad(e)
 	setMetatablesInGlobal("heliControllers", {__index = heliController})
 
 	--restore gui metatables
-	for _,remotegui in pairs(global.remoteGuis) do
-		for _,gui in pairs(remotegui.guis) do
-			if gui.setmeta then
-				gui:setmeta()
+	if global.remoteGuis then
+		for _,remotegui in pairs(global.remoteGuis) do
+			for _,gui in pairs(remotegui.guis) do
+				if gui.setmeta then
+					gui:setmeta()
+				end
 			end
 		end
 	end
