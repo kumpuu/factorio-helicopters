@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.3.6
-Date: 16. 05. 2019
+Version: 0.3.7
+Date: 19. 05. 2019
   Bugfixes:
       - Fixed a lingering player to character api change, which caused players to get stuck in
         the helicopter collision box.
