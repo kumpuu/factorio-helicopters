@@ -33,6 +33,15 @@ function OnLoad(e)
 	setMetatablesInGlobal("heliPads", {__index = heliPad})
 	setMetatablesInGlobal("heliControllers", {__index = heliController})
 
+	--restore gui metatables
+	for _,remotegui in pairs(global.remoteGuis) do
+		for _,gui in pairs(remotegui.guis) do
+			if gui.setmeta then
+				gui:setmeta()
+			end
+		end
+	end
+
 	callInGlobal("helis", "OnLoad")
 
 	mtMgr.OnLoad()
