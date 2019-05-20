@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.12
+Date: 19. 05. 2019
+  Bugfixes:
+      - Fixed crash when helicopter selection GUI is open and a helicopter is destroyed, causing crash
+      - Fixed helicopter selection GUI to update when a helicopter is created or removed
+---------------------------------------------------------------------------------------------------
 Version: 0.3.11
 Date: 19. 05. 2019
   Bugfixes:
