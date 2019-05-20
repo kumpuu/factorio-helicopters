@@ -820,7 +820,16 @@ heliBase = {
 			end
 		end
 
-		return remainingFuel / (self.baseEnt.prototype.consumption + self.baseEngineConsumption) / self.fullTankFlightTime
+		local burner = self.baseEnt.burner
+		local full_value = 0
+		if burner.currently_burning then
+			full_value = burner.currently_burning.fuel_value * burner.currently_burning.stack_size * #burner.inventory
+		end
+		if full_value > 0 then
+			return remainingFuel / full_value
+		else
+			return 0
+		end
 	end,
 
 	handleFuelConsumption = function(self)

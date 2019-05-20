@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.13
 Date: 19. 05. 2019
+  Changes:
+      - Changed fuel gauge to be based upon currently burning fuel value, rather than a 10minute flight time.
+---------------------------------------------------------------------------------------------------
+Version: 0.3.13
+Date: 19. 05. 2019
   Bugfixes:
       - Fixed bug with decorations being removed from the entire map.
 ---------------------------------------------------------------------------------------------------
