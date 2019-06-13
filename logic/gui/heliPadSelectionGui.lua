@@ -13,6 +13,11 @@ heliPadSelectionGui =
 			{
 				parent = mod_gui.get_frame_flow(p),
 			},
+
+			setmeta = function(self)
+				setmetatable(self, {__index = heliPadSelectionGui})
+			end,
+
 		}
 
 		for k,v in pairs(heliPadSelectionGui) do

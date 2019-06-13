@@ -369,7 +369,7 @@ heliBase = {
 			heli:setRotorTargetRPF(heli.rotorMaxRPF)
 
 			if not (heli.burnerDriver and heli.burnerDriver.valid) then
-				heli.burnerDriver = heli.surface.create_entity{name="player", force = game.forces.neutral, position = heli.baseEnt.position}
+				heli.burnerDriver = heli.surface.create_entity{name="character", force = game.forces.neutral, position = heli.baseEnt.position}
 				heli.childs.burnerEnt.set_driver(heli.burnerDriver)
 			end
 
@@ -762,7 +762,7 @@ heliBase = {
 			self.childs.floodlightEnt.operable = false
 
 			if not (self.floodlightDriver and self.floodlightDriver.valid) then
-				self.floodlightDriver = self.surface.create_entity{name="player", force = game.forces.neutral, position = self.baseEnt.position}
+				self.floodlightDriver = self.surface.create_entity{name="character", force = game.forces.neutral, position = self.baseEnt.position}
 			end
 
 			self.childs.floodlightEnt.set_driver(self.floodlightDriver)
@@ -820,7 +820,16 @@ heliBase = {
 			end
 		end
 
-		return remainingFuel / (self.baseEnt.prototype.consumption + self.baseEngineConsumption) / self.fullTankFlightTime
+		local burner = self.baseEnt.burner
+		local full_value = 0
+		if burner.currently_burning then
+			full_value = burner.currently_burning.fuel_value * burner.currently_burning.stack_size * #burner.inventory
+		end
+		if full_value > 0 then
+			return remainingFuel / full_value
+		else
+			return 0
+		end
 	end,
 
 	handleFuelConsumption = function(self)
@@ -843,7 +852,7 @@ heliBase = {
 					driver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
 				
 				else	
-					driver = self.surface.create_entity{name = "player", force = self.baseEnt.force, position = self.baseEnt.position}
+					driver = self.surface.create_entity{name = "character", force = self.baseEnt.force, position = self.baseEnt.position}
 					self.baseEnt.set_driver(driver)
 					driver.riding_state = {acceleration = defines.riding.acceleration.accelerating, direction = defines.riding.direction.straight}
 					driver.destroy()
@@ -863,7 +872,6 @@ heliBase = {
 				if fuelItemStack then
 					baseBurner.currently_burning = fuelItemStack.name
 					baseBurner.remaining_burning_fuel = fuelItemStack.prototype.fuel_value
-
 					baseBurner.inventory.remove({name = fuelItemStack.name})
 				end
 			end

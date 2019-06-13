@@ -64,7 +64,7 @@ heliController =
 
 		if not heli.baseEnt.get_driver() then
 			obj.driverIsBot = true
-			obj.driver = heli.surface.create_entity{name = "player", force = player.force, position = player.position}
+			obj.driver = heli.surface.create_entity{name = "character", force = player.force, position = player.position}
 			heli.baseEnt.set_driver(obj.driver)
 		else
 			obj.driverIsBot = false
@@ -114,7 +114,7 @@ heliController =
 				self:destroy()
 			else
 				self.driverIsBot = true
-				self.driver = self.heli.surface.create_entity{name = "player", force = self.owner.force, position = self.owner.position}
+				self.driver = self.heli.surface.create_entity{name = "character", force = self.owner.force, position = self.owner.position}
 				self.heli.baseEnt.set_driver(self.driver)
 				self.heli:OnUp()
 			end

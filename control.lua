@@ -23,16 +23,26 @@ end
 
 function OnLoad(e)
 	if global.helis then
-		for k, curHeli in pairs(global.helis) do
-			if not curHeli.type or curHeli.type == "heliAttack" then
-				setmetatable(curHeli, {__index = heliAttack})
+		for _, heli in pairs(global.helis) do
+			if not heli.type or heli.type == "heliAttack" then
+				setmetatable(heli, {__index = heliAttack})
 			end
 		end
 	end
-
-	setMetatablesInGlobal("remoteGuis", remoteGui.mt)
+	setMetatablesInGlobal("remoteGuis", {__index = remoteGui})
 	setMetatablesInGlobal("heliPads", {__index = heliPad})
 	setMetatablesInGlobal("heliControllers", {__index = heliController})
+
+	--restore gui metatables
+	if global.remoteGuis then
+		for _,remotegui in pairs(global.remoteGuis) do
+			for _,gui in pairs(remotegui.guis) do
+				if gui.setmeta then
+					gui:setmeta()
+				end
+			end
+		end
+	end
 
 	callInGlobal("helis", "OnLoad")
 
@@ -96,6 +106,17 @@ function OnConfigChanged(e)
 			end
 		end
 	end
+
+	--fixing left open guis when saved
+	if global.remoteGuis then
+		global.remoteGuis = {}
+		for _,p in pairs(game.players) do
+			local flow = mod_gui.get_frame_flow(p)
+			if flow["heli_heliSelectionGui_rootFrame"] then
+				flow["heli_heliSelectionGui_rootFrame"].destroy()
+			end
+		end
+	end
 end
 
 function OnTick(e)
@@ -111,7 +132,12 @@ function OnBuilt(e)
 
 	if ent.name == "heli-placement-entity-_-" then
 		local newHeli = insertInGlobal("helis", heliAttack.new(ent))
-		callInGlobal("remoteGuis", "OnHeliBuilt", newHeli)
+
+		if global.remoteGuis then
+			for _,rg in pairs(global.remoteGuis) do
+				rg:OnHeliBuilt(newHeli)
+			end
+		end
 
 	elseif ent.name == "heli-pad-placement-entity" then
 		local newPad = insertInGlobal("heliPads", heliPad.new(ent)) 
@@ -133,8 +159,12 @@ function OnRemoved(e)
 				if val:isBaseOrChild(ent) then
 					val:destroy()
 					table.remove(global.helis, i)
-					
-					callInGlobal("remoteGuis", "OnHeliRemoved", val)
+
+					if global.remoteGuis then
+						for _,rg in pairs(global.remoteGuis) do
+							rg:OnHeliRemoved(val)
+						end
+					end
 				end
 			end
 		end

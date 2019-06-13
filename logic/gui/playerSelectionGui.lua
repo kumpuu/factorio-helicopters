@@ -13,6 +13,10 @@ playerSelectionGui =
 			{
 				parent = mod_gui.get_frame_flow(p),
 			},
+
+			setmeta = function(self)
+				setmetatable(self, {__index = playerSelectionGui})
+			end,
 		}
 
 		for k,v in pairs(playerSelectionGui) do

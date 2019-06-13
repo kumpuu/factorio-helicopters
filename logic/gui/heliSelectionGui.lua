@@ -15,11 +15,13 @@ heliSelectionGui =
 			},
 
 			curCamID = 0,
+			
+			setmeta = function(self)
+				setmetatable(self, {__index = heliSelectionGui})
+			end,
 		}
 
-		for k,v in pairs(heliSelectionGui) do
-			obj[k] = v
-		end
+		setmetatable(obj, {__index = heliSelectionGui})
 
 		obj:buildGui()
 
@@ -35,7 +37,7 @@ heliSelectionGui =
 	end,
 
 	setVisible = function(self, val)
-		self.guiElems.root.style.visible = val
+		self.guiElems.root.visible = val
 	end,
 
 	OnTick = function(self)
@@ -44,7 +46,7 @@ heliSelectionGui =
 
 	OnPlayerChangedForce = function(self, player)
 		if player == self.player then
-			local vis = self.guiElems.root.style.visible
+			local vis = self.visible
 			self.guiElems.root.destroy()
 			self.guiElems = {parent = self.guiElems.parent}
 			self.selectedCam = nil
@@ -178,7 +180,9 @@ heliSelectionGui =
 
 	updateCamPositions = function(self)
 		for k, curCam in pairs(self.guiElems.cams) do
-			curCam.cam.position = curCam.heli.baseEnt.position
+			if curCam.heli.valid then
+				curCam.cam.position = curCam.heli.baseEnt.position
+			end
 		end
 	end,
 

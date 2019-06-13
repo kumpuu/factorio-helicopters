@@ -21,7 +21,7 @@ data:extend({
 	      buffer_capacity = "2MJ",
 	      input_flow_limit = "1MW",
 	      output_flow_limit = "1MW",
-	      usage_priority = "terciary"
+	      usage_priority = "tertiary"
 	    },
 	    categories = {"armor"}
 	  },

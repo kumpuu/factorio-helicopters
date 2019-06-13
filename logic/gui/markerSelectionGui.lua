@@ -16,6 +16,10 @@ markerSelectionGui =
 			},
 
 			curRefreshCooldown = markerSelectionGui.refreshCooldown,
+			
+			setmeta = function(self)
+				setmetatable(self, {__index = markerSelectionGui})
+			end,
 		}
 
 		for k,v in pairs(markerSelectionGui) do
@@ -310,7 +314,7 @@ markerSelectionGui =
 			{
 				type = "textfield",
 				name = self.prefix .. "searchField",
-				style = "search_textfield",
+				style = "search_textfield_with_fixed_width",
 			}
 			self.guiElems.searchField.style.left_padding = 22
 			self.guiElems.searchField.style.minimal_height = 26

@@ -35,8 +35,6 @@ heliPad =
 			right_bottom = {placementEnt.position.x + 3.5, placementEnt.position.y + 3.5}
 		}
 
-		obj.surface.destroy_decoratives(boundingBox)
-
 		local scorches = obj.surface.find_entities_filtered
 		{
 			area = boundingBox,
