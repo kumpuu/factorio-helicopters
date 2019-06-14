@@ -211,3 +211,8 @@ function playerHasEquipment(p, equipName)
 		p.character.grid and p.character.grid.valid and
 		equipmentGridHasItem(p.character.grid, equipName)
 end
+
+function make(table, key, val)
+    if not table[key] then table[key] = (val or {}) end
+    return table[key]
+end
