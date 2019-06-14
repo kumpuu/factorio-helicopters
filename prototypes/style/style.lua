@@ -92,49 +92,34 @@ function makeButtonStyle(width, height, image, padding)
     bottom_padding = padding.bottom or 0,
     left_padding = padding.left or 0,
   
-  --[[  default_graphical_set =
+  default_graphical_set =
     {
-      type = "monolith",
-      monolith_image =
-      {
-        filename = image,
-        priority = "extra-high-no-scale",
-        width = width,
-        height = height,
-        priority = "extra-high-no-scale",
-      },
-      stretch_monolith_image_to_size = false
+      filename = image,
+      priority = "extra-high-no-scale",
+      width = width,
+      height = height,
+      priority = "extra-high-no-scale",
     },
   
     hovered_graphical_set =
     {
-      type = "monolith",
-      monolith_image =
-      {
-        filename = image,
-        priority = "extra-high-no-scale",
-        width = width,
-        height = height,
-        x = width,
-        priority = "extra-high-no-scale",
-      },
-      stretch_monolith_image_to_size = false
+      filename = image,
+      priority = "extra-high-no-scale",
+      width = width,
+      height = height,
+      position = {width, y = 0},
+      priority = "extra-high-no-scale",
     },
   
     clicked_graphical_set =
     {
-      type = "monolith",
-      monolith_image =
-      {
-        filename = image,
-        priority = "extra-high-no-scale",
-        width = width,
-        height = height,
-        x = width * 2,
-        priority = "extra-high-no-scale",
-      },
-      stretch_monolith_image_to_size = false
-    },--]]
+      filename = image,
+      priority = "extra-high-no-scale",
+      width = width,
+      height = height,
+      position = {width * 2, 0},
+      priority = "extra-high-no-scale",
+    },
   }
 end
 
