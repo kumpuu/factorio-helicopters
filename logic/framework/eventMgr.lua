@@ -14,15 +14,13 @@ eventMgr =
             table.insert(subs, callback)
         end
 
-        if eventName ~= "on_tick" and 
-            defines.events[eventName] and 
-            not eventMgr.subscribedGameEvents[eventName] then
-
-            eventMgr.subscribedGameEvents[eventName] = true
-
+        if not eventMgr.subscribedGameEvents[eventName] then
             local gameEventCallback = function(e) eventMgr.raise(eventName, e) end
+            
+            if defines.events[eventName] and eventName ~= "on_tick" then
+                script.on_event(defines.events[eventName], gameEventCallback)
 
-            if eventName == "on_init" then
+            elseif eventName == "on_init" then
                 script.on_init(gameEventCallback)
 
             elseif eventName == "on_load" then
@@ -32,8 +30,10 @@ eventMgr =
                 script.on_configuration_changed(gameEventCallback)
                 
             else
-                script.on_event(defines.events[eventName], gameEventCallback)
+                return
             end
+
+            eventMgr.subscribedGameEvents[eventName] = true
         end
     end,
 

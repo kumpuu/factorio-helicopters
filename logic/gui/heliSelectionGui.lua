@@ -122,7 +122,6 @@ heliSelectionGui = baseClass.child("heliSelectionGui",
 	end,
 
 	__OnHeliControllerCreated = function(self, e)
-		printA("yyy")
 		local controller = e.controller
 		local cam = searchInTable(self.guiElems.cams, controller.heli, "heli")
 		if cam then

@@ -42,6 +42,7 @@ end
 
 function printA(...)
 	if not game then
+		table.insert(printQueu, {...})
 		return
 	end
 
@@ -233,3 +234,11 @@ function getThisModVersion()
 	
 	return thisModVersion
 end
+
+printQueu = {}
+eventMgr.subscribe("on_load_done", function(e)
+	for k,v in pairs(printQueu) do
+		printA(unpack(v))
+	end
+	printQueu = nil
+end)

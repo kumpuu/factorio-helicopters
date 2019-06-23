@@ -1,16 +1,16 @@
 --[[
-    Base Object to provide some standard object behaviour
+    Base Class to provide some standard object behaviour
 
     Usage:
-        Create a prototype that will inherit from baseObject with baseObject.child
-        In prototype.new you create an instance with baseObject.new
+        Create a prototype that will inherit from baseClass with baseClass.child
+        In prototype.new you create an instance with baseClass.new
 
         The instance will have all its event listeners (__On<EventName>) subscribed to eventMgr
         It will get assigned the right metatable, any metamethods (__<metamethod>) will be assigned to the metatable
         During on_load, event listeners and the metatable will be reassigned to all instances stored in global (as they exist in the prototype)
 ]]
 
-baseObject =
+baseClass =
 {
     valid = true,
     modVersion = nil,
@@ -42,7 +42,7 @@ baseObject =
 
         mtMgr.assign(classId, mt)
         
-        return setmetatable(prototype, {__index = baseObject})
+        return setmetatable(prototype, {__index = baseClass})
     end,
 
     destroy = function(self)
@@ -50,4 +50,4 @@ baseObject =
     end,
 }
 
-baseObject.super = baseObject
+baseClass.super = baseClass

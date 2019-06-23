@@ -1,12 +1,12 @@
 math3d = require("math3d")
 require("mod-gui")
 
-require("logic.util")
-
 require("logic.framework.baseClass")
 require("logic.framework.mtMgr")
 require("logic.framework.eventMgr")
 require("logic.framework.versionNumber")
+
+require("logic.util")
 
 require("logic.timer")
 require("logic.simpleNoise")
