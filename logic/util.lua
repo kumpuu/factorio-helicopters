@@ -1,3 +1,17 @@
+function copyTable(t)
+	local t2 = {}
+
+	for k,v in pairs(t) do
+		if type(v) == "table" then
+			t2[k] = copyTable(v)
+		else
+			t2[k] = v
+		end
+	end
+
+	return t2
+end
+
 function tableToString(table)
 	local s = ""
 	for k,v in pairs(table) do
@@ -27,6 +41,10 @@ function printTable(t, prefix)
 end
 
 function printA(...)
+	if not game then
+		return
+	end
+
 	local s = ""
 	local n = select("#", ...)
 	for i = 1, n do
@@ -137,15 +155,6 @@ function fEqual(a, b, prec)
 	return math.abs(a - b) <= prec
 end
 
-function versionStrToInt(s)
-	v = 0
-	for num in s:gmatch("%d+") do
-		v = v * 100 + tonumber(num)
-	end
-
-	return v
-end
-
 function concatStrTable(t, c)
 	local s = ""
 	for k,v in pairs(t) do
@@ -215,4 +224,12 @@ end
 function make(table, key, val)
     if not table[key] then table[key] = (val or {}) end
     return table[key]
+end
+
+function getThisModVersion()
+	if not thisModVersion then
+		thisModVersion = versionNumber.new(game.active_mods[thisModName])
+	end
+	
+	return thisModVersion
 end

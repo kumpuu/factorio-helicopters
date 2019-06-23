@@ -1,11 +1,9 @@
-heliSelectionGui =
+heliSelectionGui = baseClass.child("heliSelectionGui",
 {
 	prefix = "heli_heliSelectionGui_",
 
 	new = function(mgr, p)
-		obj = 
-		{
-			valid = true,
+		local obj = baseClass.new({
 			manager = mgr,
 			player = p,
 
@@ -19,9 +17,7 @@ heliSelectionGui =
 			setmeta = function(self)
 				setmetatable(self, {__index = heliSelectionGui})
 			end,
-		}
-
-		setmetatable(obj, {__index = heliSelectionGui})
+		}, heliSelectionGui)
 
 		obj:buildGui()
 
@@ -29,7 +25,7 @@ heliSelectionGui =
 	end,
 
 	destroy = function(self)
-		self.valid = false
+		self.super.destroy(self)
 	
 		if self.guiElems.root and self.guiElems.root.valid then
 			self.guiElems.root.destroy()
@@ -125,7 +121,9 @@ heliSelectionGui =
 		end
 	end,
 
-	OnHeliControllerCreated = function(self, controller)
+	__OnHeliControllerCreated = function(self, e)
+		printA("yyy")
+		local controller = e.controller
 		local cam = searchInTable(self.guiElems.cams, controller.heli, "heli")
 		if cam then
 			cam.heliController = controller
@@ -416,4 +414,4 @@ heliSelectionGui =
 
 					self:setNothingAvailableIfNecessary()
 	end,
-}
+})

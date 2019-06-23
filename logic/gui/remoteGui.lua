@@ -38,10 +38,6 @@ function toggleRemoteGui(player)
 	end
 end
 
-function OnHeliControllerCreated(controller)
-	callInGlobal("remoteGuis", "OnHeliControllerCreated", controller)
-end
-
 function OnHeliControllerDestroyed(controller)
 	callInGlobal("remoteGuis", "OnHeliControllerDestroyed", controller)
 end

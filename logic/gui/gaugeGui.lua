@@ -16,8 +16,7 @@ end
 
 local pointerFrames = 128
 
-gaugeGui =
-{
+gaugeGui = baseClass.child("gaugeGui", {
 	prefix = "heli_gaugeGui_",
 
 	pointerData =
@@ -60,9 +59,7 @@ gaugeGui =
 	},
 
 	new = function(player, heli)
-		obj = 
-		{
-			valid = true,
+		local obj = baseClass.new({
 			player = player,
 			heli = heli,
 
@@ -70,9 +67,7 @@ gaugeGui =
 			{
 				parent = mod_gui.get_frame_flow(player),
 			},
-		}
-
-		mtMgr.set(obj, "gaugeGui")
+		}, gaugeGui)
 
 		obj:buildGui()
 		heli:addGaugeGui(obj)
@@ -81,7 +76,7 @@ gaugeGui =
 	end,
 
 	destroy = function(self)
-		self.valid = false
+		self.super.destroy(self)
 	
 		if self.guiElems.root and self.guiElems.root.valid then
 			self.guiElems.root.destroy()
@@ -309,6 +304,7 @@ gaugeGui =
 		self:setGauge("gauge_hr", "height", self.pointerData.height.min)
 		self:setGauge("gauge_hr", "rpm", self.pointerData.rpm.min)
 	end,
-}
+})
 
-mtMgr.assign("gaugeGui", {__index = gaugeGui})
+--setmetatable(gaugeGui, {__index = baseClass})
+--mtMgr.assign("gaugeGui", {__index = gaugeGui})

@@ -1,10 +1,13 @@
 math3d = require("math3d")
 require("mod-gui")
 
-require("logic.mtMgr")
-require("logic.eventMgr")
-
 require("logic.util")
+
+require("logic.framework.baseClass")
+require("logic.framework.mtMgr")
+require("logic.framework.eventMgr")
+require("logic.framework.versionNumber")
+
 require("logic.timer")
 require("logic.simpleNoise")
 
@@ -17,6 +20,10 @@ require("logic.gui.remoteGui")
 require("logic.gui.gaugeGui")
 
 Entity = require("stdlib.entity.entity")
+
+require("logic.tests.tests")
+
+thisModName = "Helicopters"
 
 function playerIsInHeli(p)
 	return p.driving and string.find(heliBaseEntityNames, p.vehicle.name .. ",", 1, true)

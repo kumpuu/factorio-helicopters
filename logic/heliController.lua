@@ -76,7 +76,7 @@ heliController =
 
 		setmetatable(obj, {__index = heliController})
 
-		OnHeliControllerCreated(obj)
+		eventMgr.raise("OnHeliControllerCreated", {controller = obj})
 		return obj
 	end,
 

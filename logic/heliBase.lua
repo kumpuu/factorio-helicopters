@@ -181,8 +181,6 @@ heliBase = {
 		baseEnt.health = placementEnt.health
 
 		local obj = {
-			version = versionStrToInt(game.active_mods.Helicopters),
-
 			lockedBaseOrientation = baseEnt.orientation,
 
 			baseEnt = baseEnt,
