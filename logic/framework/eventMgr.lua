@@ -1,7 +1,6 @@
 eventMgr =
 {
     events = {},
-    eventIds = {},
     subscribedGameEvents = {},
 
     subscribe = function(eventName, callback, id)
@@ -14,26 +13,8 @@ eventMgr =
             table.insert(subs, callback)
         end
 
-        if not eventMgr.subscribedGameEvents[eventName] then
-            local gameEventCallback = function(e) eventMgr.raise(eventName, e) end
-            
-            if defines.events[eventName] and eventName ~= "on_tick" then
-                script.on_event(defines.events[eventName], gameEventCallback)
-
-            elseif eventName == "on_init" then
-                script.on_init(gameEventCallback)
-
-            elseif eventName == "on_load" then
-                script.on_load(gameEventCallback)
-
-            elseif eventName == "on_configuration_changed" then
-                script.on_configuration_changed(gameEventCallback)
-                
-            else
-                return
-            end
-
-            eventMgr.subscribedGameEvents[eventName] = true
+        if defines.events[eventName] and eventName ~= "on_tick" then
+            eventMgr.hookGameEvent(eventName, defines.events[eventName])
         end
     end,
 
@@ -55,24 +36,6 @@ eventMgr =
         end
     end,
 
-    getEventId = function(eventName)
-        local evts = eventMgr.eventIds
-    
-        if type(eventName) == "string" then
-            if eventName:match("^(__)?[oO]n.+") then
-                if evts[eventName] then
-                    return evts[eventName]
-                else
-                    return make(evts, eventName, script.generate_event_name())
-                end
-            else
-                return nil
-            end
-        end
-    
-        return eventName
-    end,
-
     registerInstanceEvents = function(inst, prototype)
         for k, method in pairs(prototype) do
             if type(method) == "function" and k:match("^__[oO]n.+") then
@@ -80,6 +43,30 @@ eventMgr =
                 eventMgr.subscribe(k:sub(3), function(e) method(inst, e) end)
             end
         end
+    end,
+
+    hookGameEvent = function(eventName, eventId)
+        if not eventMgr.subscribedGameEvents[eventName] then
+            eventMgr.subscribedGameEvents[eventName] = true
+
+            local gameEventCallback = function(e) 
+                eventMgr.raise(eventName, e) 
+            end
+                
+            script.on_event(eventId, gameEventCallback)
+        end
+    end,
+
+    on_init = function(e)
+        eventMgr.raise("on_init", e)
+    end,
+
+    on_load = function(e)
+        eventMgr.raise("on_load", e)
+    end,
+
+    on_configuration_changed = function(e)
+        eventMgr.raise("on_configuration_changed", e)
     end,
 
     on_tick = function(e)
@@ -95,12 +82,21 @@ eventMgr =
 __firstTick = true
 script.on_event(defines.events.on_tick, eventMgr.on_tick)
 
---[[event ids are not valid after game load anymore so we have to regenerate them
-eventMgr.subscribe("OnLoadDone", function(e)
-    if globals.eventIds then
-        for k, v in pairs(global.eventIds) do
-            global.eventIds[k] = script.generate_event_name()
+script.on_init(eventMgr.on_init)
+script.on_load(eventMgr.on_load)
+script.on_configuration_changed(eventMgr.on_configuration_changed)
+
+
+__oldData = data
+data = 
+{
+    extend = function(self, t)
+        for k,v in pairs(t) do
+            if v.type == "custom-input" then
+                eventMgr.hookGameEvent(v.name, v.name)
+            end
         end
     end
-end)
-]]
+}
+require("input.input")
+data = __oldData

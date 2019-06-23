@@ -40,6 +40,7 @@ function printTable(t, prefix)
 	end
 end
 
+printQueu = {}
 function printA(...)
 	if not game then
 		table.insert(printQueu, {...})
@@ -229,16 +230,8 @@ end
 
 function getThisModVersion()
 	if not thisModVersion then
-		thisModVersion = versionNumber.new(game.active_mods[thisModName])
+		thisModVersion = versionNumber.new(game.active_mods[script.mod_name])
 	end
 	
 	return thisModVersion
 end
-
-printQueu = {}
-eventMgr.subscribe("on_load_done", function(e)
-	for k,v in pairs(printQueu) do
-		printA(unpack(v))
-	end
-	printQueu = nil
-end)

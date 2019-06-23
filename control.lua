@@ -1,12 +1,12 @@
 math3d = require("math3d")
 require("mod-gui")
 
+require("logic.util")
+
 require("logic.framework.baseClass")
 require("logic.framework.mtMgr")
 require("logic.framework.eventMgr")
 require("logic.framework.versionNumber")
-
-require("logic.util")
 
 require("logic.timer")
 require("logic.simpleNoise")
@@ -23,7 +23,13 @@ Entity = require("stdlib.entity.entity")
 
 require("logic.tests.tests")
 
-thisModName = "Helicopters"
+--for debugging messages before map starts
+eventMgr.subscribe("on_load_done", function(e)
+	for k,v in pairs(printQueu) do
+		printA(unpack(v))
+	end
+	printQueu = nil
+end)
 
 function playerIsInHeli(p)
 	return p.driving and string.find(heliBaseEntityNames, p.vehicle.name .. ",", 1, true)
