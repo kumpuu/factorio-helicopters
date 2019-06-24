@@ -89,7 +89,7 @@ heliController =
 			self.driver.destroy()
 		end
 
-		OnHeliControllerDestroyed(self)
+		eventMgr.raise("OnHeliControllerDestroyed", {controller = self})
 	end,
 
 	stopAndDestroy = function(self)

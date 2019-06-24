@@ -30,6 +30,7 @@ eventMgr.subscribe("on_load_done", function(e)
 	end
 	printQueu = nil
 end)
+--------------------------
 
 function playerIsInHeli(p)
 	return p.driving and string.find(heliBaseEntityNames, p.vehicle.name .. ",", 1, true)

@@ -130,7 +130,8 @@ heliSelectionGui = baseClass.child("heliSelectionGui",
 		end
 	end,
 
-	OnHeliControllerDestroyed = function(self, controller)
+	__OnHeliControllerDestroyed = function(self, e)
+		local controller = e.controller
 		local cam = searchInTable(self.guiElems.cams, controller, "heliController")
 		if cam then
 			cam.heliController = nil

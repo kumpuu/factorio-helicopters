@@ -19,8 +19,8 @@ eventMgr =
     end,
 
     unsubscribe = function(eventName, id)
-        if eventMgr[eventName] then
-            eventMgr[eventName][id] = nil
+        if eventMgr.events[eventName] then
+            eventMgr.events[eventName][id] = nil
         end
     end,
 
@@ -36,11 +36,18 @@ eventMgr =
         end
     end,
 
-    registerInstanceEvents = function(inst, prototype)
-        for k, method in pairs(prototype) do
+    subscribeInstanceEvents = function(inst)
+        for k, method in pairs(inst.__prototype) do
             if type(method) == "function" and k:match("^__[oO]n.+") then
-                printA("register " .. k)
-                eventMgr.subscribe(k:sub(3), function(e) method(inst, e) end)
+                eventMgr.subscribe(k:sub(3), function(e) method(inst, e) end, tostring(inst))
+            end
+        end
+    end,
+
+    unsubscribeInstanceEvents = function(inst)
+        for k, method in pairs(inst.__prototype) do
+            if type(method) == "function" and k:match("^__[oO]n.+") then
+                eventMgr.unsubscribe(k:sub(3), tostring(inst))
             end
         end
     end,
@@ -87,6 +94,7 @@ script.on_load(eventMgr.on_load)
 script.on_configuration_changed(eventMgr.on_configuration_changed)
 
 
+-- Dirty trick to hook all custom inputs. They don't exist in defines.events so subscribe wouldn't do it.
 __oldData = data
 data = 
 {

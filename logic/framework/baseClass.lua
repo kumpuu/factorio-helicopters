@@ -17,10 +17,12 @@ baseClass =
 
     new = function(newInstance, prototype, noVersioning)
         mtMgr.set(newInstance, prototype.__classId)
-        eventMgr.registerInstanceEvents(newInstance, prototype)
+
+        newInstance.__prototype = prototype
+        eventMgr.subscribeInstanceEvents(newInstance)
 
         if not noVersioning then
-            newInstance.modVersion = getThisModVersion()
+            newInstance.__modVersion = getThisModVersion()
         end
 
         return newInstance
@@ -45,8 +47,10 @@ baseClass =
         return setmetatable(prototype, {__index = baseClass})
     end,
 
-    destroy = function(self)
-        self.valid = false
+    destroy = function(inst)
+        eventMgr.unsubscribeInstanceEvents(inst)
+        
+        inst.valid = false
     end,
 }
 
