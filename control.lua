@@ -3,9 +3,9 @@ require("mod-gui")
 
 require("logic.util")
 
-require("logic.framework.baseClass")
-require("logic.framework.mtMgr")
+require("logic.framework.tableCrawler")
 require("logic.framework.eventMgr")
+require("logic.framework.baseClass")
 require("logic.framework.versionNumber")
 
 require("logic.timer")
@@ -60,8 +60,6 @@ function OnLoad(e)
 	end
 
 	callInGlobal("helis", "OnLoad")
-
-	mtMgr.OnLoad()
 end
 
 function OnConfigChanged(e)

@@ -16,7 +16,8 @@ end
 
 local pointerFrames = 128
 
-gaugeGui = baseClass.child("gaugeGui", {
+gaugeGui = baseClass.extend({
+	__classId = "gaugeGui",
 	prefix = "heli_gaugeGui_",
 
 	pointerData =
@@ -305,6 +306,3 @@ gaugeGui = baseClass.child("gaugeGui", {
 		self:setGauge("gauge_hr", "rpm", self.pointerData.rpm.min)
 	end,
 })
-
---setmetatable(gaugeGui, {__index = baseClass})
---mtMgr.assign("gaugeGui", {__index = gaugeGui})

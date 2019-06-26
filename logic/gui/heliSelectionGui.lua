@@ -1,5 +1,5 @@
-heliSelectionGui = baseClass.child("heliSelectionGui",
-{
+heliSelectionGui = baseClass.extend({
+	__classId = "heliSelectionGui",
 	prefix = "heli_heliSelectionGui_",
 
 	new = function(mgr, p)

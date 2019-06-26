@@ -1,4 +1,6 @@
-versionNumber = baseClass.child("versionNumber", {
+versionNumber = baseClass.extend({
+    __classId = "versionNumber",
+    
     new = function(strVersion)
         local obj = baseClass.new({
             version = versionNumber.versionStrToTable(strVersion)

@@ -15,11 +15,13 @@ baseClass =
     valid = true,
     modVersion = nil,
 
-    new = function(newInstance, prototype, noVersioning)
-        mtMgr.set(newInstance, prototype.__classId)
+    childs = {},
 
-        newInstance.__prototype = prototype
-        eventMgr.subscribeInstanceEvents(newInstance)
+    new = function(newInstance, prototype, noVersioning)
+        newInstance.__classId = prototype.__classId
+
+        setmetatable(newInstance, baseClass.childs[prototype.__classId].metatable)
+        eventMgr.subscribeInstanceEvents(newInstance, prototype)
 
         if not noVersioning then
             newInstance.__modVersion = getThisModVersion()
@@ -28,9 +30,7 @@ baseClass =
         return newInstance
     end,
 
-    child = function(classId, prototype)
-        prototype.__classId = classId
-
+    extend = function(prototype)
         local mt = {__index = prototype}
 
         local metaFields = {"__eq", "__lt", "__le",
@@ -42,16 +42,38 @@ baseClass =
             end
         end
 
-        mtMgr.assign(classId, mt)
+        assert(prototype.__classId, "baseClass.lua: prototype must have field __classId")
+        assert(not baseClass.childs[prototype.__classId], "baseClass.lua: " .. prototype.__classId .. " does already exist")
+
+        baseClass.childs[prototype.__classId] = {prototype = prototype, metatable = mt}
         
         return setmetatable(prototype, {__index = baseClass})
     end,
 
     destroy = function(inst)
-        eventMgr.unsubscribeInstanceEvents(inst)
+        eventMgr.unsubscribeInstanceEvents(inst, baseClass.childs[inst.__classId].prototype)
         
         inst.valid = false
+    end,
+
+    getPrototype = function(classId)
+        return baseClass.childs[classId].prototype
     end,
 }
 
 baseClass.super = baseClass
+
+eventMgr.subscribe("on_load", function(e)
+    tableCrawler.crawl(global, function(t)
+        local classId = t.__classId or t.__mtMgr_type
+
+        if classId then
+            local classMeta = baseClass.childs[classId]
+
+            if classMeta then
+                setmetatable(t, classMeta.metatable)
+                eventMgr.subscribeInstanceEvents(t, classMeta.prototype)
+            end
+        end
+    end)
+end)

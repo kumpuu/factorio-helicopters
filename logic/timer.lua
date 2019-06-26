@@ -1,17 +1,15 @@
-timer =
-{
+timer = baseClass.extend({
+	__classId = "timer",
+
 	new = function(func, frames, isInterval, timerData)
-		local timer = 
-		{
+		local timer = baseClass.new({
 			valid = true,
 			callback = func,
 			runTick = game.tick + frames,
 			interval = isInterval and frames,
 			paused = false,
 			data = timerData,
-		}
-
-		mtMgr.set(timer, "timer")
+		}, timer)
 
 		return insertInGlobal("timers", timer)
 	end,
@@ -29,7 +27,7 @@ timer =
 		self.paused = false
 		self.runTick = game.tick + self.remaining
 	end,
-}
+})
 
 function setTimeout(func, frames, timerData)
 	return timer.new(func, frames, false, timerData)
@@ -65,5 +63,3 @@ function OnTimerTick()
 		end 
 	end
 end
-
-mtMgr.assign("timer", {__index = timer})

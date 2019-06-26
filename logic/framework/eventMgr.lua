@@ -36,16 +36,16 @@ eventMgr =
         end
     end,
 
-    subscribeInstanceEvents = function(inst)
-        for k, method in pairs(inst.__prototype) do
+    subscribeInstanceEvents = function(inst, prototype)
+        for k, method in pairs(prototype) do
             if type(method) == "function" and k:match("^__[oO]n.+") then
                 eventMgr.subscribe(k:sub(3), function(e) method(inst, e) end, tostring(inst))
             end
         end
     end,
 
-    unsubscribeInstanceEvents = function(inst)
-        for k, method in pairs(inst.__prototype) do
+    unsubscribeInstanceEvents = function(inst, prototype)
+        for k, method in pairs(prototype) do
             if type(method) == "function" and k:match("^__[oO]n.+") then
                 eventMgr.unsubscribe(k:sub(3), tostring(inst))
             end

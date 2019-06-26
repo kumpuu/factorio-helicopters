@@ -2,11 +2,11 @@
 --It's actually just smoothed random values,
 --but I guess that can be said about any noise gen.
 
-simpleNoise =
-{
+simpleNoise = baseClass.extend({
+	__classId = "simpleNoise",
+
 	new = function(magnitude, timeAdvance, minFrequency, maxFrequency)
-		local obj =
-		{
+		local obj = baseClass.new({
 			magnitude = magnitude or 1,
 			timeAdvance = timeAdvance or 0.2,
 			minFrequency = minFrequency or 1,
@@ -17,11 +17,11 @@ simpleNoise =
 
 			transitionTime = 0,
 			curTime = 0,
-		}
+		}, simpleNoise)
 
 		obj.maxFrequency = obj.maxFrequency - obj.minFrequency
 
-		return mtMgr.set(obj, "simpleNoise")
+		return obj
 	end,
 
 	easing = function(t)
@@ -47,6 +47,4 @@ simpleNoise =
 
 		return (self.lastVal + self.valDelta * self.easing(self.curTime / self.transitionTime)) * self.magnitude
 	end,
-}
-
-mtMgr.assign("simpleNoise", {__index = simpleNoise})
+})
